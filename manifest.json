@@ -1,0 +1,9 @@
+﻿{
+    "name": "Vs_Twitch",
+    "version_number": "1.0.0",
+    "website_url": "https://github.com/JustDerb/RoR2-VsTwitch",
+    "description": "Fight Twitch chat.",
+    "dependencies": [
+        "bbepis-BepInExPack-5.3.1"
+    ]
+}
