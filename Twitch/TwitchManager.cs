@@ -12,7 +12,7 @@ namespace VsTwitch
     class TwitchManager
     {
         private Client TwitchClient = null;
-        private PubSub TwitchPubSub = null;
+        //private PubSub TwitchPubSub = null;
         private string Channel;
         public string Username { get; private set; }
 
@@ -49,7 +49,7 @@ namespace VsTwitch
 
             ConnectionCredentials credentials = new ConnectionCredentials(username, oauthToken);
             TwitchClient = new Client();
-            TwitchPubSub = new PubSub();
+            //TwitchPubSub = new PubSub();
 
             TwitchClient.Initialize(credentials, channel);
             TwitchClient.OnLog += TwitchClient_OnLog;
@@ -58,27 +58,27 @@ namespace VsTwitch
             TwitchClient.OnConnected += TwitchClient_OnConnected;
             TwitchClient.OnDisconnected += OnDisconnected;
 
-            TwitchPubSub.OnPubSubServiceConnected += (sender, e) =>
-            {
-                Console.WriteLine("Sending topics to listen too...");
-                TwitchPubSub.SendTopics(oauthToken);
-            };
-            TwitchPubSub.OnListenResponse += (sender, e) =>
-            {
-                if (!e.Successful)
-                {
-                    Console.WriteLine($"Failed to listen! Response: {e.Response}");
-                }
-                else
-                {
-                    Console.WriteLine($"Listening to {e.Topic} - {e.Response}");
-                }
-            };
-            TwitchPubSub.OnRewardRedeemed += TwitchPubSub_OnRewardRedeemed;
+            //TwitchPubSub.OnPubSubServiceConnected += (sender, e) =>
+            //{
+            //    Console.WriteLine("Sending topics to listen too...");
+            //    TwitchPubSub.SendTopics(oauthToken);
+            //};
+            //TwitchPubSub.OnListenResponse += (sender, e) =>
+            //{
+            //    if (!e.Successful)
+            //    {
+            //        Console.WriteLine($"Failed to listen! Response: {e.Response}");
+            //    }
+            //    else
+            //    {
+            //        Console.WriteLine($"Listening to {e.Topic} - {e.Response}");
+            //    }
+            //};
+            //TwitchPubSub.OnRewardRedeemed += TwitchPubSub_OnRewardRedeemed;
 
-            TwitchPubSub.ListenToRewards("DrD0wney");
+            // TwitchPubSub.ListenToRewards();
             TwitchClient.Connect();
-            TwitchPubSub.Connect();
+            //TwitchPubSub.Connect();
         }
 
         private void TwitchPubSub_OnRewardRedeemed(object sender, TwitchLib.PubSub.Events.OnRewardRedeemedArgs e)
@@ -93,11 +93,11 @@ namespace VsTwitch
                 TwitchClient.Disconnect();
                 TwitchClient = null;
             }
-            if (TwitchPubSub != null)
-            {
-                TwitchPubSub.Disconnect();
-                TwitchPubSub = null;
-            }
+            //if (TwitchPubSub != null)
+            //{
+            //    TwitchPubSub.Disconnect();
+            //    TwitchPubSub = null;
+            //}
         }
 
         public bool IsConnected()
