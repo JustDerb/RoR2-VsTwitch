@@ -2,6 +2,7 @@
 using BepInEx.Configuration;
 using R2API.Utils;
 using RoR2;
+using RoR2.Networking;
 using RoR2.UI;
 using System;
 using System.Collections;
@@ -15,6 +16,7 @@ namespace VsTwitch
     [BepInDependency(R2API.R2API.PluginGUID)]
     [BepInPlugin(GUID, ModName, Version)]
     [R2APISubmoduleDependency(nameof(CommandHelper))]
+    [NetworkCompatibility(CompatibilityLevel.NoNeedForSync)]
     public class VsTwitch : BaseUnityPlugin
     {
         private static readonly char[] SPACE = new char[] { ' ' };
@@ -88,11 +90,9 @@ namespace VsTwitch
                 StreamerName = TwitchChannel.Value
             };
 
-            On.RoR2.ChestBehavior.ItemDrop += ChestBehavior_ItemDrop;
-            On.RoR2.ShopTerminalBehavior.DropPickup += ShopTerminalBehavior_DropPickup;
-            On.RoR2.MultiShopController.DisableAllTerminals += MultiShopController_DisableAllTerminals;
+            GameNetworkManager.onStartHostGlobal += GameNetworkManager_onStartHostGlobal;
+            GameNetworkManager.onStopHostGlobal += GameNetworkManager_onStopHostGlobal;
             On.RoR2.Language.GetLocalizedStringByToken += Language_GetLocalizedStringByToken;
-            On.RoR2.UI.CharacterSelectController.OnEnable += CharacterSelectController_OnEnable;
             On.RoR2.Run.OnEnable += Run_OnEnable;
             On.RoR2.Run.OnDisable += Run_OnDisable;
 
@@ -102,10 +102,12 @@ namespace VsTwitch
             bitsManager.OnUpdateBits += BitsManager_OnUpdateBits;
 
             twitchManager.OnConnected += (sender, joinedChannel) => {
+                Debug.Log($"Connected to Twitch! Watching {joinedChannel.Channel}...");
                 Chat.AddMessage($"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>Connected to Twitch!</color> Watching {joinedChannel.Channel}...");
             };
             twitchManager.OnDisconnected += (sender, disconnect) =>
             {
+                Debug.Log("Disconnected from Twitch!");
                 Chat.AddMessage($"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>Disconnected from Twitch!</color>");
             };
             twitchManager.OnMessageReceived += TwitchManager_OnMessageReceived;
@@ -115,12 +117,9 @@ namespace VsTwitch
         {
             Instance = SingletonHelper.Unassign(Instance, this);
 
-            // FIXME: Unload hooks
-            On.RoR2.ChestBehavior.ItemDrop -= ChestBehavior_ItemDrop;
-            On.RoR2.ShopTerminalBehavior.DropPickup -= ShopTerminalBehavior_DropPickup;
-            On.RoR2.MultiShopController.DisableAllTerminals -= MultiShopController_DisableAllTerminals;
+            GameNetworkManager.onStartHostGlobal -= GameNetworkManager_onStartHostGlobal;
+            GameNetworkManager.onStopHostGlobal -= GameNetworkManager_onStopHostGlobal;
             On.RoR2.Language.GetLocalizedStringByToken -= Language_GetLocalizedStringByToken;
-            On.RoR2.UI.CharacterSelectController.OnEnable -= CharacterSelectController_OnEnable;
             On.RoR2.Run.OnEnable -= Run_OnEnable;
             On.RoR2.Run.OnDisable -= Run_OnDisable;
         }
@@ -130,6 +129,16 @@ namespace VsTwitch
         private void Run_OnEnable(On.RoR2.Run.orig_OnEnable orig, Run self)
         {
             orig(self);
+
+            // These hooks are server-side only
+            if (!IsRunning() || !NetworkServer.active)
+            {
+                return;
+            }
+
+            On.RoR2.ChestBehavior.ItemDrop += ChestBehavior_ItemDrop;
+            On.RoR2.ShopTerminalBehavior.DropPickup += ShopTerminalBehavior_DropPickup;
+            On.RoR2.MultiShopController.DisableAllTerminals += MultiShopController_DisableAllTerminals;
 
             if (self.gameObject.GetComponent<EventDirector>() == null)
             {
@@ -149,6 +158,16 @@ namespace VsTwitch
         private void Run_OnDisable(On.RoR2.Run.orig_OnDisable orig, Run self)
         {
             orig(self);
+
+            // These hooks are server-side only
+            if (!IsRunning() || !NetworkServer.active)
+            {
+                return;
+            }
+
+            On.RoR2.ChestBehavior.ItemDrop -= ChestBehavior_ItemDrop;
+            On.RoR2.ShopTerminalBehavior.DropPickup -= ShopTerminalBehavior_DropPickup;
+            On.RoR2.MultiShopController.DisableAllTerminals -= MultiShopController_DisableAllTerminals;
 
             if (eventDirector)
             {
@@ -260,10 +279,8 @@ namespace VsTwitch
             return twitchManager != null && twitchManager.IsConnected();
         }
 
-        private void CharacterSelectController_OnEnable(On.RoR2.UI.CharacterSelectController.orig_OnEnable orig, CharacterSelectController self)
+        private void GameNetworkManager_onStartHostGlobal()
         {
-            orig(self);
-
             try
             {
                 twitchManager.Connect(TwitchChannel.Value, TwitchOAuth.Value, TwitchUsername.Value);
@@ -276,6 +293,18 @@ namespace VsTwitch
                 {
                     Chat.AddMessage($"Did you configure the mod correctly?");
                 }
+            }
+        }
+
+        private void GameNetworkManager_onStopHostGlobal()
+        {
+            try
+            {
+                twitchManager.Disconnect();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
             }
         }
 
