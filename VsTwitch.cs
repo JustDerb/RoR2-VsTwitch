@@ -20,7 +20,7 @@ namespace VsTwitch
         private static readonly char[] SPACE = new char[] { ' ' };
         public const string GUID = "com.justinderby.vstwitch";
         public const string ModName = "Vs Twitch";
-        public const string Version = "1.0.0";
+        public const string Version = "1.0.1";
 
         // This is only used for ConCommands, since they need to be static...
         public static VsTwitch Instance;
