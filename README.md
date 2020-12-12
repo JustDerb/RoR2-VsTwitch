@@ -50,6 +50,13 @@ To disable an event, simply set the weight to 0. Giving a higher weight increase
 |------|----|-------|-----|
 |`SimpleUI`|true/false|false|If enabled, simplifies the item vote UI by putting a single popup in the top-middle of the game screen. If you are playing with multiple people, or generally have a lot of drones, enabling this option can help with clutter on the left side of the game window.|
 
+## Behaviour
+
+|Config|Type|Default|Notes|
+|------|----|-------|-----|
+|`EnableChoosingLunarItems`|true/false|true|If enabled, Lunar Pod item/equipment drops will be decided by Twitch Chat.|
+|`ForceUniqueRolls`|true/false|false|If enabled, all rolls will be guaranteed to be unique. No more rolls with three rusted keys!|
+
 # Events
 
 When your channel hits the defined bit goal (via the `BitsThreshold` config setting), a random in-game event will occur. If enough bits are donated to trigger the goal more than once, the event's will continue to trigger until the bits are reduced under the given goal. For example, if the bit goal is 500 and someone donates 1040 bits, there will be two bit events and the current bit count will reset to 40 bits (1040 - 500 - 500 = 40).
@@ -121,3 +128,19 @@ These console commands are generally for testing purposes. You should never need
 * `vs_connect_twitch <channel> <access_token> [username]` - Connect to Twitch. Note that this automatically happens when starting a new run.
 * `vs_add_bits <bits>` - Force add bits to the game. Going over the bit goal will trigger an in-game event.
 * `vs_set_bit_goal <bits>` - Sets the bit goal and saves it to the config file.
+
+# Changelog
+
+### 1.0.1
+
+See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/1?closed=1
+
+* VsTwitch should now only activate when hosting a game. This mod will not enable and connect to Twitch if you are joining a game as a client.
+* Lunar Pods have been added to the choices Twitch Chat can choose from (Config: `EnableChoosingLunarItems`)
+* Now rolls can be forced to always be unique (Config: `ForceUniqueRolls`)
+* Added new Bit Event: Shrine of Order (Config: `ShrineOfOrderWeight`)
+* Added new Bit Event: Shrine of the Mountain (Config: `ShrineOfTheMountainWeight`)
+
+### 1.0.0
+
+* Initial release
