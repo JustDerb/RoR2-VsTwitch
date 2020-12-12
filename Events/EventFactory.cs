@@ -28,6 +28,17 @@ namespace VsTwitch
             }
         }
 
+        public Func<EventDirector, IEnumerator> BroadcastChat(Chat.ChatMessageBase message)
+        {
+            return (director) => { return BroadcastChatInternal(message); };
+        }
+
+        private IEnumerator BroadcastChatInternal(Chat.ChatMessageBase message)
+        {
+            Chat.SendBroadcastChat(message);
+            yield break;
+        }
+
         public Func<EventDirector, IEnumerator> SpawnItem(PickupIndex pickupIndex)
         {
             return (director) => { return SpawnItemInternal(pickupIndex); };

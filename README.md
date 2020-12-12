@@ -16,6 +16,8 @@ Currently, **all config values** need to be filled out. Especially `Channel`, `U
 
 ## Twitch
 
+**WARNING:** The code you put into `ImplicitOAuth` is valid for about 30 days. After that, you'll need to re-auth and update the field!
+
 |Config|Type|Default|Notes|
 |------|----|-------|-----|
 |`Channel`|text||The channel to monitor Twitch chat|
@@ -28,6 +30,18 @@ Currently, **all config values** need to be filled out. Especially `Channel`, `U
 
 [1]: https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=q6batx0epp608isickayubi39itsckt&redirect_uri=https://twitchapps.com/tmi/&scope=channel_subscriptions+user_subscriptions+channel_check_subscription+bits:read+chat:read+chat:edit+channel:read:redemptions+channel:read:hype_train
 [2]: https://www.twitch.tv/settings/connections
+
+## ChannelPoints
+
+**WARNING:** Not typing the Channel Points title in exactly will cause the specific feature not to work! You should see a warning in the console if this happens.
+
+|Config|Type|Default|Notes|
+|------|----|-------|-----|
+|`Enable`|true/false|true|Enable all Channel Point features|
+|`AllyBeetle`|text||**(Case Sensitive!)** Channel Points Title to spawn Ally Elite Beetle. Leave empty to disable.|
+|`AllyLemurian`|text||**(Case Sensitive!)** Channel Points Title to spawn Ally Elite Lemurian. Leave empty to disable.|
+|`AllyElderLemurian`|text||**(Case Sensitive!)** Channel Points Title to spawn Ally Elite Elder Lemurian. Leave empty to disable.|
+|`RustedKey`|text||**(Case Sensitive!)** Channel Points Title to give everyone a Rusted Key. Leave empty to disable.|
 
 ## Event
 
@@ -120,6 +134,10 @@ These will eventually be hooked into Channel Points; but for know you can manual
 * `!allysuperdino <name>` - Spawn random elite ally Lemurian with the given name.
 * `!allybigdino <name>` - Spawn ally Elder Lemurian with the given name.
 * `!allysuperbigdino <name>` - Spawn random elite ally Elder Lemurian with the given name.
+
+## Other
+
+* `!rustedkey <name>` - Give all players a rusted key.
 
 # Console Commands
 

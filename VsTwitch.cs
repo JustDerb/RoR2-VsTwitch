@@ -3,7 +3,6 @@ using BepInEx.Configuration;
 using R2API.Utils;
 using RoR2;
 using RoR2.Networking;
-using RoR2.UI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -27,8 +26,9 @@ namespace VsTwitch
         // This is only used for ConCommands, since they need to be static...
         public static VsTwitch Instance;
 
-        private BitsManager bitsManager;
         private TwitchManager twitchManager;
+        private BitsManager bitsManager;
+        private ChannelPointsManager channelPointsManager;
         private ItemRollerManager itemRollerManager;
         private LanguageOverride languageOverride;
         private EventDirector eventDirector;
@@ -36,6 +36,7 @@ namespace VsTwitch
 
         // Twitch
         public static ConfigEntry<string> TwitchChannel { get; set; }
+        public static ConfigEntry<string> TwitchClientID { get; set; }
         public static ConfigEntry<string> TwitchUsername { get; set; }
         public static ConfigEntry<string> TwitchOAuth { get; set; }
         public static ConfigEntry<bool> EnableItemVoting { get; set; }
@@ -54,6 +55,13 @@ namespace VsTwitch
         public static ConfigEntry<float> MithrixWeight { get; set; }
         public static ConfigEntry<float> ElderLemurianWeight { get; set; }
 
+        // Channel Points
+        public static ConfigEntry<bool> ChannelPointsEnable { get; set; }
+        public static ConfigEntry<string> ChannelPointsAllyBeetle { get; set; }
+        public static ConfigEntry<string> ChannelPointsAllyLemurian { get; set; }
+        public static ConfigEntry<string> ChannelPointsAllyElderLemurian { get; set; }
+        public static ConfigEntry<string> ChannelPointsRustedKey { get; set; }
+
         // UI
         public static ConfigEntry<bool> SimpleUI { get; set; }
 
@@ -70,6 +78,7 @@ namespace VsTwitch
 
             // Twitch
             TwitchChannel = Config.Bind("Twitch", "Channel", "", "Your Twitch channel name");
+            TwitchClientID = TwitchUsername = Config.Bind("Twitch", "ClientID", "q6batx0epp608isickayubi39itsckt", "Client ID used to get ImplicitOAuth value");
             TwitchUsername = Config.Bind("Twitch", "Username", "", "Your Twitch username");
             TwitchOAuth = Config.Bind("Twitch", "ImplicitOAuth", "", "Implicite OAuth code (this is not your password - it's a generated password!): " +
                 "https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=q6batx0epp608isickayubi39itsckt&redirect_uri=https://twitchapps.com/tmi/&scope=channel_subscriptions+user_subscriptions+channel_check_subscription+bits:read+chat:read+chat:edit+channel:read:redemptions+channel:read:hype_train");
@@ -87,6 +96,12 @@ namespace VsTwitch
             LunarWispWeight = Config.Bind("Event", "LunarWispWeight", 1f, "Weight for the Lunar Chimera (Wisp) bit event. Set to 0 to disable.");
             MithrixWeight = Config.Bind("Event", "MithrixWeight", 1f, "Weight for the Mithrix bit event. Set to 0 to disable.");
             ElderLemurianWeight = Config.Bind("Event", "ElderLemurianWeight", 1f, "Weight for the Elder Lemurian bit event. Set to 0 to disable.");
+            // Channel Points
+            ChannelPointsEnable = Config.Bind("ChannelPoints", "Enable", true, "Enable all Channel Point features.");
+            ChannelPointsAllyBeetle = Config.Bind("ChannelPoints", "AllyBeetle", "", "(Case Sensitive!) Channel Points Title to spawn Ally Elite Beetle. Leave empty to disable.");
+            ChannelPointsAllyLemurian = Config.Bind("ChannelPoints", "AllyLemurian", "", "(Case Sensitive!) Channel Points Title to spawn Ally Elite Lemurian. Leave empty to disable.");
+            ChannelPointsAllyElderLemurian = Config.Bind("ChannelPoints", "AllyElderLemurian", "", "(Case Sensitive!) Channel Points Title to spawn Ally Elite Elder Lemurian. Leave empty to disable.");
+            ChannelPointsRustedKey = Config.Bind("ChannelPoints", "RustedKey", "", "(Case Sensitive!) Channel Points Title to give everyone a Rusted Key. Leave empty to disable.");
             // UI
             SimpleUI = Config.Bind("UI", "SimpleUI", false, "Simplify the UI. Set to true if you are playing Multiplayer.");
             // Behaviour
@@ -94,7 +109,14 @@ namespace VsTwitch
             ForceUniqueRolls = Config.Bind("Behaviour", "ForceUniqueRolls", false, "Ensure, when rolling for items, that they are always different. This doesn't affect multi-shops.");
 
             bitsManager = new BitsManager(CurrentBits.Value);
+            channelPointsManager = new ChannelPointsManager();
+            if (ChannelPointsEnable.Value)
+            {
+                SetUpChannelPoints();
+            }
             twitchManager = new TwitchManager();
+            // FIMXE: Remove
+            twitchManager.DebugLogs = true;
             itemRollerManager = new ItemRollerManager(new MaxVoteStrategy<PickupIndex>());
             languageOverride = new LanguageOverride
             {
@@ -122,6 +144,67 @@ namespace VsTwitch
                 Chat.AddMessage($"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>Disconnected from Twitch!</color>");
             };
             twitchManager.OnMessageReceived += TwitchManager_OnMessageReceived;
+            twitchManager.OnRewardRedeemed += TwitchManager_OnRewardRedeemed;
+        }
+
+        private void SetUpChannelPoints()
+        {
+            if (channelPointsManager.RegisterEvent(ChannelPointsAllyBeetle.Value, (manager, e) =>
+            {
+                eventDirector.AddEvent(eventFactory.CreateAlly(
+                    e.DisplayName,
+                    MonsterSpawner.Monsters.Beetle,
+                    RollForElite(true)));
+            }))
+            {
+                Debug.Log("Successfully registered Channel Points event: Ally Beetle");
+            }
+            else
+            {
+                Debug.LogWarning("Could not register Channel Points event: Ally Beetle");
+            }
+
+            if (channelPointsManager.RegisterEvent(ChannelPointsAllyLemurian.Value, (manager, e) =>
+            {
+                eventDirector.AddEvent(eventFactory.CreateAlly(
+                    e.DisplayName,
+                    MonsterSpawner.Monsters.Lemurian,
+                    RollForElite(true)));
+            }))
+            {
+                Debug.Log("Successfully registered Channel Points event: Ally Lemurian");
+            }
+            else
+            {
+                Debug.LogWarning("Could not register Channel Points event: Ally Lemurian");
+            }
+
+            if (channelPointsManager.RegisterEvent(ChannelPointsAllyElderLemurian.Value, (manager, e) =>
+            {
+                eventDirector.AddEvent(eventFactory.CreateAlly(
+                    e.DisplayName,
+                    MonsterSpawner.Monsters.LemurianBruiser,
+                    RollForElite(true)));
+            }))
+            {
+                Debug.Log("Successfully registered Channel Points event: Ally Elder Lemurian");
+            }
+            else
+            {
+                Debug.LogWarning("Could not register Channel Points event: Ally Elder Lemurian");
+            }
+
+            if (channelPointsManager.RegisterEvent(ChannelPointsRustedKey.Value, (manager, e) =>
+            {
+                GiveRustedKey(e.DisplayName);
+            }))
+            {
+                Debug.Log("Successfully registered Channel Points event: Rusted Key");
+            }
+            else
+            {
+                Debug.LogWarning("Could not register Channel Points event: Rusted Key");
+            }
         }
 
         public void OnDestroy()
@@ -214,7 +297,7 @@ namespace VsTwitch
             string username = args.Count > 2 ? args[2] : args[0];
             try
             {
-                Instance.twitchManager.Connect(channel, oauthToken, username);
+                Instance.twitchManager.Connect(channel, oauthToken, username, null);
             }
             catch (Exception e)
             {
@@ -294,7 +377,7 @@ namespace VsTwitch
         {
             try
             {
-                twitchManager.Connect(TwitchChannel.Value, TwitchOAuth.Value, TwitchUsername.Value);
+                twitchManager.Connect(TwitchChannel.Value, TwitchOAuth.Value, TwitchUsername.Value, TwitchClientID.Value);
             }
             catch (Exception e)
             {
@@ -385,6 +468,9 @@ namespace VsTwitch
                                 MonsterSpawner.Monsters.LemurianBruiser,
                                 RollForElite(true)));
                             break;
+                        case "!rustedkey":
+                            GiveRustedKey(GetUsernameFromCommand(msgParts, "Twitch Chat"));
+                            break;
                         case "!roll":
                             RollBitReward();
                             break;
@@ -417,6 +503,30 @@ namespace VsTwitch
                             eventDirector.AddEvent(eventFactory.CreateMonster(MonsterSpawner.Monsters.Grandparent));
                             break;
                     }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+            }
+        }
+
+        private void GiveRustedKey(string name)
+        {
+            eventDirector.AddEvent(eventFactory.BroadcastChat(new Chat.SimpleChatMessage
+            {
+                baseToken = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>{Util.EscapeRichTextForTextMeshPro(name)} wants you to take their rusted key.</color>"
+            }));
+            eventDirector.AddEvent(eventFactory.SpawnItem(PickupCatalog.FindPickupIndex(ItemIndex.TreasureCache)));
+        }
+
+        private void TwitchManager_OnRewardRedeemed(object sender, TwitchLib.PubSub.Events.OnRewardRedeemedArgs e)
+        {
+            try
+            {
+                if (!channelPointsManager.TriggerEvent(e))
+                {
+                    Debug.LogWarning($"Could not trigger event for Channel Points Redemption: {e.RewardTitle}");
                 }
             }
             catch (Exception ex)
