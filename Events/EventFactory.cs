@@ -173,9 +173,14 @@ namespace VsTwitch
             {
                 if (squad.memberCount == 0)
                 {
-                    var deathMessage = $"<color=#{ColorUtility.ToHtmlStringRGB(Color.green)}>{nameEscaped}</color>" +
-                        $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}> has died! :(</color>";
-                    Chat.SendBroadcastChat(new Chat.SimpleChatMessage { baseToken = deathMessage });
+                    string[] standardDeathQuoteTokens = (string[])typeof(GlobalEventManager)
+                        .GetField("standardDeathQuoteTokens", BindingFlags.Static | BindingFlags.NonPublic)
+                        .GetValue(null);
+                    Chat.SendBroadcastChat(new Chat.PlayerDeathChatMessage
+                    {
+                        subjectAsCharacterBody = member.GetBody(),
+                        baseToken = standardDeathQuoteTokens[UnityEngine.Random.Range(0, standardDeathQuoteTokens.Length)]
+                    });
                 }
             };
 
