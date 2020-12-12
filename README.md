@@ -37,6 +37,7 @@ To disable an event, simply set the weight to 0. Giving a higher weight increase
 |------|----|-------|-----|
 |`BitStormWeight`|number|1|Weight for the bit storm bit event.|
 |`BountyWeight`|number|1|Weight for the doppleganger bit event.|
+|`ShrineOfOrderWeight`|number|1|Weight for the Shrine of Order bit event.|
 |`TitanWeight`|number|1|Weight for the Aurelionite bit event.|
 |`LunarWispWeight`|number|1|Weight for the Lunar Chimera (Wisp) bit event.|
 |`MithrixWeight`|number|1|Weight for the Mithrix bit event.|
@@ -59,6 +60,10 @@ Dodge the meteors while trying to move ahead in the stage!
 ## Bounty
 
 Your Doppleganger has come to try to stop you!
+
+## Shrine of Order
+
+What's this? You see a Shrine that looks rare, and seems to emit a purple hue. You can't help yourself, but you offer a Lunar coin to it...
 
 ## Aurelionite
 
@@ -85,6 +90,7 @@ Chat commands can only be executed by Moderators or the Broadcaster of the chann
 * `!roll` - Forces a random bit event to occur.
 * `!meteor` - Force Meteor shower bit event.
 * `!bounty` - Force Doppleganger bit event.
+* `!order` - Force a Shrine of Order bit event.
 * `!titan` - Force Aurelionite bit event.
 * `!lunar` - Force Lunar Chimera (Wisp) bit event.
 * `!mithrix` - Force Mithrix bit event.

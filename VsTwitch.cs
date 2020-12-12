@@ -45,12 +45,13 @@ namespace VsTwitch
         public static ConfigEntry<int> CurrentBits { get; set; }
 
         // Event
-        public static ConfigEntry<int> BitStormWeight { get; set; }
-        public static ConfigEntry<int> BountyWeight { get; set; }
-        public static ConfigEntry<int> TitanWeight { get; set; }
-        public static ConfigEntry<int> LunarWispWeight { get; set; }
-        public static ConfigEntry<int> MithrixWeight { get; set; }
-        public static ConfigEntry<int> ElderLemurianWeight { get; set; }
+        public static ConfigEntry<float> BitStormWeight { get; set; }
+        public static ConfigEntry<float> BountyWeight { get; set; }
+        public static ConfigEntry<float> ShrineOfOrderWeight { get; set; }
+        public static ConfigEntry<float> TitanWeight { get; set; }
+        public static ConfigEntry<float> LunarWispWeight { get; set; }
+        public static ConfigEntry<float> MithrixWeight { get; set; }
+        public static ConfigEntry<float> ElderLemurianWeight { get; set; }
 
         // UI
         public static ConfigEntry<bool> SimpleUI { get; set; }
@@ -77,12 +78,13 @@ namespace VsTwitch
             BitsThreshold = Config.Bind("Twitch", "BitsThreshold", 1500, "How many Bits are needed before something happens.");
             CurrentBits = Config.Bind("Twitch", "CurrentBits", 0, "(DO NOT EDIT) How many Bits have currently been donated.");
             // Event
-            BitStormWeight = Config.Bind("Event", "BitStormWeight", 1, "Weight for the bit storm bit event. Set to 0 to disable.");
-            BountyWeight = Config.Bind("Event", "BountyWeight", 1, "Weight for the doppleganger bit event. Set to 0 to disable.");
-            TitanWeight = Config.Bind("Event", "TitanWeight", 1, "Weight for the Aurelionite bit event. Set to 0 to disable.");
-            LunarWispWeight = Config.Bind("Event", "LunarWispWeight", 1, "Weight for the Lunar Chimera (Wisp) bit event. Set to 0 to disable.");
-            MithrixWeight = Config.Bind("Event", "MithrixWeight", 1, "Weight for the Mithrix bit event. Set to 0 to disable.");
-            ElderLemurianWeight = Config.Bind("Event", "ElderLemurianWeight", 1, "Weight for the Elder Lemurian bit event. Set to 0 to disable.");
+            BitStormWeight = Config.Bind("Event", "BitStormWeight", 1f, "Weight for the bit storm bit event. Set to 0 to disable.");
+            BountyWeight = Config.Bind("Event", "BountyWeight", 1f, "Weight for the doppleganger bit event. Set to 0 to disable.");
+            ShrineOfOrderWeight = Config.Bind("Event", "ShrineOfOrderWeight", 1f, "Weight for the Shrine of Order bit event. Set to 0 to disable.");
+            TitanWeight = Config.Bind("Event", "TitanWeight", 1f, "Weight for the Aurelionite bit event. Set to 0 to disable.");
+            LunarWispWeight = Config.Bind("Event", "LunarWispWeight", 1f, "Weight for the Lunar Chimera (Wisp) bit event. Set to 0 to disable.");
+            MithrixWeight = Config.Bind("Event", "MithrixWeight", 1f, "Weight for the Mithrix bit event. Set to 0 to disable.");
+            ElderLemurianWeight = Config.Bind("Event", "ElderLemurianWeight", 1f, "Weight for the Elder Lemurian bit event. Set to 0 to disable.");
             // UI
             SimpleUI = Config.Bind("UI", "SimpleUI", false, "Simplify the UI. Set to true if you are playing Multiplayer.");
             // Behaviour
@@ -390,6 +392,9 @@ namespace VsTwitch
                         case "!bounty":
                             eventDirector.AddEvent(eventFactory.CreateBounty());
                             break;
+                        case "!order":
+                            eventDirector.AddEvent(eventFactory.TriggerShrineOfOrder());
+                            break;
                         case "!titan":
                             eventDirector.AddEvent(eventFactory.CreateMonster(MonsterSpawner.Monsters.TitanGold));
                             break;
@@ -435,6 +440,7 @@ namespace VsTwitch
             WeightedSelection<Func<EventDirector, IEnumerator>> choices = new WeightedSelection<Func<EventDirector, IEnumerator>>();
             choices.AddChoice(eventFactory.CreateBitStorm(), Math.Max(0, BitStormWeight.Value));
             choices.AddChoice(eventFactory.CreateBounty(), Math.Max(0, BountyWeight.Value));
+            choices.AddChoice(eventFactory.TriggerShrineOfOrder(), Math.Max(0, ShrineOfOrderWeight.Value));
             choices.AddChoice(eventFactory.CreateMonster(MonsterSpawner.Monsters.TitanGold), Math.Max(0, TitanWeight.Value));
             choices.AddChoice(eventFactory.CreateMonster(MonsterSpawner.Monsters.LunarWisp, 2), Math.Max(0, LunarWispWeight.Value));
             choices.AddChoice(eventFactory.CreateMonster(MonsterSpawner.Monsters.Brother), Math.Max(0, MithrixWeight.Value));

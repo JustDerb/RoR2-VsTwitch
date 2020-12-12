@@ -114,6 +114,59 @@ namespace VsTwitch
             yield break;
         }
 
+        public Func<EventDirector, IEnumerator> TriggerShrineOfOrder()
+        {
+            return (director) => { return TriggerShrineOfOrderInternal(); };
+        }
+
+        private IEnumerator TriggerShrineOfOrderInternal()
+        {
+            try
+            {
+                foreach (var controller in PlayerCharacterMasterController.instances)
+                {
+                    // Skip dead players
+                    if (controller.master.IsDeadAndOutOfLivesServer())
+                    {
+                        continue;
+                    }
+
+                    Inventory inventory = controller.master.inventory;
+                    if (inventory)
+                    {
+                        inventory.ShrineRestackInventory(RoR2Application.rng);
+
+                        CharacterBody body = controller.master.GetBody();
+                        if (body)
+                        {
+                            Chat.SendBroadcastChat(new Chat.SubjectFormatChatMessage
+                            {
+                                subjectAsCharacterBody = body,
+                                baseToken = "SHRINE_RESTACK_USE_MESSAGE"
+                            });
+                            EffectManager.SpawnEffect(Resources.Load<GameObject>("Prefabs/Effects/ShrineUseEffect"), new EffectData
+                            {
+                                origin = body.corePosition,
+                                rotation = Quaternion.identity,
+                                scale = body.bestFitRadius * 2f,
+                                color = new Color(1f, 0.23f, 0.6337214f)
+                            }, true);
+                        }
+                    }
+                }
+
+                Chat.SendBroadcastChat(new Chat.SimpleChatMessage
+                {
+                    baseToken = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>Twitch Chat decides you should have 'better' items.</color>"
+                });
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+            yield break;
+        }
+
         public Func<EventDirector, IEnumerator> CreateMonster(string monster, EliteIndex eliteIndex)
         {
             return CreateMonster(monster, 1, eliteIndex);
