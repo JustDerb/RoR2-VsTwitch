@@ -167,6 +167,60 @@ namespace VsTwitch
             yield break;
         }
 
+        public Func<EventDirector, IEnumerator> TriggerShrineOfTheMountain(int count = 1)
+        {
+            return (director) => { return TriggerShrineOfTheMountainInternal(count); };
+        }
+
+        private IEnumerator TriggerShrineOfTheMountainInternal(int count)
+        {
+            // Wait until the teleporter isn't active
+            yield return new WaitUntil(() => {
+                return TeleporterInteraction.instance && TeleporterInteraction.instance.isIdle;
+            });
+
+            try
+            {
+                foreach (var controller in PlayerCharacterMasterController.instances)
+                {
+                    if (TeleporterInteraction.instance)
+                    {
+                        for (int i = 0; i < count; ++i)
+                        {
+                            TeleporterInteraction.instance.AddShrineStack();
+                        }
+
+                        CharacterBody body = controller.master.GetBody();
+                        if (body)
+                        {
+                            Chat.SendBroadcastChat(new Chat.SubjectFormatChatMessage
+                            {
+                                subjectAsCharacterBody = body,
+                                baseToken = "SHRINE_BOSS_USE_MESSAGE"
+                            });
+                            EffectManager.SpawnEffect(Resources.Load<GameObject>("Prefabs/Effects/ShrineUseEffect"), new EffectData
+                            {
+                                origin = body.corePosition,
+                                rotation = Quaternion.identity,
+                                scale = body.bestFitRadius * 2f,
+                                color = new Color(0.7372549f, 0.90588236f, 0.94509804f)
+                            }, true);
+                        }
+                    }
+                }
+
+                Chat.SendBroadcastChat(new Chat.SimpleChatMessage
+                {
+                    baseToken = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>Twitch Chat feels the boss should be harder on this stage.</color>"
+                });
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+            yield break;
+        }
+
         public Func<EventDirector, IEnumerator> CreateMonster(string monster, EliteIndex eliteIndex)
         {
             return CreateMonster(monster, 1, eliteIndex);

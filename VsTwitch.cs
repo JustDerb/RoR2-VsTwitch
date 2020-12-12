@@ -48,6 +48,7 @@ namespace VsTwitch
         public static ConfigEntry<float> BitStormWeight { get; set; }
         public static ConfigEntry<float> BountyWeight { get; set; }
         public static ConfigEntry<float> ShrineOfOrderWeight { get; set; }
+        public static ConfigEntry<float> ShrineOfTheMountainWeight { get; set; }
         public static ConfigEntry<float> TitanWeight { get; set; }
         public static ConfigEntry<float> LunarWispWeight { get; set; }
         public static ConfigEntry<float> MithrixWeight { get; set; }
@@ -81,6 +82,7 @@ namespace VsTwitch
             BitStormWeight = Config.Bind("Event", "BitStormWeight", 1f, "Weight for the bit storm bit event. Set to 0 to disable.");
             BountyWeight = Config.Bind("Event", "BountyWeight", 1f, "Weight for the doppleganger bit event. Set to 0 to disable.");
             ShrineOfOrderWeight = Config.Bind("Event", "ShrineOfOrderWeight", 1f, "Weight for the Shrine of Order bit event. Set to 0 to disable.");
+            ShrineOfTheMountainWeight = Config.Bind("Event", "ShrineOfTheMountainWeight", 1f, "Weight for the Shrine of the Mountain bit event. Set to 0 to disable.");
             TitanWeight = Config.Bind("Event", "TitanWeight", 1f, "Weight for the Aurelionite bit event. Set to 0 to disable.");
             LunarWispWeight = Config.Bind("Event", "LunarWispWeight", 1f, "Weight for the Lunar Chimera (Wisp) bit event. Set to 0 to disable.");
             MithrixWeight = Config.Bind("Event", "MithrixWeight", 1f, "Weight for the Mithrix bit event. Set to 0 to disable.");
@@ -395,6 +397,9 @@ namespace VsTwitch
                         case "!order":
                             eventDirector.AddEvent(eventFactory.TriggerShrineOfOrder());
                             break;
+                        case "!mountain":
+                            eventDirector.AddEvent(eventFactory.TriggerShrineOfTheMountain(2));
+                            break;
                         case "!titan":
                             eventDirector.AddEvent(eventFactory.CreateMonster(MonsterSpawner.Monsters.TitanGold));
                             break;
@@ -441,6 +446,7 @@ namespace VsTwitch
             choices.AddChoice(eventFactory.CreateBitStorm(), Math.Max(0, BitStormWeight.Value));
             choices.AddChoice(eventFactory.CreateBounty(), Math.Max(0, BountyWeight.Value));
             choices.AddChoice(eventFactory.TriggerShrineOfOrder(), Math.Max(0, ShrineOfOrderWeight.Value));
+            choices.AddChoice(eventFactory.TriggerShrineOfTheMountain(2), Math.Max(0, ShrineOfTheMountainWeight.Value));
             choices.AddChoice(eventFactory.CreateMonster(MonsterSpawner.Monsters.TitanGold), Math.Max(0, TitanWeight.Value));
             choices.AddChoice(eventFactory.CreateMonster(MonsterSpawner.Monsters.LunarWisp, 2), Math.Max(0, LunarWispWeight.Value));
             choices.AddChoice(eventFactory.CreateMonster(MonsterSpawner.Monsters.Brother), Math.Max(0, MithrixWeight.Value));
