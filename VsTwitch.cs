@@ -57,6 +57,7 @@ namespace VsTwitch
 
         // Behaviour
         public static ConfigEntry<bool> EnableChoosingLunarItems { get; set; }
+        public static ConfigEntry<bool> ForceUniqueRolls { get; set; }
 
         #region "Constructors/Destructors"
         public void Awake()
@@ -86,6 +87,7 @@ namespace VsTwitch
             SimpleUI = Config.Bind("UI", "SimpleUI", false, "Simplify the UI. Set to true if you are playing Multiplayer.");
             // Behaviour
             EnableChoosingLunarItems = Config.Bind("Behaviour", "EnableChoosingLunarItems", true, "Twitch Chat chooses items when opening lunar chests (pods)");
+            ForceUniqueRolls = Config.Bind("Behaviour", "ForceUniqueRolls", false, "Ensure, when rolling for items, that they are always different. This doesn't affect multi-shops.");
 
             bitsManager = new BitsManager(CurrentBits.Value);
             twitchManager = new TwitchManager();
@@ -682,18 +684,20 @@ namespace VsTwitch
                 {
                     var itemdef = PickupCatalog.GetPickupDef(dropPickupValue);
                     List<PickupIndex> indices = new List<PickupIndex>();
-                    if (itemdef.equipmentIndex != EquipmentIndex.None)
-                    {
-                        indices.Add(dropPickupValue);
-                        indices.Add(RollVoteEquipment(itemdef));
-                        indices.Add(RollVoteEquipment(itemdef));
-                    }
-                    else
-                    {
-                        indices.Add(dropPickupValue);
-                        indices.Add(RollVoteItem(self));
-                        indices.Add(RollVoteItem(self));
-                    }
+                    // Always make the first choice what was in the chest
+                    indices.Add(dropPickupValue);
+                    // Choose two more based on chances in run
+                    RollForItems(indices, ForceUniqueRolls.Value, 2,
+                            () => {
+                                if (itemdef.equipmentIndex != EquipmentIndex.None)
+                                {
+                                    return RollVoteEquipment(itemdef);
+                                }
+                                else
+                                {
+                                    return RollVoteItem(self);
+                                }
+                            });
 
                     itemRollerManager.RollForItem(indices, pickupIndex =>
                     {
@@ -712,6 +716,24 @@ namespace VsTwitch
             } catch (Exception e)
             {
                 Debug.LogException(e);
+            }
+        }
+
+        private void RollForItems(List<PickupIndex> list, bool forceUnique, int number, Func<PickupIndex> roll)
+        {
+            int added = 0;
+            while (added < number)
+            {
+                PickupIndex toAdd = roll();
+                if (forceUnique && list.Exists((item) => { return item == toAdd; }))
+                {
+                    Debug.Log("Rerolling item to guarantee unique items...");
+                    // Roll again...
+                    continue;
+                }
+
+                list.Add(toAdd);
+                added++;
             }
         }
 
