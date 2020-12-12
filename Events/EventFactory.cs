@@ -192,8 +192,6 @@ namespace VsTwitch
                 member.inventory.GiveItem(ItemIndex.HealWhileSafe, Run.instance.livingPlayerCount);
                 member.inventory.GiveItem(ItemIndex.Medkit, Run.instance.livingPlayerCount);
                 member.inventory.GiveItem(ItemIndex.Infusion, Run.instance.livingPlayerCount);
-                member.inventory.GiveItem(ItemIndex.Hoof, member.inventory.GetItemCount(ItemIndex.Hoof));
-                member.inventory.GiveItem(ItemIndex.SprintBonus, member.inventory.GetItemCount(ItemIndex.SprintBonus));
 
                 //CharacterBody memberBody = member.GetBody();
                 //if (memberBody)
@@ -214,6 +212,10 @@ namespace VsTwitch
                 }
 
                 CharacterMaster summonerMaster = summonerBody.master;
+
+                member.inventory.GiveItem(ItemIndex.Hoof, summonerMaster.inventory.GetItemCount(ItemIndex.Hoof));
+                member.inventory.GiveItem(ItemIndex.SprintBonus, summonerMaster.inventory.GetItemCount(ItemIndex.SprintBonus));
+
                 if (summonerMaster && summonerMaster.minionOwnership.ownerMaster)
                 {
                     summonerMaster = summonerMaster.minionOwnership.ownerMaster;
