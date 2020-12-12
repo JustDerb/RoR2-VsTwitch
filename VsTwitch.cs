@@ -55,6 +55,9 @@ namespace VsTwitch
         // UI
         public static ConfigEntry<bool> SimpleUI { get; set; }
 
+        // Behaviour
+        public static ConfigEntry<bool> EnableChoosingLunarItems { get; set; }
+
         #region "Constructors/Destructors"
         public void Awake()
         {
@@ -81,6 +84,8 @@ namespace VsTwitch
             ElderLemurianWeight = Config.Bind("Event", "ElderLemurianWeight", 1, "Weight for the Elder Lemurian bit event. Set to 0 to disable.");
             // UI
             SimpleUI = Config.Bind("UI", "SimpleUI", false, "Simplify the UI. Set to true if you are playing Multiplayer.");
+            // Behaviour
+            EnableChoosingLunarItems = Config.Bind("Behaviour", "EnableChoosingLunarItems", true, "Twitch Chat chooses items when opening lunar chests (pods)");
 
             bitsManager = new BitsManager(CurrentBits.Value);
             twitchManager = new TwitchManager();
@@ -628,10 +633,16 @@ namespace VsTwitch
 
             // Set as purchased, like the original method
             MethodInfo setHasBeenPurchased = self.GetType().GetMethod("SetHasBeenPurchased", BindingFlags.Instance | BindingFlags.NonPublic);
-            setHasBeenPurchased.Invoke(self, new object[] { true });
-
-            // We purposefully don't call the original because then it'd create the pickup drop :(
-            // orig(self);
+            if (setHasBeenPurchased != null)
+            {
+                setHasBeenPurchased.Invoke(self, new object[] { true });
+            }
+            else
+            {
+                Debug.LogWarning($"ShopTerminalBehavior_DropPickup: {self.gameObject.name} doesn't have SetHasBeenPurchased method!!");
+                // Continue the original method to ensure things don't break horribly
+                orig(self);
+            }
         }
 
         private void ChestBehavior_ItemDrop(On.RoR2.ChestBehavior.orig_ItemDrop orig, ChestBehavior self)
@@ -659,7 +670,7 @@ namespace VsTwitch
 
                 var chestName = self.gameObject.name.ToLower();
 
-                if (chestName.StartsWith("lunarchest"))
+                if (!EnableChoosingLunarItems.Value && chestName.StartsWith("lunarchest"))
                 {
                     orig(self);
                     return;
@@ -674,8 +685,8 @@ namespace VsTwitch
                     if (itemdef.equipmentIndex != EquipmentIndex.None)
                     {
                         indices.Add(dropPickupValue);
-                        indices.Add(RollVoteEquipment());
-                        indices.Add(RollVoteEquipment());
+                        indices.Add(RollVoteEquipment(itemdef));
+                        indices.Add(RollVoteEquipment(itemdef));
                     }
                     else
                     {
@@ -704,9 +715,10 @@ namespace VsTwitch
             }
         }
 
-        private PickupIndex RollVoteEquipment()
+        private PickupIndex RollVoteEquipment(PickupDef pickupDef)
         {
-            List<PickupIndex> equipmentList = Run.instance.availableEquipmentDropList;
+            List<PickupIndex> equipmentList = pickupDef.isLunar ? Run.instance.availableLunarEquipmentDropList :
+                Run.instance.availableEquipmentDropList;
 
             return equipmentList[UnityEngine.Random.Range(0, equipmentList.Count)];
         }
