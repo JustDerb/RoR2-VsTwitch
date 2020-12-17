@@ -149,6 +149,13 @@ These console commands are generally for testing purposes. You should never need
 
 # Changelog
 
+### 1.0.2
+
+See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/2?closed=1
+
+* Added Channel Points integration (See ChannelPoints Configuration)
+* Updated how bit event bosses Health and HP scale over time. This should make them more difficult as the run progresses.
+
 ### 1.0.1
 
 See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/1?closed=1
