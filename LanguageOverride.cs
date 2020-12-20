@@ -109,7 +109,8 @@ namespace VsTwitch
                 { "DIFFICULTY_BAR_8", "BibleThump" },
                 { "DIFFICULTY_BAR_9", "KAPPAKAPPA" },
                 // Main.txt
-                { "TITLE_MULTIPLAYER", "Fight Chat" },
+                { "TITLE_SINGLEPLAYER", "Fight Chat" },
+                { "TITLE_MULTIPLAYER", "Fight Chat w/ Friends" },
                 { "DIFFICULTY_EASY_NAME", "LUL" },
                 { "DIFFICULTY_NORMAL_NAME", "PogChamp" },
                 { "DIFFICULTY_HARD_NAME", "NotLikeThis" },
