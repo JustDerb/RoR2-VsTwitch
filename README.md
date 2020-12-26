@@ -12,7 +12,7 @@ Will your chat help you along your journey, or try to stop your run early? Chat 
 
 # Configurations
 
-Currently, **all config values** need to be filled out. Especially `Channel`, `Username`, and `ImplicitOAuth`.
+Currently, `Channel`, `Username`, and `ImplicitOAuth` need to be filled out at a minimum (if you use nothing but the default values).
 
 ## Twitch
 
@@ -23,6 +23,7 @@ Currently, **all config values** need to be filled out. Especially `Channel`, `U
 |`Channel`|text||The channel to monitor Twitch chat|
 |`Username`|text||The username to use when calling Twitch APIs. If you aren't using a secondary account, this should be the same as `Channel`|
 |`ImplicitOAuth`|text||The "password" to access Twitch APIs. Please visit [twitchapps.com][1] to get the password to put here. Note that this password is not sent to any servers other than Twitch to authenticate. **DO NOT GIVE THIS TO ANYONE.** To revoke this password, go to [Twitch Connections Settings][2] and Disconnect the app named "Twitch Chat OAuth Token Generator".|
+|`ClientID`|text|q6batx0epp608isickayubi39itsckt|The client ID of the app that you used to populate the `ImplicitOAuth` field. If you used [twitchapps.com][1] this would be the default value. If you used another Twitch app, this needs to be changed accordingly.|
 |`EnableItemVoting`|true/false|true|Enables the main feature of this mod. Disable it if you only want to enable bit interactions.|
 |`VoteDurationdSec`|number (secs)|20|How long to allow Twitch to vote on items. Increase this value if viewers think the voting is going too "fast" - they might have their video delay too great.|
 |`BitsThreshold`|number|1500|The number of bits needed to cause an in-game event.|
@@ -34,6 +35,10 @@ Currently, **all config values** need to be filled out. Especially `Channel`, `U
 ## ChannelPoints
 
 **WARNING:** Not typing the Channel Points title in exactly will cause the specific feature not to work! You should see a warning in the console if this happens.
+
+See the [Twitch Channel Points Guide][3] (section "Custom Rewards") for how to create custom rewards. The Reward Name/Channel Points Title needs to be pasted into the configuration exactly as entered (case sensitive).
+
+[3]: https://help.twitch.tv/s/article/channel-points-guide?language=en_US
 
 |Config|Type|Default|Notes|
 |------|----|-------|-----|
