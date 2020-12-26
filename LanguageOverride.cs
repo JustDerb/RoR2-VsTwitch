@@ -31,8 +31,8 @@ namespace VsTwitch
             StreamerName = "Streamer";
             StringsByToken = new Dictionary<string, string>
             {
-				// Dialogue.txt
-				{ "BROTHER_DIALOGUE_FORMAT", "<color=#c6d5ff><size=120%>Twitch Chat: {0}</color></size>" },
+                // Dialogue.txt
+                { "BROTHER_DIALOGUE_FORMAT", "<color=#c6d5ff><size=120%>Twitch Chat: {0}</color></size>" },
                 { "BROTHER_SPAWN_PHASE1_1", $"Get that F key warmed up, {STREAMER_TOKEN}" },
                 { "BROTHER_SPAWN_PHASE1_2", $"Time to get one hit KO'd, {STREAMER_TOKEN}" },
                 { "BROTHER_SPAWN_PHASE1_3", $"No amount of character guide Youtube videos can save you now, {STREAMER_TOKEN}" },
