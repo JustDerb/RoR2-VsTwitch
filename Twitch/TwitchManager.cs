@@ -35,6 +35,7 @@ namespace VsTwitch
         public void Connect(string channel, string oauthToken, string username, string clientId)
         {
             Disconnect();
+            LogDebug("TwitchManager::Connect");
 
             if (channel == null || channel.Trim().Length == 0)
             {
@@ -52,6 +53,7 @@ namespace VsTwitch
             Channel = channel;
             Username = username;
 
+            LogDebug("[Twitch API] Creating...");
             TwitchApi = new Api();
             string twitchApiOauthToken = oauthToken;
             if (twitchApiOauthToken.StartsWith("oauth:"))
@@ -63,6 +65,7 @@ namespace VsTwitch
             string channelId = null;
             try
             {
+                LogDebug("[Twitch API] Trying to find channel ID...");
                 Task<TwitchLib.Api.Helix.Models.Users.GetUsersResponse> response = TwitchApi.Helix.Users.GetUsersAsync(null,
                     new List<string>(new string[] { channel }));
                 response.Wait();
@@ -70,7 +73,7 @@ namespace VsTwitch
                 if (response.Result.Users.Length == 1)
                 {
                     channelId = response.Result.Users[0].Id;
-                    Console.WriteLine($"[Twitch] Channel ID for {channel} = {channelId}");
+                    Console.WriteLine($"[Twitch API] Channel ID for {channel} = {channelId}");
                 }
                 else
                 {
@@ -86,6 +89,7 @@ namespace VsTwitch
                 Console.WriteLine(ex);
             }
 
+            LogDebug("[Twitch Client] Creating...");
             ConnectionCredentials credentials = new ConnectionCredentials(username, oauthToken);
             TwitchClient = new Client();
             TwitchClient.Initialize(credentials, channel);
@@ -94,10 +98,12 @@ namespace VsTwitch
             TwitchClient.OnMessageReceived += OnMessageReceived;
             TwitchClient.OnConnected += TwitchClient_OnConnected;
             TwitchClient.OnDisconnected += OnDisconnected;
+            LogDebug("[Twitch Client] Connecting...");
             TwitchClient.Connect();
 
             if (channelId != null && channelId.Trim().Length != 0)
             {
+                LogDebug("[Twitch PubSub] Creating...");
                 TwitchPubSub = new PubSub();
                 TwitchPubSub.OnLog += TwitchPubSub_OnLog;
                 TwitchPubSub.OnPubSubServiceConnected += (sender, e) =>
@@ -126,13 +132,14 @@ namespace VsTwitch
                     }
                 };
                 TwitchPubSub.OnRewardRedeemed += OnRewardRedeemed;
-                Console.WriteLine("[Twitch PubSub] Trying to connect...");
+                Console.WriteLine("[Twitch PubSub] Connecting...");
                 TwitchPubSub.Connect();
             }
         }
 
         public void Disconnect()
         {
+            LogDebug("TwitchManager::Disconnect");
             if (TwitchClient != null)
             {
                 TwitchClient.Disconnect();
@@ -158,7 +165,7 @@ namespace VsTwitch
         {
             if (!IsConnected())
             {
-                Console.WriteLine("Not connected to Twitch!");
+                Console.WriteLine("[Twitch Client] Not connected to Twitch!");
                 return;
             }
             TwitchClient.SendMessage(Channel, message);
@@ -166,24 +173,25 @@ namespace VsTwitch
 
         private void TwitchClient_OnConnected(object sender, OnConnectedArgs e)
         {
-            Console.WriteLine("Connected to Twitch using username: " + e.BotUsername);
+            Console.WriteLine("[Twitch Client] Connected to Twitch using username: " + e.BotUsername);
         }
 
         private void TwitchPubSub_OnLog(object sender, TwitchLib.PubSub.Events.OnLogArgs e)
         {
-            if (DebugLogs)
-            {
-                Console.WriteLine($"[Twitch PubSub] {e.Data}");
-            }
+            LogDebug($"[Twitch PubSub] {e.Data}");
         }
 
         private void TwitchClient_OnLog(object sender, TwitchLib.Client.Events.OnLogArgs e)
         {
-            if (DebugLogs)
-            {
-                Console.WriteLine($"[Twitch] {e.DateTime}: {e.BotUsername} - {e.Data}");
-            }
+            LogDebug($"[Twitch Client] {e.DateTime}: {e.BotUsername} - {e.Data}");
         }
 
+        private void LogDebug(string message)
+        {
+            if (DebugLogs)
+            {
+                Console.WriteLine(message);
+            }
+        }
     }
 }

@@ -39,6 +39,7 @@ namespace VsTwitch
         public static ConfigEntry<string> TwitchClientID { get; set; }
         public static ConfigEntry<string> TwitchUsername { get; set; }
         public static ConfigEntry<string> TwitchOAuth { get; set; }
+        public static ConfigEntry<bool> TwitchDebugLogs { get; set; }
         public static ConfigEntry<bool> EnableItemVoting { get; set; }
         public static ConfigEntry<int> VoteDurationSec { get; set; }
         public static ConfigEntry<bool> EnableBitEvents { get; set; }
@@ -82,6 +83,7 @@ namespace VsTwitch
             TwitchUsername = Config.Bind("Twitch", "Username", "", "Your Twitch username");
             TwitchOAuth = Config.Bind("Twitch", "ImplicitOAuth", "", "Implicite OAuth code (this is not your password - it's a generated password!): " +
                 "https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=q6batx0epp608isickayubi39itsckt&redirect_uri=https://twitchapps.com/tmi/&scope=channel_subscriptions+user_subscriptions+channel_check_subscription+bits:read+chat:read+chat:edit+channel:read:redemptions+channel:read:hype_train");
+            TwitchDebugLogs = Config.Bind("Twitch", "DebugLogs", false, "Enable debug logging for Twitch - will spam to the console!");
             EnableItemVoting = Config.Bind("Twitch", "EnableItemVoting", true, "Enable item voting on Twitch.");
             VoteDurationSec = Config.Bind("Twitch", "VoteDurationdSec", 20, "How long to allow twitch voting.");
             EnableBitEvents = Config.Bind("Twitch", "EnableBitEvents", true, "Enable bit events from Twitch.");
@@ -114,9 +116,10 @@ namespace VsTwitch
             {
                 SetUpChannelPoints();
             }
-            twitchManager = new TwitchManager();
-            // FIMXE: Remove
-            twitchManager.DebugLogs = true;
+            twitchManager = new TwitchManager()
+            {
+                DebugLogs = TwitchDebugLogs.Value,
+            };
             itemRollerManager = new ItemRollerManager(new MaxVoteStrategy<PickupIndex>());
             languageOverride = new LanguageOverride
             {
