@@ -659,7 +659,7 @@ namespace VsTwitch
                     {
                         VoteItems voteItems = gameObject.AddComponent<VoteItems>();
                         voteItems.SetItems(items, VoteDurationSec.Value, item.Key);
-                        voteItems.SetPosition(new Vector3(256 + 32, Screen.height / 2, 0) + new Vector3(0, ((item.Key - 1) * -128) + 128, 0));
+                        voteItems.SetPosition(new Vector3(Screen.width * (640f / 1920f) , Screen.height / 2, 0) + new Vector3(0, ((item.Key - 1) * -128) + 128, 0));
                     }
                 }
             }
