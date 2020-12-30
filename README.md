@@ -23,6 +23,7 @@ Currently, `Channel`, `Username`, and `ImplicitOAuth` need to be filled out at a
 |`Channel`|text||The channel to monitor Twitch chat|
 |`Username`|text||The username to use when calling Twitch APIs. If you aren't using a secondary account, this should be the same as `Channel`|
 |`ImplicitOAuth`|text||The "password" to access Twitch APIs. Please visit [twitchapps.com][1] to get the password to put here. Note that this password is not sent to any servers other than Twitch to authenticate. **DO NOT GIVE THIS TO ANYONE.** To revoke this password, go to [Twitch Connections Settings][2] and Disconnect the app named "Twitch Chat OAuth Token Generator".|
+|`DebugLogs`|true/false|false|Enable debug logging for Twitch - will spam to the console!|
 |`ClientID`|text|q6batx0epp608isickayubi39itsckt|The client ID of the app that you used to populate the `ImplicitOAuth` field. If you used [twitchapps.com][1] this would be the default value. If you used another Twitch app, this needs to be changed accordingly.|
 |`EnableItemVoting`|true/false|true|Enables the main feature of this mod. Disable it if you only want to enable bit interactions.|
 |`VoteDurationdSec`|number (secs)|20|How long to allow Twitch to vote on items. Increase this value if viewers think the voting is going too "fast" - they might have their video delay too great.|
