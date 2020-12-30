@@ -26,6 +26,19 @@ namespace VsTwitch
             this.id = 1;
         }
 
+        public int QueueSize()
+        {
+            cacheLock.EnterReadLock();
+            try
+            {
+                return voteQueue.Count;
+            }
+            finally
+            {
+                cacheLock.ExitReadLock();
+            }
+        }
+
         public void EndVote()
         {
             OnVoteEnd();
@@ -65,6 +78,14 @@ namespace VsTwitch
             cacheLock.EnterWriteLock();
             try
             {
+                if (isSameVote(vote, currentVote))
+                {
+                    System.Console.WriteLine($"WARNING: Not adding roll for {string.Join(", ", vote.GetCandidates().Values)} with id {vote.GetId()} " +
+                        $"because the previous vote was exactly that. There might be another mod causing issues making rolling busted.");
+                    return;
+                }
+
+                System.Console.WriteLine($"Adding roll for {string.Join(", ", vote.GetCandidates().Values)} with id {vote.GetId()}");
                 voteQueue.Add(vote);
             }
             finally
@@ -73,6 +94,17 @@ namespace VsTwitch
             }
 
             TryStartVote();
+        }
+
+        private bool isSameVote(Vote vote, Vote lastVote)
+        {
+            if (vote == null || lastVote == null)
+            {
+                return false;
+            }
+            HashSet<PickupIndex> vote1 = new HashSet<PickupIndex>(vote.GetCandidates().Values);
+            HashSet<PickupIndex> vote2 = new HashSet<PickupIndex>(lastVote.GetCandidates().Values);
+            return vote1.SetEquals(vote2);
         }
 
         public void AddVote(string username, int index)

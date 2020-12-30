@@ -630,7 +630,7 @@ namespace VsTwitch
             {
                 if (sender is Vote vote)
                 {
-                    Debug.LogWarning($"Starting vote {vote.GetId()}");
+                    Debug.LogWarning($"Starting vote for {string.Join(", ", vote.GetCandidates().Values)} with id {vote.GetId()}");
                 }
                 List<PickupIndex> items = new List<PickupIndex>();
                 List<string> inGameItemsString = new List<string>();
