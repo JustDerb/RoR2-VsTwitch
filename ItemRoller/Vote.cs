@@ -9,13 +9,13 @@ namespace VsTwitch
     {
         private readonly Dictionary<int, PickupIndex> indices;
         private readonly IVoteStrategy<PickupIndex> strategy;
-
         private readonly Dictionary<string, PickupIndex> votes;
+        private readonly int id;
 
         public event EventHandler<IDictionary<int, PickupIndex>> OnVoteStart;
         public event EventHandler<PickupIndex> OnVoteEnd;
 
-        public Vote(List<PickupIndex> indices, IVoteStrategy<PickupIndex> strategy)
+        public Vote(List<PickupIndex> indices, IVoteStrategy<PickupIndex> strategy, int id)
         {
             this.indices = new Dictionary<int, PickupIndex>();
             int i = 1;
@@ -26,11 +26,17 @@ namespace VsTwitch
             }
             this.strategy = strategy;
             votes = new Dictionary<string, PickupIndex>();
+            this.id = id;
         }
 
         public IDictionary<int, PickupIndex> GetCandidates()
         {
             return new ReadOnlyDictionary<int, PickupIndex>(indices);
+        }
+
+        public int GetId()
+        {
+            return id;
         }
 
         public void StartVote()

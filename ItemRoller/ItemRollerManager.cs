@@ -14,6 +14,7 @@ namespace VsTwitch
 
         private readonly BlockingCollection<Vote> voteQueue;
         private Vote currentVote;
+        private int id;
 
         public event EventHandler<IDictionary<int, PickupIndex>> OnVoteStart;
 
@@ -22,6 +23,7 @@ namespace VsTwitch
             this.cacheLock = new ReaderWriterLockSlim();
             this.voteQueue = new BlockingCollection<Vote>();
             this.voteStrategy = voteStrategy;
+            this.id = 1;
         }
 
         public void EndVote()
@@ -53,7 +55,7 @@ namespace VsTwitch
 
         public void RollForItem(List<PickupIndex> indices, Action<PickupIndex> callback)
         {
-            Vote vote = new Vote(indices, voteStrategy);
+            Vote vote = new Vote(indices, voteStrategy, Interlocked.Increment(ref id));
             vote.OnVoteStart += OnVoteStart;
             vote.OnVoteEnd += (sender, e) =>
             {
