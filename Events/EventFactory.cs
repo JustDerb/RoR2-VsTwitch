@@ -311,9 +311,7 @@ namespace VsTwitch
                 nameChange.NameToken = nameEscaped;
 
                 // Help them out since the AI are pretty bad at staying alive
-                member.inventory.GiveItem(ItemIndex.HealOnCrit, Run.instance.livingPlayerCount);
                 member.inventory.GiveItem(ItemIndex.HealWhileSafe, Run.instance.livingPlayerCount);
-                member.inventory.GiveItem(ItemIndex.Medkit, Run.instance.livingPlayerCount);
                 member.inventory.GiveItem(ItemIndex.Infusion, Run.instance.livingPlayerCount);
 
                 //CharacterBody memberBody = member.GetBody();

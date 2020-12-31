@@ -173,6 +173,7 @@ See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/3?closed=1
 * Added more debug logging around TwitchLib (this library...can be finicky for some people). (Config: `DebugLogs`)
 * Move the location of the vote notification to no longer be in the way of any allies. It's not positioning using the best calculation... but it's better than it was.'
 * Protect against mods that cause rolls to happen mutliple times, causing the same rolls one after the other. If this happens a warning will be printed to the console.
+* Allies get reduced items to hopefully be less "tanky"
 
 ### 1.0.2
 
