@@ -412,6 +412,7 @@ namespace VsTwitch
             string username = args.Count > 2 ? args[2] : args[0];
             try
             {
+                Debug.Log("Connecting to Twitch...");
                 Instance.twitchManager.Connect(channel, oauthToken, username, null);
             }
             catch (Exception e)
@@ -492,6 +493,7 @@ namespace VsTwitch
         {
             try
             {
+                Debug.Log("Connecting to Twitch...");
                 twitchManager.Connect(TwitchChannel.Value, TwitchOAuth.Value, TwitchUsername.Value, TwitchClientID.Value);
             }
             catch (Exception e)
