@@ -51,7 +51,7 @@ See the [Twitch Channel Points Guide][3] (section "Custom Rewards") for how to c
 |`BitStorm`|text||**(Case Sensitive!)** Channel Points Title for the bit storm bit event.|
 |`Bounty`|text||**(Case Sensitive!)** Channel Points Title for the doppleganger bit event.|
 |`ShrineOfOrder`|text||**(Case Sensitive!)** Channel Points Title for the Shrine of Order bit event.|
-|`ShrineOfTheMountain`|text||**(Case Sensitive!)** Channel Points Title for the Shrine of Order bit event.|
+|`ShrineOfTheMountain`|text||**(Case Sensitive!)** Channel Points Title for the Shrine of the Mountain bit event.|
 |`Titan`|text||**(Case Sensitive!)** Channel Points Title for the Aurelionite bit event.|
 |`LunarWisp`|text||**(Case Sensitive!)** Channel Points Title for the Lunar Chimera (Wisp) bit event.|
 |`Mithrix`|text||**(Case Sensitive!)** Channel Points Title for the Mithrix bit event.|
