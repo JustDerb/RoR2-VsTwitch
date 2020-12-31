@@ -950,6 +950,12 @@ namespace VsTwitch
                 if (dropPickupValue != PickupIndex.none)
                 {
                     var itemdef = PickupCatalog.GetPickupDef(dropPickupValue);
+                    // If this drops a Lunar Coin we just let it go
+                    if (itemdef.internalName.StartsWith("LunarCoin."))
+                    {
+                        orig(self);
+                        return;
+                    }
                     List<PickupIndex> indices = new List<PickupIndex>();
                     // Always make the first choice what was in the chest
                     indices.Add(dropPickupValue);
