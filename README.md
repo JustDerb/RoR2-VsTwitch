@@ -163,6 +163,17 @@ These console commands are generally for testing purposes. You should never need
 
 # Changelog
 
+### 1.0.3
+
+See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/3?closed=1
+
+* All Bit Events can now be triggered via Channel Points (if configured).
+* Updated title menu text.
+* Update language to use they/them pronouns.
+* Added more debug logging around TwitchLib (this library...can be finicky for some people). (Config: `DebugLogs`)
+* Move the location of the vote notification to no longer be in the way of any allies. It's not positioning using the best calculation... but it's better than it was.'
+* Protect against mods that cause rolls to happen mutliple times, causing the same rolls one after the other. If this happens a warning will be printed to the console.
+
 ### 1.0.2
 
 See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/2?closed=1
