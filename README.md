@@ -48,6 +48,14 @@ See the [Twitch Channel Points Guide][3] (section "Custom Rewards") for how to c
 |`AllyLemurian`|text||**(Case Sensitive!)** Channel Points Title to spawn Ally Elite Lemurian. Leave empty to disable.|
 |`AllyElderLemurian`|text||**(Case Sensitive!)** Channel Points Title to spawn Ally Elite Elder Lemurian. Leave empty to disable.|
 |`RustedKey`|text||**(Case Sensitive!)** Channel Points Title to give everyone a Rusted Key. Leave empty to disable.|
+|`BitStorm`|text||**(Case Sensitive!)** Channel Points Title for the bit storm bit event.|
+|`Bounty`|text||**(Case Sensitive!)** Channel Points Title for the doppleganger bit event.|
+|`ShrineOfOrder`|text||**(Case Sensitive!)** Channel Points Title for the Shrine of Order bit event.|
+|`ShrineOfTheMountain`|text||**(Case Sensitive!)** Channel Points Title for the Shrine of Order bit event.|
+|`Titan`|text||**(Case Sensitive!)** Channel Points Title for the Aurelionite bit event.|
+|`LunarWisp`|text||**(Case Sensitive!)** Channel Points Title for the Lunar Chimera (Wisp) bit event.|
+|`Mithrix`|text||**(Case Sensitive!)** Channel Points Title for the Mithrix bit event.|
+|`ElderLemurian`|text||**(Case Sensitive!)** Channel Points Title for the Elder Lemurian bit event.|
 
 ## Event
 

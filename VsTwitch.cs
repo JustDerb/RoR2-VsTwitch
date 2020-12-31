@@ -62,6 +62,14 @@ namespace VsTwitch
         public static ConfigEntry<string> ChannelPointsAllyLemurian { get; set; }
         public static ConfigEntry<string> ChannelPointsAllyElderLemurian { get; set; }
         public static ConfigEntry<string> ChannelPointsRustedKey { get; set; }
+        public static ConfigEntry<string> ChannelPointsBitStorm { get; set; }
+        public static ConfigEntry<string> ChannelPointsBounty { get; set; }
+        public static ConfigEntry<string> ChannelPointsShrineOfOrder { get; set; }
+        public static ConfigEntry<string> ChannelPointsShrineOfTheMountain { get; set; }
+        public static ConfigEntry<string> ChannelPointsTitan { get; set; }
+        public static ConfigEntry<string> ChannelPointsLunarWisp { get; set; }
+        public static ConfigEntry<string> ChannelPointsMithrix { get; set; }
+        public static ConfigEntry<string> ChannelPointsElderLemurian { get; set; }
 
         // UI
         public static ConfigEntry<bool> SimpleUI { get; set; }
@@ -104,6 +112,14 @@ namespace VsTwitch
             ChannelPointsAllyLemurian = Config.Bind("ChannelPoints", "AllyLemurian", "", "(Case Sensitive!) Channel Points Title to spawn Ally Elite Lemurian. Leave empty to disable.");
             ChannelPointsAllyElderLemurian = Config.Bind("ChannelPoints", "AllyElderLemurian", "", "(Case Sensitive!) Channel Points Title to spawn Ally Elite Elder Lemurian. Leave empty to disable.");
             ChannelPointsRustedKey = Config.Bind("ChannelPoints", "RustedKey", "", "(Case Sensitive!) Channel Points Title to give everyone a Rusted Key. Leave empty to disable.");
+            ChannelPointsBitStorm = Config.Bind("ChannelPoints", "BitStorm", "", "(Case Sensitive!) Channel Points Title for the bit storm bit event. Leave empty to disable.");
+            ChannelPointsBounty = Config.Bind("ChannelPoints", "Bounty", "", "(Case Sensitive!) Channel Points Title for the doppleganger bit event. Leave empty to disable.");
+            ChannelPointsShrineOfOrder = Config.Bind("ChannelPoints", "ShrineOfOrder", "", "(Case Sensitive!) Channel Points Title for the Shrine of Order bit event. Leave empty to disable.");
+            ChannelPointsShrineOfTheMountain = Config.Bind("ChannelPoints", "ShrineOfTheMountain", "", "(Case Sensitive!) Channel Points Title for the Shrine of Order bit event. Leave empty to disable.");
+            ChannelPointsTitan = Config.Bind("ChannelPoints", "Titan", "", "(Case Sensitive!) Channel Points Title for the Aurelionite bit event. Leave empty to disable.");
+            ChannelPointsLunarWisp = Config.Bind("ChannelPoints", "LunarWisp", "", "(Case Sensitive!) Channel Points Title for the Lunar Chimera (Wisp) bit event. Leave empty to disable.");
+            ChannelPointsMithrix = Config.Bind("ChannelPoints", "Mithrix", "", "(Case Sensitive!) Channel Points Title for the Mithrix bit event. Leave empty to disable.");
+            ChannelPointsElderLemurian = Config.Bind("ChannelPoints", "ElderLemurian", "", "(Case Sensitive!) Channel Points Title for the Elder Lemurian bit event. Leave empty to disable.");
             // UI
             SimpleUI = Config.Bind("UI", "SimpleUI", false, "Simplify the UI. Set to true if you are playing Multiplayer.");
             // Behaviour
@@ -207,6 +223,102 @@ namespace VsTwitch
             else
             {
                 Debug.LogWarning("Could not register Channel Points event: Rusted Key");
+            }
+
+            if (channelPointsManager.RegisterEvent(ChannelPointsBitStorm.Value, (manager, e) =>
+            {
+                eventDirector.AddEvent(eventFactory.CreateBitStorm());
+            }))
+            {
+                Debug.Log("Successfully registered Channel Points event: Bit Storm");
+            }
+            else
+            {
+                Debug.LogWarning("Could not register Channel Points event: Bit Storm");
+            }
+
+            if (channelPointsManager.RegisterEvent(ChannelPointsBounty.Value, (manager, e) =>
+            {
+                eventDirector.AddEvent(eventFactory.CreateBounty());
+            }))
+            {
+                Debug.Log("Successfully registered Channel Points event: Bounty");
+            }
+            else
+            {
+                Debug.LogWarning("Could not register Channel Points event: Bounty");
+            }
+
+            if (channelPointsManager.RegisterEvent(ChannelPointsShrineOfOrder.Value, (manager, e) =>
+            {
+                eventDirector.AddEvent(eventFactory.TriggerShrineOfOrder());
+            }))
+            {
+                Debug.Log("Successfully registered Channel Points event: Shrine Of Order");
+            }
+            else
+            {
+                Debug.LogWarning("Could not register Channel Points event: Shrine Of Order");
+            }
+
+            if (channelPointsManager.RegisterEvent(ChannelPointsShrineOfTheMountain.Value, (manager, e) =>
+            {
+                eventDirector.AddEvent(eventFactory.TriggerShrineOfTheMountain());
+            }))
+            {
+                Debug.Log("Successfully registered Channel Points event: Shrine Of The Mountain");
+            }
+            else
+            {
+                Debug.LogWarning("Could not register Channel Points event: Shrine Of The Mountain");
+            }
+
+            if (channelPointsManager.RegisterEvent(ChannelPointsTitan.Value, (manager, e) =>
+            {
+                eventDirector.AddEvent(eventFactory.CreateMonster(MonsterSpawner.Monsters.TitanGold));
+            }))
+            {
+                Debug.Log("Successfully registered Channel Points event: Aurelionite");
+            }
+            else
+            {
+                Debug.LogWarning("Could not register Channel Points event: Aurelionite");
+            }
+
+            if (channelPointsManager.RegisterEvent(ChannelPointsLunarWisp.Value, (manager, e) =>
+            {
+                eventDirector.AddEvent(eventFactory.CreateMonster(MonsterSpawner.Monsters.LunarWisp, 2));
+            }))
+            {
+                Debug.Log("Successfully registered Channel Points event: Lunar Chimera (Wisp)");
+            }
+            else
+            {
+                Debug.LogWarning("Could not register Channel Points event: Lunar Chimera (Wisp)");
+            }
+
+            if (channelPointsManager.RegisterEvent(ChannelPointsMithrix.Value, (manager, e) =>
+            {
+                eventDirector.AddEvent(eventFactory.CreateMonster(MonsterSpawner.Monsters.Brother));
+            }))
+            {
+                Debug.Log("Successfully registered Channel Points event: Mithrix");
+            }
+            else
+            {
+                Debug.LogWarning("Could not register Channel Points event: Mithrix");
+            }
+
+            if (channelPointsManager.RegisterEvent(ChannelPointsElderLemurian.Value, (manager, e) =>
+            {
+                eventDirector.AddEvent(eventFactory.CreateMonster(MonsterSpawner.Monsters.LemurianBruiser, RollForElite()));
+            }))
+            {
+                Debug.Log("Successfully registered Channel Points event: Elder Lemurian");
+            }
+            else
+            {
+                Debug.LogWarning("Could not register Channel Points event: Elder Lemurian");
             }
         }
 
