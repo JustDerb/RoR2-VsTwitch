@@ -249,6 +249,12 @@ namespace VsTwitch
             foreach (var member in squad.readOnlyMembersList)
             {
                 characterName = Util.GetBestBodyName(member.GetBodyObject());
+                CharacterBody body = member.GetBody();
+                if (body)
+                {
+                    body.gameObject.AddComponent<TeleportInKillZone>();
+                    body.bodyFlags |= CharacterBody.BodyFlags.IgnoreFallDamage;
+                }
                 break;
             }
             // FIXME: Use "{0} has summoned {1}" text

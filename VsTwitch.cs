@@ -348,6 +348,7 @@ namespace VsTwitch
             On.RoR2.ChestBehavior.ItemDrop += ChestBehavior_ItemDrop;
             On.RoR2.ShopTerminalBehavior.DropPickup += ShopTerminalBehavior_DropPickup;
             On.RoR2.MultiShopController.DisableAllTerminals += MultiShopController_DisableAllTerminals;
+            On.RoR2.MapZone.TryZoneStart += MapZone_TryZoneStart;
 
             if (self.gameObject.GetComponent<EventDirector>() == null)
             {
@@ -377,6 +378,7 @@ namespace VsTwitch
             On.RoR2.ChestBehavior.ItemDrop -= ChestBehavior_ItemDrop;
             On.RoR2.ShopTerminalBehavior.DropPickup -= ShopTerminalBehavior_DropPickup;
             On.RoR2.MultiShopController.DisableAllTerminals -= MultiShopController_DisableAllTerminals;
+            On.RoR2.MapZone.TryZoneStart -= MapZone_TryZoneStart;
 
             if (eventDirector)
             {
@@ -737,6 +739,28 @@ namespace VsTwitch
             return orig(self, token);
         }
         #endregion
+
+        private void MapZone_TryZoneStart(On.RoR2.MapZone.orig_TryZoneStart orig, MapZone self, Collider other)
+        {
+            CharacterBody body = other.GetComponent<CharacterBody>();
+            if (body && body.currentVehicle == null)
+            {
+                TeleportInKillZone teleport = body.GetComponent<TeleportInKillZone>();
+                if (teleport &&
+                    NetworkServer.active &&
+                    self.zoneType == MapZone.ZoneType.OutOfBounds &&
+                    body.teamComponent.teamIndex == TeamIndex.Monster &&
+                    !Physics.GetIgnoreLayerCollision(self.gameObject.layer, other.gameObject.layer))
+                {
+                    typeof(MapZone)
+                        .GetMethod("TeleportBody", BindingFlags.Instance | BindingFlags.NonPublic)
+                        .Invoke(self, new object[] { body });
+                    return;
+                }
+            }
+
+            orig(self, other);
+        }
 
         private void ItemRollerManager_OnVoteStart(object sender, IDictionary<int, PickupIndex> e)
         {
