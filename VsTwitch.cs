@@ -1,5 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
 using R2API.Utils;
 using RoR2;
 using RoR2.Networking;
@@ -349,6 +351,9 @@ namespace VsTwitch
             On.RoR2.ShopTerminalBehavior.DropPickup += ShopTerminalBehavior_DropPickup;
             On.RoR2.MultiShopController.DisableAllTerminals += MultiShopController_DisableAllTerminals;
             On.RoR2.MapZone.TryZoneStart += MapZone_TryZoneStart;
+            On.RoR2.HealthComponent.Suicide += HealthComponent_Suicide;
+            On.EntityStates.Missions.BrotherEncounter.BrotherEncounterBaseState.KillAllMonsters += BrotherEncounterBaseState_KillAllMonsters;
+            On.RoR2.ArenaMissionController.EndRound += ArenaMissionController_EndRound;
 
             if (self.gameObject.GetComponent<EventDirector>() == null)
             {
@@ -379,6 +384,9 @@ namespace VsTwitch
             On.RoR2.ShopTerminalBehavior.DropPickup -= ShopTerminalBehavior_DropPickup;
             On.RoR2.MultiShopController.DisableAllTerminals -= MultiShopController_DisableAllTerminals;
             On.RoR2.MapZone.TryZoneStart -= MapZone_TryZoneStart;
+            On.RoR2.HealthComponent.Suicide -= HealthComponent_Suicide;
+            On.EntityStates.Missions.BrotherEncounter.BrotherEncounterBaseState.KillAllMonsters -= BrotherEncounterBaseState_KillAllMonsters;
+            On.RoR2.ArenaMissionController.EndRound -= ArenaMissionController_EndRound;
 
             if (eventDirector)
             {
@@ -740,13 +748,51 @@ namespace VsTwitch
         }
         #endregion
 
+        #region "Monster Suicide Protection"
+        private void PreventSpawnedMonsterSuicides()
+        {
+            if (NetworkServer.active)
+            {
+                foreach (var teamComponent in TeamComponent.GetTeamMembers(TeamIndex.Monster))
+                {
+                    SpawnedMonster spawned = teamComponent?.body?.master?.GetComponent<SpawnedMonster>();
+                    if (spawned)
+                    {
+                        spawned.suicideProtection++;
+                    }
+                }
+            }
+        }
+
+        private void HealthComponent_Suicide(On.RoR2.HealthComponent.orig_Suicide orig, HealthComponent self, GameObject killerOverride, GameObject inflictorOverride, DamageType damageType)
+        {
+            if (!NetworkServer.active)
+            {
+                orig(self, killerOverride, inflictorOverride, damageType);
+                return;
+            }
+
+            SpawnedMonster spawned = self.body?.master?.GetComponent<SpawnedMonster>();
+            if (spawned && spawned.suicideProtection > 0)
+            {
+                // Don't actually suicide
+                spawned.suicideProtection--;
+                Debug.Log($"Prevented suicide of {self.body.master}");
+                return;
+            }
+            else
+            {
+                orig(self, killerOverride, inflictorOverride, damageType);
+            }
+        }
+
         private void MapZone_TryZoneStart(On.RoR2.MapZone.orig_TryZoneStart orig, MapZone self, Collider other)
         {
             CharacterBody body = other.GetComponent<CharacterBody>();
             if (body && body.currentVehicle == null)
             {
-                TeleportInKillZone teleport = body.GetComponent<TeleportInKillZone>();
-                if (teleport &&
+                SpawnedMonster spawnedMonster = body.master?.GetComponent<SpawnedMonster>();
+                if (spawnedMonster && spawnedMonster.teleportWhenOOB &&
                     NetworkServer.active &&
                     self.zoneType == MapZone.ZoneType.OutOfBounds &&
                     body.teamComponent.teamIndex == TeamIndex.Monster &&
@@ -761,6 +807,19 @@ namespace VsTwitch
 
             orig(self, other);
         }
+
+        private void BrotherEncounterBaseState_KillAllMonsters(On.EntityStates.Missions.BrotherEncounter.BrotherEncounterBaseState.orig_KillAllMonsters orig, EntityStates.Missions.BrotherEncounter.BrotherEncounterBaseState self)
+        {
+            PreventSpawnedMonsterSuicides();
+            orig(self);
+        }
+
+        private void ArenaMissionController_EndRound(On.RoR2.ArenaMissionController.orig_EndRound orig, ArenaMissionController self)
+        {
+            PreventSpawnedMonsterSuicides();
+            orig(self);
+        }
+        #endregion
 
         private void ItemRollerManager_OnVoteStart(object sender, IDictionary<int, PickupIndex> e)
         {

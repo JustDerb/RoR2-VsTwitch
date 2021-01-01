@@ -245,17 +245,23 @@ namespace VsTwitch
         private IEnumerator CreateMonsterInternal(EventDirector director, string monster, int num, EliteIndex eliteIndex)
         {
             CombatSquad squad = spawner.SpawnMonsters(monster, eliteIndex, FindFirstAliveBody(), num, director);
-            var characterName = "monster";
+            string characterName = null;
             foreach (var member in squad.readOnlyMembersList)
             {
-                characterName = Util.GetBestBodyName(member.GetBodyObject());
+                if (characterName == null) {
+                    characterName = Util.GetBestBodyName(member.GetBodyObject());
+                }
+                SpawnedMonster spawnedMonster = member.gameObject.AddComponent<SpawnedMonster>();
+                spawnedMonster.teleportWhenOOB = true;
                 CharacterBody body = member.GetBody();
                 if (body)
                 {
-                    body.gameObject.AddComponent<TeleportInKillZone>();
                     body.bodyFlags |= CharacterBody.BodyFlags.IgnoreFallDamage;
                 }
-                break;
+            }
+            if (characterName == null)
+            {
+                characterName = "monster";
             }
             // FIXME: Use "{0} has summoned {1}" text
             var pluralize = squad.readOnlyMembersList.Count == 1 ? $"{characterName} jumps" : $"{squad.readOnlyMembersList.Count} {characterName}'s jump";
@@ -275,6 +281,7 @@ namespace VsTwitch
                     }
                 };
             }
+
             yield break;
         }
 
@@ -315,6 +322,10 @@ namespace VsTwitch
                 // This is to make the name "stick" between stages
                 ForceNameChange nameChange = member.gameObject.AddComponent<ForceNameChange>();
                 nameChange.NameToken = nameEscaped;
+
+                SpawnedMonster spawnedMonster = member.gameObject.AddComponent<SpawnedMonster>();
+                // Allies aren't special here, let the regular game code handle them.
+                spawnedMonster.teleportWhenOOB = false;
 
                 // Help them out since the AI are pretty bad at staying alive
                 member.inventory.GiveItem(ItemIndex.HealWhileSafe, Run.instance.livingPlayerCount);
