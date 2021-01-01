@@ -14,6 +14,7 @@ namespace VsTwitch
 
         private readonly BlockingCollection<Vote> voteQueue;
         private Vote currentVote;
+        private Vote previousVote;
         private int id;
 
         public event EventHandler<IDictionary<int, PickupIndex>> OnVoteStart;
@@ -52,6 +53,7 @@ namespace VsTwitch
                 try
                 {
                     currentVote.EndVote();
+                    previousVote = currentVote;
                     currentVote = null;
                 }
                 finally
@@ -127,11 +129,23 @@ namespace VsTwitch
             {
                 if (currentVote == null)
                 {
-                    if (!voteQueue.TryTake(out currentVote))
+                    while (true)
                     {
+                        if (!voteQueue.TryTake(out currentVote))
+                        {
+                            return;
+                        }
+
+                        if (isSameVote(previousVote, currentVote))
+                        {
+                            System.Console.WriteLine($"WARNING: Not starting vote for {string.Join(", ", currentVote.GetCandidates().Values)} with id {currentVote.GetId()} " +
+                                $"because the previous vote was exactly that. There might be another mod causing issues making rolling busted.");
+                            continue;
+                        }
+
+                        currentVote.StartVote();
                         return;
                     }
-                    currentVote.StartVote();
                 }
             }
             finally
