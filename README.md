@@ -163,6 +163,16 @@ These console commands are generally for testing purposes. You should never need
 
 # Changelog
 
+### 1.0.4
+
+See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/4?closed=1
+
+* Spawned monsters from Bit/Channel Point events will not be destroyed after Void Field waves or Mithrix waves.
+* Spawned monsters no longer die immediatly when hitting out of bounds/zone triggers. No more cheesing Mithrix.
+* Spawned monsters do not take fall damage (mainly to counter teleporting them back into the stage).
+* Twisted Scavenger should correctly drop Lunar Coins at the end instead of causing a roll
+* Shrine of the Mountain, on the last stage, is worthless; now it gives all alive enemies Dio's Best Friend and random items equivalent to the number of players in the run. If the monster already has a Dio's (consumed or not) they do not recieve this buff.
+
 ### 1.0.3
 
 See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/3?closed=1
