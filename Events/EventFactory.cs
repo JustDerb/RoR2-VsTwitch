@@ -194,8 +194,12 @@ namespace VsTwitch
                     CharacterBody body = teamComponent.body;
                     if (body)
                     {
-                        body.inventory.GiveItem(ItemIndex.ExtraLife, 1);
-                        body.inventory.GiveRandomItems(Run.instance.livingPlayerCount);
+                        if (body.inventory.GetItemCount(ItemIndex.ExtraLife) == 0 &&
+                            body.inventory.GetItemCount(ItemIndex.ExtraLifeConsumed) == 0)
+                        {
+                            body.inventory.GiveItem(ItemIndex.ExtraLife, 1);
+                            body.inventory.GiveRandomItems(Run.instance.livingPlayerCount);
+                        }
                     }
                 }
 
