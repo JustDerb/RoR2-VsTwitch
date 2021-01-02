@@ -170,6 +170,14 @@ namespace VsTwitch
 
         private void SetUpChannelPoints()
         {
+            void UsedChannelPoints(TwitchLib.PubSub.Events.OnRewardRedeemedArgs e)
+            {
+                eventDirector.AddEvent(eventFactory.BroadcastChat(new Chat.SimpleChatMessage()
+                {
+                    baseToken = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>{Util.EscapeRichTextForTextMeshPro(e.DisplayName)} used their channel points.</color>"
+                }));
+            }
+
             if (channelPointsManager.RegisterEvent(ChannelPointsAllyBeetle.Value, (manager, e) =>
             {
                 eventDirector.AddEvent(eventFactory.CreateAlly(
@@ -229,6 +237,7 @@ namespace VsTwitch
 
             if (channelPointsManager.RegisterEvent(ChannelPointsBitStorm.Value, (manager, e) =>
             {
+                UsedChannelPoints(e);
                 eventDirector.AddEvent(eventFactory.CreateBitStorm());
             }))
             {
@@ -241,6 +250,7 @@ namespace VsTwitch
 
             if (channelPointsManager.RegisterEvent(ChannelPointsBounty.Value, (manager, e) =>
             {
+                UsedChannelPoints(e);
                 eventDirector.AddEvent(eventFactory.CreateBounty());
             }))
             {
@@ -253,6 +263,7 @@ namespace VsTwitch
 
             if (channelPointsManager.RegisterEvent(ChannelPointsShrineOfOrder.Value, (manager, e) =>
             {
+                UsedChannelPoints(e);
                 eventDirector.AddEvent(eventFactory.TriggerShrineOfOrder());
             }))
             {
@@ -265,6 +276,7 @@ namespace VsTwitch
 
             if (channelPointsManager.RegisterEvent(ChannelPointsShrineOfTheMountain.Value, (manager, e) =>
             {
+                UsedChannelPoints(e);
                 eventDirector.AddEvent(eventFactory.TriggerShrineOfTheMountain());
             }))
             {
@@ -277,6 +289,7 @@ namespace VsTwitch
 
             if (channelPointsManager.RegisterEvent(ChannelPointsTitan.Value, (manager, e) =>
             {
+                UsedChannelPoints(e);
                 eventDirector.AddEvent(eventFactory.CreateMonster(MonsterSpawner.Monsters.TitanGold));
             }))
             {
@@ -289,6 +302,7 @@ namespace VsTwitch
 
             if (channelPointsManager.RegisterEvent(ChannelPointsLunarWisp.Value, (manager, e) =>
             {
+                UsedChannelPoints(e);
                 eventDirector.AddEvent(eventFactory.CreateMonster(MonsterSpawner.Monsters.LunarWisp, 2));
             }))
             {
@@ -301,6 +315,7 @@ namespace VsTwitch
 
             if (channelPointsManager.RegisterEvent(ChannelPointsMithrix.Value, (manager, e) =>
             {
+                UsedChannelPoints(e);
                 eventDirector.AddEvent(eventFactory.CreateMonster(MonsterSpawner.Monsters.Brother));
             }))
             {
@@ -313,6 +328,7 @@ namespace VsTwitch
 
             if (channelPointsManager.RegisterEvent(ChannelPointsElderLemurian.Value, (manager, e) =>
             {
+                UsedChannelPoints(e);
                 eventDirector.AddEvent(eventFactory.CreateMonster(MonsterSpawner.Monsters.LemurianBruiser, RollForElite()));
             }))
             {
