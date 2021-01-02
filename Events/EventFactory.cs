@@ -185,7 +185,35 @@ namespace VsTwitch
 
         private IEnumerator TriggerShrineOfTheMountainInternal(int count)
         {
+            // For the last stages let's do something slightly different
+            if (SceneCatalog.GetSceneDefForCurrentScene().isFinalStage)
+            {
+                // Give every enemy that's currently out an extra life and a couple extra equipment
+                foreach (var teamComponent in TeamComponent.GetTeamMembers(TeamIndex.Monster))
+                {
+                    CharacterBody body = teamComponent.body;
+                    if (body)
+                    {
+                        body.inventory.GiveItem(ItemIndex.ExtraLife, 1);
+                        body.inventory.GiveRandomItems(Run.instance.livingPlayerCount);
+                    }
+                }
+
+                Chat.SendBroadcastChat(new Chat.SimpleChatMessage
+                {
+                    baseToken = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>Twitch Chat feels the last stage should be harder.</color>"
+                });
+                yield break;
+            }
+
             // Wait until the teleporter isn't active
+            if (TeleporterInteraction.instance && !TeleporterInteraction.instance.isIdle)
+            {
+                Chat.SendBroadcastChat(new Chat.SimpleChatMessage
+                {
+                    baseToken = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>Twitch Chat feels the boss should be harder on the next stage.</color>"
+                });
+            }
             yield return new WaitUntil(() => {
                 return TeleporterInteraction.instance && TeleporterInteraction.instance.isIdle;
             });
