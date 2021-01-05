@@ -128,6 +128,20 @@ namespace VsTwitch
             EnableChoosingLunarItems = Config.Bind("Behaviour", "EnableChoosingLunarItems", true, "Twitch Chat chooses items when opening lunar chests (pods)");
             ForceUniqueRolls = Config.Bind("Behaviour", "ForceUniqueRolls", false, "Ensure, when rolling for items, that they are always different. This doesn't affect multi-shops.");
 
+            if (gameObject.GetComponent<EventDirector>() == null)
+            {
+                eventDirector = gameObject.AddComponent<EventDirector>();
+                eventDirector.OnProcessingEventsChanged += (sender, processing) =>
+                {
+                    var message = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>VsTwitch:</color> Events {(processing ? "enabled" : "paused")}.";
+                    Chat.SendBroadcastChat(new Chat.SimpleChatMessage { baseToken = message });
+                };
+            }
+            if (gameObject.GetComponent<EventFactory>() == null)
+            {
+                eventFactory = gameObject.AddComponent<EventFactory>();
+            }
+
             bitsManager = new BitsManager(CurrentBits.Value);
             channelPointsManager = new ChannelPointsManager();
             if (ChannelPointsEnable.Value)
@@ -370,20 +384,6 @@ namespace VsTwitch
             On.RoR2.HealthComponent.Suicide += HealthComponent_Suicide;
             On.EntityStates.Missions.BrotherEncounter.BrotherEncounterBaseState.KillAllMonsters += BrotherEncounterBaseState_KillAllMonsters;
             On.RoR2.ArenaMissionController.EndRound += ArenaMissionController_EndRound;
-
-            if (self.gameObject.GetComponent<EventDirector>() == null)
-            {
-                eventDirector = self.gameObject.AddComponent<EventDirector>();
-                eventDirector.OnProcessingEventsChanged += (sender, processing) =>
-                {
-                    var message = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>VsTwitch:</color> Events {(processing ? "enabled" : "paused")}.";
-                    Chat.SendBroadcastChat(new Chat.SimpleChatMessage { baseToken = message });
-                };
-            }
-            if (self.gameObject.GetComponent<EventFactory>() == null)
-            {
-                eventFactory = self.gameObject.AddComponent<EventFactory>();
-            }
         }
 
         private void Run_OnDisable(On.RoR2.Run.orig_OnDisable orig, Run self)
@@ -406,13 +406,7 @@ namespace VsTwitch
 
             if (eventDirector)
             {
-                Destroy(eventDirector);
-                eventDirector = null;
-            }
-            if (eventFactory)
-            {
-                Destroy(eventFactory);
-                eventFactory = null;
+                eventDirector.ClearEvents();
             }
         }
         #endregion

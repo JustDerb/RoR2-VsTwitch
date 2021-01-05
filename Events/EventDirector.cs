@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace VsTwitch
 {
@@ -90,6 +91,11 @@ namespace VsTwitch
             eventQueue.Add(eventToQueue);
         }
 
+        public void ClearEvents()
+        {
+            while(eventQueue.TryTake(out _)) {}
+        }
+
         /// <summary>
         /// Force the current stages teleporter to not fully charge until the returned handle is disposed.
         /// <br/>
@@ -145,6 +151,12 @@ namespace VsTwitch
                 return false;
             }
 
+            // We need to actively be the Server!
+            if (!NetworkServer.active)
+            {
+                return false;
+            }
+
             // If there isn't a Run active, or we hit Game Over
             if (!Run.instance || Run.instance.isGameOverServer)
             {
@@ -152,7 +164,13 @@ namespace VsTwitch
             }
 
             // If we aren't on a Stage, or the Stage is completed
-            if (Stage.instance == null || Stage.instance.completed)
+            if (!Stage.instance || Stage.instance.completed)
+            {
+                return false;
+            }
+
+            // If we are on the GameOver screen, don't run any events
+            if (GameOverController.instance)
             {
                 return false;
             }
@@ -163,27 +181,15 @@ namespace VsTwitch
                 return false;
             }
 
-            // Players are spawned; now check if the teleporter is charged
-            if (!TeleporterInteraction.instance)
-            {
-                return true;
-            }
-
-            TeleporterInteraction teleporter = TeleporterInteraction.instance;
-            if (teleporter.isIdle || teleporter.isIdleToCharging || teleporter.isCharging || !teleporter.isCharged)
-            {
-                return true;
-            }
-
+            // We are exiting the scene, so don't do events
             if (SceneExitController.isRunning)
             {
-                //if (teleporter.sceneExitController)
-                //{
-                //    FieldInfo exitStateField = typeof(SceneExitController).GetField("exitState", BindingFlags.Instance | BindingFlags.NonPublic);
-                //    SceneExitController.ExitState exitState = (SceneExitController.ExitState)exitStateField.GetValue(teleporter.sceneExitController);
-                //    // If they have interacted with the teleporter, stop processing
-                //    return exitState == SceneExitController.ExitState.Idle;
-                //}
+                return false;
+            }
+
+            // Players are spawned; now check if the teleporter is charged and finished
+            if (TeleporterInteraction.instance && TeleporterInteraction.instance.isInFinalSequence)
+            {
                 return false;
             }
 
