@@ -1,7 +1,5 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
-using Mono.Cecil.Cil;
-using MonoMod.Cil;
 using R2API.Utils;
 using RoR2;
 using RoR2.Networking;
@@ -22,7 +20,7 @@ namespace VsTwitch
     {
         private static readonly char[] SPACE = new char[] { ' ' };
         public const string GUID = "com.justinderby.vstwitch";
-        public const string ModName = "Vs Twitch";
+        public const string ModName = "VsTwitch";
         public const string Version = "1.0.4";
 
         // This is only used for ConCommands, since they need to be static...
@@ -133,7 +131,7 @@ namespace VsTwitch
                 eventDirector = gameObject.AddComponent<EventDirector>();
                 eventDirector.OnProcessingEventsChanged += (sender, processing) =>
                 {
-                    var message = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>VsTwitch:</color> Events {(processing ? "enabled" : "paused")}.";
+                    var message = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>{ModName}:</color> Events {(processing ? "enabled" : "paused")}.";
                     Chat.SendBroadcastChat(new Chat.SimpleChatMessage { baseToken = message });
                 };
             }
@@ -377,6 +375,11 @@ namespace VsTwitch
                 return;
             }
 
+            Chat.SendBroadcastChat(new Chat.SimpleChatMessage()
+            {
+                baseToken = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>{ModName} {Version} enabled for run</color>"
+            });
+
             On.RoR2.ChestBehavior.ItemDrop += ChestBehavior_ItemDrop;
             On.RoR2.ShopTerminalBehavior.DropPickup += ShopTerminalBehavior_DropPickup;
             On.RoR2.MultiShopController.DisableAllTerminals += MultiShopController_DisableAllTerminals;
@@ -417,7 +420,7 @@ namespace VsTwitch
         {
             if (!Instance)
             {
-                Debug.LogError("VsTwitch mod not instatiated!");
+                Debug.LogError($"{ModName} mod not instatiated!");
                 return;
             }
             
@@ -446,7 +449,7 @@ namespace VsTwitch
         {
             if (!Instance)
             {
-                Debug.LogError("VsTwitch mod not instatiated!");
+                Debug.LogError($"{ModName} mod not instatiated!");
                 return;
             }
 
@@ -477,7 +480,7 @@ namespace VsTwitch
         {
             if (!Instance)
             {
-                Debug.LogError("VsTwitch mod not instatiated!");
+                Debug.LogError($"{ModName} mod not instatiated!");
                 return;
             }
 
