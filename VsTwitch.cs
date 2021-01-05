@@ -188,7 +188,7 @@ namespace VsTwitch
             {
                 eventDirector.AddEvent(eventFactory.BroadcastChat(new Chat.SimpleChatMessage()
                 {
-                    baseToken = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>{Util.EscapeRichTextForTextMeshPro(e.DisplayName)} used their channel points.</color>"
+                    baseToken = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>{Util.EscapeRichTextForTextMeshPro(e.DisplayName)} used their channel points ({e.RewardCost:N0}).</color>"
                 }));
             }
 
@@ -720,8 +720,8 @@ namespace VsTwitch
             try
             {
                 var rollMessage = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>" +
-                    $"{Util.EscapeRichTextForTextMeshPro(username)} throws bits into the pool. Twitch Chat's temptation grows...</color> " +
-                    $"({bitsManager.Bits + bits}/{bitsManager.BitGoal})";
+                    $"{Util.EscapeRichTextForTextMeshPro(username)} throws {bits:N0} bit{(bits == 1 ? "" : "s")} into the pool. Twitch Chat's temptation grows...</color> " +
+                    $"({bitsManager.Bits + bits:N0}/{bitsManager.BitGoal:N0})";
                 Chat.SendBroadcastChat(new Chat.SimpleChatMessage { baseToken = rollMessage });
                 bitsManager.AddBits(bits);
             }
@@ -736,7 +736,7 @@ namespace VsTwitch
             CurrentBits.Value = e.Bits;
 
             BitsManager bitsManager = (BitsManager)sender;
-            Debug.Log($"Recieved bits: {e.Bits} / {bitsManager.BitGoal}");
+            Debug.Log($"Recieved bits: {e.Bits:N0} / {bitsManager.BitGoal:N0}");
             // FIXME: Add credits to spawn director
             if (e.Bits >= bitsManager.BitGoal)
             {
