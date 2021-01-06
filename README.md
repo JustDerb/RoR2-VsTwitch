@@ -66,7 +66,7 @@ To disable an event, simply set the weight to 0. Giving a higher weight increase
 |`BitStormWeight`|number|1|Weight for the bit storm bit event.|
 |`BountyWeight`|number|1|Weight for the doppleganger bit event.|
 |`ShrineOfOrderWeight`|number|1|Weight for the Shrine of Order bit event.|
-|`ShrineOfTheMountainWeight`|number|1|Weight for the Shrine of Order bit event.|
+|`ShrineOfTheMountainWeight`|number|1|Weight for the Shrine of the Mountain bit event.|
 |`TitanWeight`|number|1|Weight for the Aurelionite bit event.|
 |`LunarWispWeight`|number|1|Weight for the Lunar Chimera (Wisp) bit event.|
 |`MithrixWeight`|number|1|Weight for the Mithrix bit event.|
