@@ -96,6 +96,29 @@ namespace VsTwitch
             while(eventQueue.TryTake(out _)) {}
         }
 
+        private void SetTeleporterCrystals(bool enabled)
+        {
+            if (TeleporterInteraction.instance)
+            {
+                ChildLocator component = TeleporterInteraction.instance.GetComponent<ModelLocator>().modelTransform.GetComponent<ChildLocator>();
+                if (component)
+                {
+                    if (enabled)
+                    {
+                        // Only enable, never disable
+                        component.FindChild("TimeCrystalProps").gameObject.SetActive(true);
+                    }
+
+                    Transform transform = component.FindChild("TimeCrystalBeaconBlocker");
+                    EffectManager.SpawnEffect(Resources.Load<GameObject>("Prefabs/Effects/TimeCrystalDeath"), new EffectData
+                    {
+                        origin = transform.transform.position
+                    }, true);
+                    transform.gameObject.SetActive(enabled);
+                }
+            }
+        }
+
         /// <summary>
         /// Force the current stages teleporter to not fully charge until the returned handle is disposed.
         /// <br/>
@@ -112,6 +135,7 @@ namespace VsTwitch
             {
                 Debug.LogError("EventDirector::ForceChargingState::Enabled = true");
                 On.RoR2.TeleporterInteraction.UpdateMonstersClear += TeleporterInteraction_UpdateMonstersClear;
+                SetTeleporterCrystals(true);
             }
 
             return new ForceChargingHandle(this);
@@ -229,6 +253,7 @@ namespace VsTwitch
                 {
                     Debug.LogError("EventDirector::ForceChargingState::Enabled = false");
                     On.RoR2.TeleporterInteraction.UpdateMonstersClear -= eventDirector.TeleporterInteraction_UpdateMonstersClear;
+                    eventDirector.SetTeleporterCrystals(false);
                 }
             }
         }
