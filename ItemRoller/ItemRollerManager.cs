@@ -21,7 +21,7 @@ namespace VsTwitch
 
         public ItemRollerManager(IVoteStrategy<PickupIndex> voteStrategy)
         {
-            this.cacheLock = new ReaderWriterLockSlim();
+            this.cacheLock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
             this.voteQueue = new BlockingCollection<Vote>();
             this.voteStrategy = voteStrategy;
             this.id = 1;
@@ -45,6 +45,21 @@ namespace VsTwitch
             OnVoteEnd();
         }
 
+        public void ClearVotes()
+        {
+            cacheLock.EnterWriteLock();
+            try
+            {
+                while (voteQueue.TryTake(out _)) { }
+                EndVote();
+                previousVote = null;
+            }
+            finally
+            {
+                cacheLock.ExitWriteLock();
+            }
+        }
+
         private void OnVoteEnd()
         {
             try
@@ -52,9 +67,12 @@ namespace VsTwitch
                 cacheLock.EnterWriteLock();
                 try
                 {
-                    currentVote.EndVote();
-                    previousVote = currentVote;
-                    currentVote = null;
+                    if (currentVote != null)
+                    {
+                        currentVote.EndVote();
+                        previousVote = currentVote;
+                        currentVote = null;
+                    }
                 }
                 finally
                 {

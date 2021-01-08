@@ -411,6 +411,10 @@ namespace VsTwitch
             {
                 eventDirector.ClearEvents();
             }
+            if (itemRollerManager != null)
+            {
+                itemRollerManager.ClearVotes();
+            }
         }
         #endregion
 
