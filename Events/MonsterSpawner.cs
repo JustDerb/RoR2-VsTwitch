@@ -107,6 +107,7 @@ namespace VsTwitch
                 // Try one last time with Random placement
                 if (!obj)
                 {
+                    Debug.LogWarning("Could not spawn monster near target body, spawning randomly on map");
                     DirectorSpawnRequest randomRequest = new DirectorSpawnRequest(
                         card,
                         new DirectorPlacementRule
@@ -133,6 +134,7 @@ namespace VsTwitch
 
             if (!spawnedAny)
             {
+                Debug.LogError("Couldn't spawn any monster!");
                 chargingHandle?.Dispose();
                 Destroy(group);
                 return null;
