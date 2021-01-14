@@ -42,6 +42,7 @@ namespace VsTwitch
         public static ConfigEntry<bool> TwitchDebugLogs { get; set; }
         public static ConfigEntry<bool> EnableItemVoting { get; set; }
         public static ConfigEntry<int> VoteDurationSec { get; set; }
+        public static ConfigEntry<string> VoteStrategy { get; set; }
         public static ConfigEntry<bool> EnableBitEvents { get; set; }
         public static ConfigEntry<int> BitsThreshold { get; set; }
         public static ConfigEntry<int> CurrentBits { get; set; }
@@ -94,6 +95,7 @@ namespace VsTwitch
             TwitchDebugLogs = Config.Bind("Twitch", "DebugLogs", false, "Enable debug logging for Twitch - will spam to the console!");
             EnableItemVoting = Config.Bind("Twitch", "EnableItemVoting", true, "Enable item voting on Twitch.");
             VoteDurationSec = Config.Bind("Twitch", "VoteDurationdSec", 20, "How long to allow twitch voting.");
+            VoteStrategy = Config.Bind("Twitch", "VoteStrategy", "MaxVote", "How to tabulate votes. One of: MaxVote, MaxVoteRandomTie, Percentile");
             EnableBitEvents = Config.Bind("Twitch", "EnableBitEvents", true, "Enable bit events from Twitch.");
             BitsThreshold = Config.Bind("Twitch", "BitsThreshold", 1500, "How many Bits are needed before something happens.");
             CurrentBits = Config.Bind("Twitch", "CurrentBits", 0, "(DO NOT EDIT) How many Bits have currently been donated.");
@@ -150,7 +152,34 @@ namespace VsTwitch
             {
                 DebugLogs = TwitchDebugLogs.Value,
             };
-            itemRollerManager = new ItemRollerManager(new MaxVoteStrategy<PickupIndex>());
+            IVoteStrategy<PickupIndex> strategy;
+            switch (VoteStrategy.Value.ToLower())
+            {
+                case "percentile":
+                case "percantile":
+                    Debug.Log("Twitch Voting Strategy: Percentile");
+                    strategy = new PercentileVoteStrategy<PickupIndex>();
+                    break;
+                case "maxvoterandomtie":
+                case "maxvoterandtie":
+                case "maxvoterandom":
+                case "maxvoterand":
+                case "maxrand":
+                case "maxrandom":
+                    Debug.Log("Twitch Voting Strategy: MaxVoteRandomTie");
+                    strategy = new MaxRandTieVoteStrategy<PickupIndex>();
+                    break;
+                case "maxvote":
+                case "max":
+                    Debug.Log("Twitch Voting Strategy: MaxVote");
+                    strategy = new MaxVoteStrategy<PickupIndex>();
+                    break;
+                default:
+                    Debug.LogError($"Invalid setting for Twitch.VoteStrategy ({VoteStrategy.Value})! Using MaxVote strategy.");
+                    strategy = new MaxVoteStrategy<PickupIndex>();
+                    break;
+            }
+            itemRollerManager = new ItemRollerManager(strategy);
             languageOverride = new LanguageOverride
             {
                 StreamerName = TwitchChannel.Value

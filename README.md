@@ -27,11 +27,32 @@ Currently, `Channel`, `Username`, and `ImplicitOAuth` need to be filled out at a
 |`ClientID`|text|q6batx0epp608isickayubi39itsckt|The client ID of the app that you used to populate the `ImplicitOAuth` field. If you used [twitchapps.com][1] this would be the default value. If you used another Twitch app, this needs to be changed accordingly.|
 |`EnableItemVoting`|true/false|true|Enables the main feature of this mod. Disable it if you only want to enable bit interactions.|
 |`VoteDurationdSec`|number (secs)|20|How long to allow Twitch to vote on items. Increase this value if viewers think the voting is going too "fast" - they might have their video delay too great.|
+|`VoteStrategy`|string|MaxVote|How to tabulate votes. See "Voting Strategies" below for the various values this setting may have.|
 |`BitsThreshold`|number|1500|The number of bits needed to cause an in-game event.|
 |`CurrentBits`|number|0|**Do not edit this field.** Used as storage whenever someone donates bits so that restarting the game doesn't clear the donation count.|
 
 [1]: https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=q6batx0epp608isickayubi39itsckt&redirect_uri=https://twitchapps.com/tmi/&scope=channel_subscriptions+user_subscriptions+channel_check_subscription+bits:read+chat:read+chat:edit+channel:read:redemptions+channel:read:hype_train
 [2]: https://www.twitch.tv/settings/connections
+
+### Vote Strategies
+
+These are the various voting strategies you can use for the `VoteStrategy` setting.
+
+#### `MaxVote`
+
+Item with the most votes wins. Ties are breaked by choosing the first item that got the most votes.
+
+#### `MaxVoteRandomTie`
+
+Item with the most votes wins. Ties are breaked by choosing randomly from the highest votes items.
+
+#### `Percentile`
+
+Item is chosen by a weighted random selection. If item 1 has 3 votes, item 2 has 4 votes, and item 3 has 1 vote (making a total of 8 votes), then the probabilites for choosing the item are as follows:
+
+* Item 1: 3 / 8 = 37.50% chance
+* Item 2: 4 / 8 = 50.00% chance
+* Item 3: 1 / 8 = 12.50% chance
 
 ## ChannelPoints
 

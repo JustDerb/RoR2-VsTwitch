@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace VsTwitch
 {
     class PercentileVoteStrategy<T> : IVoteStrategy<T>
     {
-        private readonly Random random;
-
-        public PercentileVoteStrategy(Random random)
-        {
-            this.random = random;
-        }
         public T GetWinner(Dictionary<string, T> votes)
         {
             Dictionary<T, int> totalVotes = new Dictionary<T, int>();
@@ -22,7 +16,7 @@ namespace VsTwitch
             }
 
             int maxWeight = votes.Count;
-            int randomWeight = random.Next(0, maxWeight);
+            int randomWeight = Random.Range(0, maxWeight);
             T winner = default;
             foreach (var item in totalVotes)
             {
