@@ -38,15 +38,15 @@ Currently, `Channel`, `Username`, and `ImplicitOAuth` need to be filled out at a
 
 These are the various voting strategies you can use for the `VoteStrategy` setting.
 
-#### `MaxVote`
+#### MaxVote
 
-Item with the most votes wins. Ties are breaked by choosing the first item that got the most votes.
+Item with the most votes wins. Ties are broken by choosing the first item that got the most votes.
 
-#### `MaxVoteRandomTie`
+#### MaxVoteRandomTie
 
-Item with the most votes wins. Ties are breaked by choosing randomly from the highest votes items.
+Item with the most votes wins. Ties are broken by choosing randomly from the highest votes items.
 
-#### `Percentile`
+#### Percentile
 
 Item is chosen by a weighted random selection. If item 1 has 3 votes, item 2 has 4 votes, and item 3 has 1 vote (making a total of 8 votes), then the probabilites for choosing the item are as follows:
 
