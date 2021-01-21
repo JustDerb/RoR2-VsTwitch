@@ -184,6 +184,17 @@ These console commands are generally for testing purposes. You should never need
 
 # Changelog
 
+### 1.0.5
+
+See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/5?closed=1
+
+* When someone spends Channel Points, their username will appear in the chat.
+* Event Director update: It now is created on startup and lives for the life of the game. This should help with events during the character select screen (as before they didn't work even when it seemed like they did).
+* Some text formatting around numbers.
+* Voting queue will be reset when a run ends. No more stacking the queue in the current run, ending the game, and getting them in the next run.
+* When events happen, the teleporter will now have a visual update (purple crystals). This should help for more visual queues that something is blocking the teleporter from charging.
+* The voting strategy is now configurable. (Config: `VoteStrategy`)
+
 ### 1.0.4
 
 See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/4?closed=1
