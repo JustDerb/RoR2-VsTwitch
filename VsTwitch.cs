@@ -133,8 +133,25 @@ namespace VsTwitch
                 eventDirector = gameObject.AddComponent<EventDirector>();
                 eventDirector.OnProcessingEventsChanged += (sender, processing) =>
                 {
-                    var message = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>{ModName}:</color> Events {(processing ? "enabled" : "paused")}.";
-                    Chat.SendBroadcastChat(new Chat.SimpleChatMessage { baseToken = message });
+                    Chat.SendBroadcastChat(new Chat.SimpleChatMessage
+                    {
+                        baseToken = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>{ModName}:</color> Events {(processing ? "enabled" : "paused")}."
+                    });
+
+                    try
+                    {
+                        if (!twitchManager.IsConnected())
+                        {
+                            Chat.SendBroadcastChat(new Chat.SimpleChatMessage
+                            {
+                                baseToken = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>{ModName}:</color> [WARNING] Not connected to Twitch!"
+                            });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.LogException(ex);
+                    }
                 };
             }
             if (gameObject.GetComponent<EventFactory>() == null)
@@ -542,7 +559,15 @@ namespace VsTwitch
 
         private bool IsRunning()
         {
-            return twitchManager != null && twitchManager.IsConnected();
+            try
+            {
+                return twitchManager != null && twitchManager.IsConnected();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+                return false;
+            }
         }
 
         private void GameNetworkManager_onStartHostGlobal()
@@ -885,7 +910,14 @@ namespace VsTwitch
                     inGameItemsString.Add($"{item.Key}: <color=#{ColorUtility.ToHtmlStringRGB(pickupDef.baseColor)}>{Language.GetString(pickupDef.nameToken)}</color>");
                     itemsString.Add($"{item.Key}: {Language.GetString(pickupDef.nameToken)}");
                 }
-                twitchManager.SendMessage($"Chest opened! {String.Join(" | ", itemsString)}");
+                try
+                {
+                    twitchManager.SendMessage($"Chest opened! {String.Join(" | ", itemsString)}");
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogException(ex);
+                }
                 var rollMessage = $"Choices: {String.Join(" | ", inGameItemsString)}";
                 Chat.SendBroadcastChat(new Chat.SimpleChatMessage { baseToken = rollMessage });
 
@@ -956,7 +988,14 @@ namespace VsTwitch
                 itemRollerManager.RollForItem(indices, pickupIndex =>
                 {
                     string name = Language.GetString(PickupCatalog.GetPickupDef(pickupIndex).nameToken);
-                    twitchManager.SendMessage($"Item picked: {name}");
+                    try
+                    {
+                        twitchManager.SendMessage($"Item picked: {name}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.LogException(ex);
+                    }
                     if (eventDirector && eventFactory)
                     {
                         eventDirector.AddEvent(eventFactory.SpawnItem(pickupIndex));
@@ -1079,8 +1118,15 @@ namespace VsTwitch
 
                     itemRollerManager.RollForItem(indices, pickupIndex =>
                     {
-                        string name = Language.GetString(PickupCatalog.GetPickupDef(pickupIndex).nameToken);
-                        twitchManager.SendMessage($"Item picked: {name}");
+                        try
+                        {
+                            string name = Language.GetString(PickupCatalog.GetPickupDef(pickupIndex).nameToken);
+                            twitchManager.SendMessage($"Item picked: {name}");
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.LogException(ex);
+                        }
                         if (eventDirector && eventFactory)
                         {
                             eventDirector.AddEvent(eventFactory.SpawnItem(pickupIndex));
