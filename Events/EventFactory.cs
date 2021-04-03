@@ -28,12 +28,12 @@ namespace VsTwitch
             }
         }
 
-        public Func<EventDirector, IEnumerator> BroadcastChat(Chat.ChatMessageBase message)
+        public Func<EventDirector, IEnumerator> BroadcastChat(ChatMessageBase message)
         {
             return (director) => { return BroadcastChatInternal(message); };
         }
 
-        private IEnumerator BroadcastChatInternal(Chat.ChatMessageBase message)
+        private IEnumerator BroadcastChatInternal(ChatMessageBase message)
         {
             Chat.SendBroadcastChat(message);
             yield break;
@@ -194,10 +194,10 @@ namespace VsTwitch
                     CharacterBody body = teamComponent.body;
                     if (body)
                     {
-                        if (body.inventory.GetItemCount(ItemIndex.ExtraLife) == 0 &&
-                            body.inventory.GetItemCount(ItemIndex.ExtraLifeConsumed) == 0)
+                        if (body.inventory.GetItemCount(RoR2Content.Items.ExtraLife) == 0 &&
+                            body.inventory.GetItemCount(RoR2Content.Items.ExtraLifeConsumed) == 0)
                         {
-                            body.inventory.GiveItem(ItemIndex.ExtraLife, 1);
+                            body.inventory.GiveItem(RoR2Content.Items.ExtraLife, 1);
                             body.inventory.GiveRandomItems(Run.instance.livingPlayerCount);
                         }
                     }
@@ -360,8 +360,8 @@ namespace VsTwitch
                 spawnedMonster.teleportWhenOOB = false;
 
                 // Help them out since the AI are pretty bad at staying alive
-                member.inventory.GiveItem(ItemIndex.HealWhileSafe, Run.instance.livingPlayerCount);
-                member.inventory.GiveItem(ItemIndex.Infusion, Run.instance.livingPlayerCount);
+                member.inventory.GiveItem(RoR2Content.Items.HealWhileSafe, Run.instance.livingPlayerCount);
+                member.inventory.GiveItem(RoR2Content.Items.Infusion, Run.instance.livingPlayerCount);
 
                 //CharacterBody memberBody = member.GetBody();
                 //if (memberBody)
@@ -383,8 +383,8 @@ namespace VsTwitch
 
                 CharacterMaster summonerMaster = summonerBody.master;
 
-                member.inventory.GiveItem(ItemIndex.Hoof, summonerMaster.inventory.GetItemCount(ItemIndex.Hoof));
-                member.inventory.GiveItem(ItemIndex.SprintBonus, summonerMaster.inventory.GetItemCount(ItemIndex.SprintBonus));
+                member.inventory.GiveItem(RoR2Content.Items.Hoof, summonerMaster.inventory.GetItemCount(RoR2Content.Items.Hoof));
+                member.inventory.GiveItem(RoR2Content.Items.SprintBonus, summonerMaster.inventory.GetItemCount(RoR2Content.Items.SprintBonus));
 
                 if (summonerMaster && summonerMaster.minionOwnership.ownerMaster)
                 {

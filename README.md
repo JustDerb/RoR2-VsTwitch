@@ -184,6 +184,12 @@ These console commands are generally for testing purposes. You should never need
 
 # Changelog
 
+### 1.0.6
+
+See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/6?closed=1
+
+* Updated library for new RoR2 release
+
 ### 1.0.5
 
 See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/5?closed=1

@@ -37,10 +37,6 @@ namespace VsTwitch
             EventDirector director,
             TeamIndex teamIndex)
         {
-            if (eliteIndex == EliteIndex.Count)
-            {
-                eliteIndex = EliteIndex.None;
-            }
             CombatSquad group = gameObject.AddComponent<CombatSquad>();
 
             IDisposable chargingHandle = null;
@@ -165,7 +161,7 @@ namespace VsTwitch
                 }
 
                 EliteDef eliteDef = EliteCatalog.GetEliteDef(EliteIndex);
-                EquipmentIndex equipmentIndex = (eliteDef != null) ? eliteDef.eliteEquipmentIndex : EquipmentIndex.None;
+                EquipmentIndex equipmentIndex = (eliteDef != null) ? eliteDef.eliteEquipmentDef.equipmentIndex : EquipmentIndex.None;
                 if (equipmentIndex != EquipmentIndex.None)
                 {
                     monster.inventory.SetEquipmentIndex(equipmentIndex);
@@ -176,8 +172,8 @@ namespace VsTwitch
                 damageBoostCoefficient += Run.instance.difficultyCoefficient / 15f;
                 int numberOfPlayers = Mathf.Max(1, Run.instance.livingPlayerCount);
                 healthBoostCoefficient *= Mathf.Pow(numberOfPlayers, 0.75f);
-                monster.inventory.GiveItem(ItemIndex.BoostHp, Mathf.RoundToInt(Mathf.RoundToInt(healthBoostCoefficient - 1f) * 10f));
-                monster.inventory.GiveItem(ItemIndex.BoostDamage, Mathf.RoundToInt(Mathf.RoundToInt(damageBoostCoefficient - 1f) * 10f));
+                monster.inventory.GiveItem(RoR2Content.Items.BoostHp, Mathf.RoundToInt(Mathf.RoundToInt(healthBoostCoefficient - 1f) * 10f));
+                monster.inventory.GiveItem(RoR2Content.Items.BoostDamage, Mathf.RoundToInt(Mathf.RoundToInt(damageBoostCoefficient - 1f) * 10f));
 
                 monster.isBoss = IsBoss;
             }

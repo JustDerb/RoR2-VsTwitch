@@ -21,7 +21,7 @@ namespace VsTwitch
         private static readonly char[] SPACE = new char[] { ' ' };
         public const string GUID = "com.justinderby.vstwitch";
         public const string ModName = "VsTwitch";
-        public const string Version = "1.0.5";
+        public const string Version = "1.0.6";
 
         // This is only used for ConCommands, since they need to be static...
         public static VsTwitch Instance;
@@ -715,7 +715,7 @@ namespace VsTwitch
             {
                 baseToken = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>{Util.EscapeRichTextForTextMeshPro(name)} wants you to take their rusted key.</color>"
             }));
-            eventDirector.AddEvent(eventFactory.SpawnItem(PickupCatalog.FindPickupIndex(ItemIndex.TreasureCache)));
+            eventDirector.AddEvent(eventFactory.SpawnItem(PickupCatalog.FindPickupIndex(RoR2Content.Items.TreasureCache.pickupToken)));
         }
 
         private void TwitchManager_OnRewardRedeemed(object sender, TwitchLib.PubSub.Events.OnRewardRedeemedArgs e)
@@ -764,13 +764,11 @@ namespace VsTwitch
 
         private EliteIndex RollForElite(bool forceElite = false)
         {
-            Array choices = Enum.GetValues(typeof(EliteIndex));
+            List<EliteIndex> choices = EliteCatalog.eliteList;
             EliteIndex choice;
             do
             {
-                choice = (EliteIndex)choices.GetValue(UnityEngine.Random.Range(0, choices.Length));
-                // None is weighted twice here, but that's okay
-                choice = choice != EliteIndex.Count ? choice : EliteIndex.None;
+                choice = choices[UnityEngine.Random.Range(0, choices.Count)];
             } while (forceElite && choice == EliteIndex.None);
 
             return choice;

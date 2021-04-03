@@ -110,11 +110,11 @@ namespace VsTwitch
 
                     if (itemdef.equipmentIndex != EquipmentIndex.None)
                     {
-                        icon = CreateIcon(EquipmentCatalog.GetEquipmentDef(itemdef.equipmentIndex).pickupIconPath);
+                        icon = CreateIcon(EquipmentCatalog.GetEquipmentDef(itemdef.equipmentIndex).pickupIconSprite);
                     }
                     else
                     {
-                        icon = CreateIcon(ItemCatalog.GetItemDef(itemdef.itemIndex).pickupIconPath);
+                        icon = CreateIcon(ItemCatalog.GetItemDef(itemdef.itemIndex).pickupIconSprite);
                     }
                     icon.transform.SetParent(this.notification.transform);
                     icon.transform.position = new Vector3(Screen.width / 2, Screen.height / 2, 0) +
@@ -130,10 +130,10 @@ namespace VsTwitch
             notificationGameObject.transform.position = position;
         }
 
-        private static GameObject CreateIcon(string pickupIconPath)
+        private static GameObject CreateIcon(Sprite pickupIcon)
         {
             GameObject gameObject = new GameObject("VoteItem_Icon");
-            gameObject.AddComponent<Image>().sprite = Resources.Load<Sprite>(pickupIconPath);
+            gameObject.AddComponent<Image>().sprite = pickupIcon;
 
             if (gameObject.GetComponent<CanvasRenderer>() == null)
             {
