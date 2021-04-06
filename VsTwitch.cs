@@ -1,5 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
+using Newtonsoft.Json;
 using R2API.Utils;
 using RoR2;
 using RoR2.Networking;
@@ -33,6 +34,8 @@ namespace VsTwitch
         private LanguageOverride languageOverride;
         private EventDirector eventDirector;
         private EventFactory eventFactory;
+
+        private TwitchExtClient extensionClient;
 
         // Twitch
         public static ConfigEntry<string> TwitchChannel { get; set; }
@@ -224,6 +227,26 @@ namespace VsTwitch
             };
             twitchManager.OnMessageReceived += TwitchManager_OnMessageReceived;
             twitchManager.OnRewardRedeemed += TwitchManager_OnRewardRedeemed;
+
+            extensionClient = new TwitchExtClient();
+            extensionClient.OnConnected += (sender, e) =>
+            {
+                Chat.AddMessage($"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>Connected to WebSocket!</color>");
+            };
+            extensionClient.OnDisconnected += (sender, e) =>
+            {
+                Chat.AddMessage($"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>Disconnected from WebSocket!</color> Retry? {e.ShouldRetry}");
+            };
+            extensionClient.OnError += (sender, e) =>
+            {
+                Debug.LogError(e.Message);
+                Debug.LogException(e.Exception);
+                Chat.AddMessage($"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>Error from WebSocket!</color>");
+            };
+            extensionClient.OnMessage += (sender, e) =>
+            {
+                Chat.AddMessage($"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>WebSocket:</color> {e}");
+            };
         }
 
         private void SetUpChannelPoints()
@@ -465,6 +488,27 @@ namespace VsTwitch
         #endregion
 
         #region "Twitch Integration"
+        [ConCommand(commandName = "vs_ws_send", flags = ConVarFlags.SenderMustBeServer, helpText = "Send WebSocket message")]
+        private static void TwitchWebSocketSendMessage(ConCommandArgs args)
+        {
+            if (!Instance)
+            {
+                Debug.LogError($"{ModName} mod not instatiated!");
+                return;
+            }
+
+            try
+            {
+                string message = String.Join(" ", args.userArgs);
+                Debug.LogWarning($"Sending message: `{message}`");
+                Instance.extensionClient.SendMessage(JsonConvert.DeserializeObject<ExtensionMessageRequest>(message));
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+        }
+
         [ConCommand(commandName = "vs_connect_twitch", flags = ConVarFlags.SenderMustBeServer, helpText = "Connect to Twitch.")]
         private static void ConnectToTwitch(ConCommandArgs args)
         {
@@ -576,6 +620,8 @@ namespace VsTwitch
             {
                 Debug.Log("Connecting to Twitch...");
                 twitchManager.Connect(TwitchChannel.Value, TwitchOAuth.Value, TwitchUsername.Value, TwitchClientID.Value);
+                Debug.LogWarning("Connecting to Twitch WebSocket...");
+                extensionClient.Connect(new Uri("wss://FILLMEIN.execute-api.us-west-2.amazonaws.com/Prod?twitchChannelId=test"));
             }
             catch (Exception e)
             {
@@ -593,6 +639,15 @@ namespace VsTwitch
             try
             {
                 twitchManager.Disconnect();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+
+            try
+            {
+                extensionClient.Disconnect();
             }
             catch (Exception e)
             {

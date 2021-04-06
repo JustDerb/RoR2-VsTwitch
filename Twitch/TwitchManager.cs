@@ -25,7 +25,7 @@ namespace VsTwitch
         public event EventHandler<OnMessageReceivedArgs> OnMessageReceived;
         public event EventHandler<OnRewardRedeemedArgs> OnRewardRedeemed;
         public event EventHandler<OnJoinedChannelArgs> OnConnected;
-        public event EventHandler<OnDisconnectedEventArgs> OnDisconnected;
+        public event EventHandler<TwitchLib.Communication.Events.OnDisconnectedEventArgs> OnDisconnected;
 
         public TwitchManager()
         {
