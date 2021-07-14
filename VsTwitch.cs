@@ -79,6 +79,23 @@ namespace VsTwitch
         public static ConfigEntry<bool> EnableChoosingLunarItems { get; set; }
         public static ConfigEntry<bool> ForceUniqueRolls { get; set; }
 
+        /// <summary>
+        /// Provides extrea debug information to help people understand why some Twitch libraries might not load.
+        /// This is usually because the TwitchLib libraries are being loaded in two or more locations on the filesystem.
+        /// This isn't good, as they should all be loaded via the mod; if they aren't you could get differnet
+        /// versions which may or may not have specific methods/structures.
+        /// </summary>
+        private static void DumpAssemblies()
+        {
+            Debug.LogError("===== DUMPING ASSEMBLY INFORMATION =====");
+            AppDomain currentDomain = AppDomain.CurrentDomain;
+            foreach (var assembly in currentDomain.GetAssemblies())
+            {
+                Debug.LogError($"{assembly.FullName}, {assembly.Location}");
+            }
+            Debug.LogError("===== FINISHED DUMPING ASSEMBLY INFORMATION =====");
+        }
+
         #region "Constructors/Destructors"
         public void Awake()
         {
@@ -584,6 +601,10 @@ namespace VsTwitch
                 if (e is ArgumentException)
                 {
                     Chat.AddMessage($"Did you configure the mod correctly?");
+                }
+                else
+                {
+                    DumpAssemblies();
                 }
             }
         }
