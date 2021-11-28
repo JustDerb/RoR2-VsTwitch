@@ -736,7 +736,7 @@ namespace VsTwitch
             {
                 baseToken = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>{Util.EscapeRichTextForTextMeshPro(name)} wants you to take their rusted key.</color>"
             }));
-            eventDirector.AddEvent(eventFactory.SpawnItem(PickupCatalog.FindPickupIndex(RoR2Content.Items.TreasureCache.pickupToken)));
+            eventDirector.AddEvent(eventFactory.SpawnItem(PickupCatalog.FindPickupIndex(RoR2Content.Items.TreasureCache.itemIndex)));
         }
 
         private void TwitchManager_OnRewardRedeemed(object sender, TwitchLib.PubSub.Events.OnRewardRedeemedArgs e)
