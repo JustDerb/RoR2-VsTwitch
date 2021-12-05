@@ -1,11 +1,11 @@
 ﻿{
     "name": "Vs_Twitch",
-    "version_number": "1.0.8",
+    "version_number": "1.0.9",
     "website_url": "https://github.com/JustDerb/RoR2-VsTwitch",
-    "description": "Fight Twitch chat.",
+    "description": "Fight Twitch chat. Item voting, bit events, channel points integration, and more!",
     "dependencies": [
         "bbepis-BepInExPack-5.4.9",
-        "tristanmcpherson-R2API-3.0.30",
+        "tristanmcpherson-R2API-3.0.59",
         "RiskofThunder-HookGenPatcher-1.2.1"
     ]
 }
