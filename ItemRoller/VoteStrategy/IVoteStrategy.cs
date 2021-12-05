@@ -2,8 +2,8 @@
 
 namespace VsTwitch
 {
-    interface IVoteStrategy<T>
+    public interface IVoteStrategy<T>
     {
-        T GetWinner(Dictionary<string, T> votes);
+        T GetWinner(Dictionary<string, T> votes, T[] allChoices);
     }
 }

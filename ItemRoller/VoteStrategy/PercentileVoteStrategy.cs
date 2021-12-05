@@ -3,10 +3,15 @@ using UnityEngine;
 
 namespace VsTwitch
 {
-    class PercentileVoteStrategy<T> : IVoteStrategy<T>
+    public class PercentileVoteStrategy<T> : IVoteStrategy<T>
     {
-        public T GetWinner(Dictionary<string, T> votes)
+        public T GetWinner(Dictionary<string, T> votes, T[] allChoices)
         {
+            if (votes.Count == 0)
+            {
+                return allChoices[Random.Range(0, allChoices.Length)];
+            }
+
             Dictionary<T, int> totalVotes = new Dictionary<T, int>();
 
             foreach (var item in votes)

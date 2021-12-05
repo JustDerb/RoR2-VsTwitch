@@ -55,23 +55,16 @@ namespace VsTwitch
 
         public void EndVote()
         {
-            if (votes.Count == 0)
+            if (indices.Count == 0)
             {
-                // It's quiet in here...
-                if (indices.Count == 0)
-                {
-                    // Nothing to return!
-                    OnVoteEnd?.Invoke(this, PickupIndex.none);
-                    return;
-                }
-                var e = indices.GetEnumerator();
-                e.MoveNext();
-                OnVoteEnd?.Invoke(this, e.Current.Value);
+                // Nothing to return!
+                OnVoteEnd?.Invoke(this, PickupIndex.none);
+                return;
             }
-            else
-            {
-                OnVoteEnd?.Invoke(this, strategy.GetWinner(votes));
-            }
+
+            PickupIndex[] allPickups = new PickupIndex[indices.Values.Count];
+            indices.Values.CopyTo(allPickups, 0);
+            OnVoteEnd?.Invoke(this, strategy.GetWinner(votes, allPickups));
         }
 
     }

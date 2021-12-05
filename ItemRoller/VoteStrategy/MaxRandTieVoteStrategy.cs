@@ -5,8 +5,12 @@ namespace VsTwitch
 {
     public class MaxRandTieVoteStrategy<T> : IVoteStrategy<T>
     {
-        public T GetWinner(Dictionary<string, T> votes)
+        public T GetWinner(Dictionary<string, T> votes, T[] allChoices)
         {
+            if (votes.Count == 0)
+            {
+                return allChoices[Random.Range(0, allChoices.Length)];
+            }
 
             Dictionary<T, int> totalVotes = new Dictionary<T, int>();
             

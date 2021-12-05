@@ -4,8 +4,13 @@ namespace VsTwitch
 {
     public class MaxVoteStrategy<T> : IVoteStrategy<T>
     {
-        public T GetWinner(Dictionary<string, T> votes)
+        public T GetWinner(Dictionary<string, T> votes, T[] allChoices)
         {
+            if (votes.Count == 0)
+            {
+                // First item wins
+                return allChoices[0];
+            }
 
             Dictionary<T, int> totalVotes = new Dictionary<T, int>();
             
