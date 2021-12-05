@@ -49,7 +49,15 @@ namespace VsTwitch
             var itemdef = PickupCatalog.GetPickupDef(pickupIndex);
             if (itemdef.equipmentIndex != EquipmentIndex.None)
             {
-                ItemManager.DropToAllPlayers(pickupIndex, Vector3.up * 10f);
+                if (RunArtifactManager.instance.IsArtifactEnabled(RoR2Content.Artifacts.Command))
+                {
+                    // Sorry, you're forced to pick up the equipment :(
+                    ItemManager.GiveToAllPlayers(pickupIndex);
+                }
+                else
+                {
+                    ItemManager.DropToAllPlayers(pickupIndex, Vector3.up * 10f);
+                }
             }
             else
             {

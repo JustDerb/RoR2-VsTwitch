@@ -33,7 +33,15 @@ namespace VsTwitch
                 return;
             }
 
-            characterMaster.inventory.GiveItem(PickupCatalog.GetPickupDef(pickupIndex).itemIndex, 1);
+            var itemdef = PickupCatalog.GetPickupDef(pickupIndex);
+            if (itemdef.equipmentIndex != EquipmentIndex.None)
+            {
+                characterMaster.inventory.SetEquipmentIndex(itemdef.equipmentIndex);
+            }
+            else
+            {
+                characterMaster.inventory.GiveItem(itemdef.itemIndex, 1);
+            }
 
             // Broadcast message that pickup happened
             MethodInfo sendPickupMessage = typeof(GenericPickupController).GetMethod("SendPickupMessage", BindingFlags.Static | BindingFlags.NonPublic);
