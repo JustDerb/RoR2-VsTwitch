@@ -17,12 +17,13 @@ namespace VsTwitch
             foreach (var item in votes)
             {
                 int total = totalVotes.TryGetValue(item.Value, out int tmp) ? tmp : 0;
-                totalVotes[item.Value] = total++;
+                totalVotes[item.Value] = ++total;
             }
 
             int maxWeight = votes.Count;
             int randomWeight = Random.Range(0, maxWeight);
-            T winner = default;
+            // Default to at least a random one
+            T winner = allChoices[Random.Range(0, allChoices.Length)];
             foreach (var item in totalVotes)
             {
                 if (randomWeight <= item.Value)
