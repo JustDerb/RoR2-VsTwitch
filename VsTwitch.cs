@@ -107,8 +107,7 @@ namespace VsTwitch
             TwitchChannel = Config.Bind("Twitch", "Channel", "", "Your Twitch channel name");
             TwitchClientID = TwitchUsername = Config.Bind("Twitch", "ClientID", "q6batx0epp608isickayubi39itsckt", "Client ID used to get ImplicitOAuth value");
             TwitchUsername = Config.Bind("Twitch", "Username", "", "Your Twitch username");
-            TwitchOAuth = Config.Bind("Twitch", "ImplicitOAuth", "", "Implicite OAuth code (this is not your password - it's a generated password!): " +
-                "https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=q6batx0epp608isickayubi39itsckt&redirect_uri=https://twitchapps.com/tmi/&scope=channel_subscriptions+user_subscriptions+channel_check_subscription+bits:read+chat:read+chat:edit+channel:read:redemptions+channel:read:hype_train");
+            TwitchOAuth = Config.Bind("Twitch", "ImplicitOAuth", "", "Implicit OAuth code (this is not your password - it's a generated password!). See the README/Mod Description in the thunderstore to see how to get it.");
             TwitchDebugLogs = Config.Bind("Twitch", "DebugLogs", false, "Enable debug logging for Twitch - will spam to the console!");
             EnableItemVoting = Config.Bind("Twitch", "EnableItemVoting", true, "Enable item voting on Twitch.");
             VoteDurationSec = Config.Bind("Twitch", "VoteDurationdSec", 20, "How long to allow twitch voting.");
