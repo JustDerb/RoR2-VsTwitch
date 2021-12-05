@@ -1064,17 +1064,8 @@ namespace VsTwitch
             }
 
             // Set as purchased, like the original method
-            MethodInfo setHasBeenPurchased = self.GetType().GetMethod("SetHasBeenPurchased", BindingFlags.Instance | BindingFlags.NonPublic);
-            if (setHasBeenPurchased != null)
-            {
-                setHasBeenPurchased.Invoke(self, new object[] { true });
-            }
-            else
-            {
-                Debug.LogWarning($"ShopTerminalBehavior_DropPickup: {self.gameObject.name} doesn't have SetHasBeenPurchased method!!");
-                // Continue the original method to ensure things don't break horribly
-                orig(self);
-            }
+            // but don't actually create the droplet
+            self.SetHasBeenPurchased(true);
         }
 
         private void ChestBehavior_ItemDrop(On.RoR2.ChestBehavior.orig_ItemDrop orig, ChestBehavior self)
