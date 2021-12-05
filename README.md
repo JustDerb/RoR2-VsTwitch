@@ -192,6 +192,7 @@ See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/7?closed=1
 * When chat is voting on Equipment and Artifact of Command is turned on, all players will immediatly recieve the equipment. It will no longer drop an orb (as if that happend, the orb would turn into a Command Essence).
 * MaxVoteRandomTie will correctly pick a random item if there are no votes.
 * Updated the ImplicitOAuth description to direct them to the README.md so they can easily click the link. People were trying to type the URL form the mod manager...
+* Fixed Rusted Key Channel Points integration.
 
 ### 1.0.6
 
