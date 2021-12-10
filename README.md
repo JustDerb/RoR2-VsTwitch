@@ -12,7 +12,7 @@ Will your chat help you along your journey, or try to stop your run early? Chat 
 
 # Configurations
 
-Currently, `Channel`, `Username`, and `ImplicitOAuth` need to be filled out at a minimum (if you use nothing but the default values) from the "Titch" section.
+Currently, `Channel`, `Username`, and `ImplicitOAuth` need to be filled out at a minimum (if you use nothing but the default values) from the "Twitch" section.
 
 ## Twitch
 
