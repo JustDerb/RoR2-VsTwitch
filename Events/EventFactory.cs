@@ -232,15 +232,15 @@ namespace VsTwitch
 
             try
             {
-                foreach (var controller in PlayerCharacterMasterController.instances)
+                if (TeleporterInteraction.instance)
                 {
-                    if (TeleporterInteraction.instance)
+                    for (int i = 0; i < count; ++i)
                     {
-                        for (int i = 0; i < count; ++i)
-                        {
-                            TeleporterInteraction.instance.AddShrineStack();
-                        }
+                        TeleporterInteraction.instance.AddShrineStack();
+                    }
 
+                    foreach (var controller in PlayerCharacterMasterController.instances)
+                    {
                         CharacterBody body = controller.master.GetBody();
                         if (body)
                         {

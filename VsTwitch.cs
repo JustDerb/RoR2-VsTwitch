@@ -702,7 +702,7 @@ namespace VsTwitch
                             eventDirector.AddEvent(eventFactory.TriggerShrineOfOrder());
                             break;
                         case "!mountain":
-                            eventDirector.AddEvent(eventFactory.TriggerShrineOfTheMountain(2));
+                            eventDirector.AddEvent(eventFactory.TriggerShrineOfTheMountain());
                             break;
                         case "!titan":
                             eventDirector.AddEvent(eventFactory.CreateMonster(MonsterSpawner.Monsters.TitanGold));
@@ -774,6 +774,7 @@ namespace VsTwitch
             choices.AddChoice(eventFactory.CreateBitStorm(), Math.Max(0, BitStormWeight.Value));
             choices.AddChoice(eventFactory.CreateBounty(), Math.Max(0, BountyWeight.Value));
             choices.AddChoice(eventFactory.TriggerShrineOfOrder(), Math.Max(0, ShrineOfOrderWeight.Value));
+            // Make Shrine of the Mountain a bit more difficult compared to Channel Points
             choices.AddChoice(eventFactory.TriggerShrineOfTheMountain(2), Math.Max(0, ShrineOfTheMountainWeight.Value));
             choices.AddChoice(eventFactory.CreateMonster(MonsterSpawner.Monsters.TitanGold), Math.Max(0, TitanWeight.Value));
             choices.AddChoice(eventFactory.CreateMonster(MonsterSpawner.Monsters.LunarWisp, 2), Math.Max(0, LunarWispWeight.Value));
