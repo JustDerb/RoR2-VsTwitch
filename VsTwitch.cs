@@ -133,7 +133,7 @@ namespace VsTwitch
             ChannelPointsBitStorm = Config.Bind("ChannelPoints", "BitStorm", "", "(Case Sensitive!) Channel Points Title for the bit storm bit event. Leave empty to disable.");
             ChannelPointsBounty = Config.Bind("ChannelPoints", "Bounty", "", "(Case Sensitive!) Channel Points Title for the doppleganger bit event. Leave empty to disable.");
             ChannelPointsShrineOfOrder = Config.Bind("ChannelPoints", "ShrineOfOrder", "", "(Case Sensitive!) Channel Points Title for the Shrine of Order bit event. Leave empty to disable.");
-            ChannelPointsShrineOfTheMountain = Config.Bind("ChannelPoints", "ShrineOfTheMountain", "", "(Case Sensitive!) Channel Points Title for the Shrine of Order bit event. Leave empty to disable.");
+            ChannelPointsShrineOfTheMountain = Config.Bind("ChannelPoints", "ShrineOfTheMountain", "", "(Case Sensitive!) Channel Points Title for the Shrine of the Mountain bit event. Leave empty to disable.");
             ChannelPointsTitan = Config.Bind("ChannelPoints", "Titan", "", "(Case Sensitive!) Channel Points Title for the Aurelionite bit event. Leave empty to disable.");
             ChannelPointsLunarWisp = Config.Bind("ChannelPoints", "LunarWisp", "", "(Case Sensitive!) Channel Points Title for the Lunar Chimera (Wisp) bit event. Leave empty to disable.");
             ChannelPointsMithrix = Config.Bind("ChannelPoints", "Mithrix", "", "(Case Sensitive!) Channel Points Title for the Mithrix bit event. Leave empty to disable.");
