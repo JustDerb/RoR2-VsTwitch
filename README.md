@@ -1,5 +1,7 @@
 # Vs Twitch
 
+**This is a server-side mod! Only the host needs this mod installed!**
+
 Tired of having your Twitch audience watch run after run after run without them being able to meaningful interact with you in-game? Look no further, as this mod allows your audience to become the "randomness", the "aggressor", and... Mithrix.
 
 Will your chat help you along your journey, or try to stop your run early? Chat can influence what drops you get from chests, as well as donating [Twitch Bits](https://www.twitch.tv/bits) to create random events you must fight through to survive.
@@ -12,11 +14,13 @@ Will your chat help you along your journey, or try to stop your run early? Chat 
 
 # Configurations
 
-Currently, `Channel`, `Username`, and `ImplicitOAuth` need to be filled out at a minimum (if you use nothing but the default values) from the "Twitch" section.
+Currently, `Channel`, and `ImplicitOAuth` need to be filled out at a minimum (if you use nothing but the default values for the mod) from the "Twitch" section.
 
 ## Twitch
 
-**WARNING:** The code you put into `ImplicitOAuth` is valid for about 30 days. After that, you'll need to re-auth and update the field!
+**WARNING:** If the mod continues failing to connect to Twitch, check and/or update your `ImplicitOAuth` token!
+
+**Important note for modpack creators: Ensure your configuration files DO NOT INCLUDE `ImplicitOAuth`!**
 
 |Config|Type|Default|Notes|
 |------|----|-------|-----|
@@ -183,6 +187,13 @@ These console commands are generally for testing purposes. You should never need
 * `vs_set_bit_goal <bits>` - Sets the bit goal and saves it to the config file.
 
 # Changelog
+
+### 1.0.10
+
+See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/8?closed=1
+
+* Minor language updates
+* The Shrine of the Mountain events (bits or channel points) no longer scale according to `Mountain Shrines = # of players`. Each trigger will cause only one Mountain Shrine event to happen, regardless of how many players there are.
 
 ### 1.0.9
 
