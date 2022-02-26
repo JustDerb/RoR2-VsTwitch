@@ -34,6 +34,7 @@ Currently, `Channel`, and `ImplicitOAuth` need to be filled out at a minimum (if
 |`VoteStrategy`|string|MaxVote|How to tabulate votes. See "Voting Strategies" below for the various values this setting may have.|
 |`BitsThreshold`|number|1500|The number of bits needed to cause an in-game event.|
 |`CurrentBits`|number|0|**Do not edit this field.** Used as storage whenever someone donates bits so that restarting the game doesn't clear the donation count.|
+|`PublishToChat`|true/false|true|Publish events (like voting) to Twitch chat.|
 
 [1]: https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=q6batx0epp608isickayubi39itsckt&redirect_uri=https://twitchapps.com/tmi/&scope=channel_subscriptions+user_subscriptions+channel_check_subscription+bits:read+chat:read+chat:edit+channel:read:redemptions+channel:read:hype_train
 [2]: https://www.twitch.tv/settings/connections

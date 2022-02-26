@@ -46,6 +46,7 @@ namespace VsTwitch
         public static ConfigEntry<bool> EnableBitEvents { get; set; }
         public static ConfigEntry<int> BitsThreshold { get; set; }
         public static ConfigEntry<int> CurrentBits { get; set; }
+        public static ConfigEntry<bool> PublishToChat { get; set; }
 
         // Event
         public static ConfigEntry<float> BitStormWeight { get; set; }
@@ -115,6 +116,7 @@ namespace VsTwitch
             EnableBitEvents = Config.Bind("Twitch", "EnableBitEvents", true, "Enable bit events from Twitch.");
             BitsThreshold = Config.Bind("Twitch", "BitsThreshold", 1500, "How many Bits are needed before something happens.");
             CurrentBits = Config.Bind("Twitch", "CurrentBits", 0, "(DO NOT EDIT) How many Bits have currently been donated.");
+            PublishToChat = Config.Bind("Twitch", "PublishToChat", true, "Publish events (like voting) to Twitch chat.");
             // Event
             BitStormWeight = Config.Bind("Event", "BitStormWeight", 1f, "Weight for the bit storm bit event. Set to 0 to disable.");
             BountyWeight = Config.Bind("Event", "BountyWeight", 1f, "Weight for the doppleganger bit event. Set to 0 to disable.");
@@ -931,7 +933,10 @@ namespace VsTwitch
                 }
                 try
                 {
-                    twitchManager.SendMessage($"Chest opened! {String.Join(" | ", itemsString)}");
+                    if (PublishToChat.Value)
+                    {
+                        twitchManager.SendMessage($"Chest opened! {string.Join(" | ", itemsString)}");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -1006,10 +1011,13 @@ namespace VsTwitch
 
                 itemRollerManager.RollForItem(indices, pickupIndex =>
                 {
-                    string name = Language.GetString(PickupCatalog.GetPickupDef(pickupIndex).nameToken);
                     try
                     {
-                        twitchManager.SendMessage($"Item picked: {name}");
+                        if (PublishToChat.Value)
+                        {
+                            string name = Language.GetString(PickupCatalog.GetPickupDef(pickupIndex).nameToken);
+                            twitchManager.SendMessage($"Item picked: {name}");
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -1130,8 +1138,11 @@ namespace VsTwitch
                     {
                         try
                         {
-                            string name = Language.GetString(PickupCatalog.GetPickupDef(pickupIndex).nameToken);
-                            twitchManager.SendMessage($"Item picked: {name}");
+                            if (PublishToChat.Value)
+                            {
+                                string name = Language.GetString(PickupCatalog.GetPickupDef(pickupIndex).nameToken);
+                                twitchManager.SendMessage($"Item picked: {name}");
+                            }
                         }
                         catch (Exception ex)
                         {
