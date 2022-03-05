@@ -21,41 +21,64 @@ namespace VsTwitch
 
         private GameObject notificationGameObject;
         private GenericNotification notification;
+        private float startTime;
+        private float duration;
 
         private int voteIndex;
         private string longTermTitle;
 
         public void Awake()
         {
-            notificationGameObject = Instantiate(Resources.Load<GameObject>("Prefabs/NotificationPanel2"));
+            notificationGameObject = Instantiate(LegacyResourcesAPI.Load<GameObject>("Prefabs/NotificationPanel2"));
             SetPosition(new Vector3(Screen.width / 2, Screen.height / 2, 0) + new Vector3(0, OFFSET_VERTICAL, 0));
-            notification = notificationGameObject.GetComponent<GenericNotification>();
-            notification.transform.SetParent(RoR2Application.instance.mainCanvas.transform);
-            notification.iconImage.enabled = false;
-            notification.fadeTime = 0.5f;
-            notification.duration = 20f;
+            if (notificationGameObject != null)
+            {
+                notification = notificationGameObject.GetComponent<GenericNotification>();
+                notification.transform.SetParent(RoR2Application.instance.mainCanvas.transform);
+                notification.iconImage.enabled = false;
+            }
+            else
+            {
+                Debug.LogError("Could not load Prefabs/NotificationPanel2, object is null!");
+            }
 
             voteIndex = 0;
             longTermTitle = "";
         }
 
+        public void OnDestroy()
+        {
+            if (notificationGameObject != null)
+            {
+                Destroy(notificationGameObject);
+            }
+
+            this.notificationGameObject = null;
+            this.notification = null;
+        }
+
+        private float GetTimeLeft()
+        {
+            return this.duration - (Run.instance.fixedTime - startTime);
+        }
+
         public void Update()
         {
-            if (notification == null)
+            float t = (Run.instance.fixedTime - startTime) / duration;
+            if (notification == null || t > 1f)
             {
                 Destroy(this);
                 return;
             }
 
-            
+            notification.SetNotificationT(t);
+
             if (voteIndex != 0)
             {
                 string secondsLeftString = "";
                 if (voteIndex == 1)
                 {
-                    FieldInfo age = typeof(GenericNotification).GetField("age", BindingFlags.Instance | BindingFlags.NonPublic);
-                    float ageValue = (float)age.GetValue(notification);
-                    double secondsLeft = Math.Max(0, Math.Round(notification.duration - ageValue));
+                    double secondsLeft = Math.Max(0, Math.Round(GetTimeLeft()));
                     secondsLeftString = $"({secondsLeft} sec)";
                 }
                 FieldInfo resolvedString = typeof(LanguageTextMeshController).GetField("resolvedString", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -65,9 +88,7 @@ namespace VsTwitch
             }
             else
             {
-                FieldInfo age = typeof(GenericNotification).GetField("age", BindingFlags.Instance | BindingFlags.NonPublic);
-                float ageValue = (float)age.GetValue(notification);
-                double secondsLeft = Math.Max(0, Math.Round(notification.duration - ageValue));
+                double secondsLeft = Math.Max(0, Math.Round(GetTimeLeft()));
                 FieldInfo resolvedString = typeof(LanguageTextMeshController).GetField("resolvedString", BindingFlags.Instance | BindingFlags.NonPublic);
                 resolvedString.SetValue(notification.titleText, $"Twitch vote for one item! ({secondsLeft} sec)");
                 MethodInfo UpdateLabel = typeof(LanguageTextMeshController).GetMethod("UpdateLabel", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -77,7 +98,14 @@ namespace VsTwitch
 
         public void SetItems(List<PickupIndex> items, float duration, int voteIndex = 0)
         {
-            notification.duration = duration;
+            if (notification == null)
+            {
+                Debug.LogError("Cannot set items for notification, object is null!");
+                return;
+            }
+
+            this.startTime = Run.instance.fixedTime;
+            this.duration = duration;
 
             if (voteIndex != 0)
             {

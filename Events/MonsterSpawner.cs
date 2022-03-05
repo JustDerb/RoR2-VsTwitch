@@ -61,7 +61,7 @@ namespace VsTwitch
                     placementMode = DirectorPlacementRule.PlacementMode.Approximate,
                     minDistance = 8f,
                     maxDistance = 20f,
-                    spawnOnTarget = targetBody.transform
+                    spawnOnTarget = targetBody.transform,
                 };
             }
             else
@@ -72,7 +72,7 @@ namespace VsTwitch
                 };
             }
 
-            SpawnCard card = Resources.Load<SpawnCard>(spawnCard);
+            SpawnCard card = LegacyResourcesAPI.Load<SpawnCard>(spawnCard);
             if (!card)
             {
                 Destroy(group);

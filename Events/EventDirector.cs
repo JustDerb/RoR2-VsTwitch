@@ -110,7 +110,7 @@ namespace VsTwitch
                     }
 
                     Transform transform = component.FindChild("TimeCrystalBeaconBlocker");
-                    EffectManager.SpawnEffect(Resources.Load<GameObject>("Prefabs/Effects/TimeCrystalDeath"), new EffectData
+                    EffectManager.SpawnEffect(LegacyResourcesAPI.Load<GameObject>("Prefabs/Effects/TimeCrystalDeath"), new EffectData
                     {
                         origin = transform.transform.position
                     }, true);

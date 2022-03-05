@@ -1,11 +1,9 @@
 ﻿using RoR2;
 using RoR2.Artifacts;
 using RoR2.CharacterAI;
-using RoR2.UI;
 using System;
 using System.Collections;
 using System.Reflection;
-using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -21,7 +19,6 @@ namespace VsTwitch
 
         public void Awake()
         {
-            spawner = GetComponent<MonsterSpawner>();
             if (!spawner)
             {
                 spawner = gameObject.AddComponent<MonsterSpawner>();
@@ -113,7 +110,7 @@ namespace VsTwitch
                     }
 
                     CharacterBody body = controller.master.GetBody();
-                    MeteorStormController component = Instantiate(Resources.Load<GameObject>("Prefabs/NetworkedObjects/MeteorStorm"),
+                    MeteorStormController component = Instantiate(LegacyResourcesAPI.Load<GameObject>("Prefabs/NetworkedObjects/MeteorStorm"),
                         body.corePosition, Quaternion.identity).GetComponent<MeteorStormController>();
                     component.owner = base.gameObject;
                     component.ownerDamage = body.damage * 2f;
@@ -163,7 +160,7 @@ namespace VsTwitch
                                 subjectAsCharacterBody = body,
                                 baseToken = "SHRINE_RESTACK_USE_MESSAGE"
                             });
-                            EffectManager.SpawnEffect(Resources.Load<GameObject>("Prefabs/Effects/ShrineUseEffect"), new EffectData
+                            EffectManager.SpawnEffect(LegacyResourcesAPI.Load<GameObject>("Prefabs/Effects/ShrineUseEffect"), new EffectData
                             {
                                 origin = body.corePosition,
                                 rotation = Quaternion.identity,
@@ -206,7 +203,7 @@ namespace VsTwitch
                             body.inventory.GetItemCount(RoR2Content.Items.ExtraLifeConsumed) == 0)
                         {
                             body.inventory.GiveItem(RoR2Content.Items.ExtraLife, 1);
-                            body.inventory.GiveRandomItems(Run.instance.livingPlayerCount);
+                            body.inventory.GiveRandomItems(Run.instance.livingPlayerCount, false, true);
                         }
                     }
                 }
@@ -249,7 +246,7 @@ namespace VsTwitch
                                 subjectAsCharacterBody = body,
                                 baseToken = "SHRINE_BOSS_USE_MESSAGE"
                             });
-                            EffectManager.SpawnEffect(Resources.Load<GameObject>("Prefabs/Effects/ShrineUseEffect"), new EffectData
+                            EffectManager.SpawnEffect(LegacyResourcesAPI.Load<GameObject>("Prefabs/Effects/ShrineUseEffect"), new EffectData
                             {
                                 origin = body.corePosition,
                                 rotation = Quaternion.identity,

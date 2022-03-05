@@ -1,8 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
-using R2API.Utils;
 using RoR2;
-using RoR2.Networking;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,18 +8,17 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.Networking;
 
+// Allow scanning for ConCommand, and other stuff for Risk of Rain 2
+[assembly: HG.Reflection.SearchableAttribute.OptIn]
 namespace VsTwitch
 {
-    [BepInDependency(R2API.R2API.PluginGUID)]
     [BepInPlugin(GUID, ModName, Version)]
-    [R2APISubmoduleDependency(nameof(CommandHelper))]
-    [NetworkCompatibility(CompatibilityLevel.NoNeedForSync)]
     public class VsTwitch : BaseUnityPlugin
     {
         private static readonly char[] SPACE = new char[] { ' ' };
         public const string GUID = "com.justinderby.vstwitch";
         public const string ModName = "VsTwitch";
-        public const string Version = "1.0.10";
+        public const string Version = "1.0.11";
 
         // This is only used for ConCommands, since they need to be static...
         public static VsTwitch Instance;
@@ -101,8 +98,6 @@ namespace VsTwitch
         public void Awake()
         {
             Instance = SingletonHelper.Assign(Instance, this);
-
-            CommandHelper.AddToConsoleWhenReady();
 
             // Twitch
             TwitchChannel = Config.Bind("Twitch", "Channel", "", "Your Twitch channel name");
@@ -220,8 +215,8 @@ namespace VsTwitch
                 StreamerName = TwitchChannel.Value
             };
 
-            GameNetworkManager.onStartHostGlobal += GameNetworkManager_onStartHostGlobal;
-            GameNetworkManager.onStopHostGlobal += GameNetworkManager_onStopHostGlobal;
+            RoR2.Networking.NetworkManagerSystem.onStartHostGlobal += GameNetworkManager_onStartHostGlobal;
+            RoR2.Networking.NetworkManagerSystem.onStopHostGlobal += GameNetworkManager_onStopHostGlobal;
             On.RoR2.Language.GetLocalizedStringByToken += Language_GetLocalizedStringByToken;
             On.RoR2.Run.OnEnable += Run_OnEnable;
             On.RoR2.Run.OnDisable += Run_OnDisable;
@@ -420,8 +415,8 @@ namespace VsTwitch
         {
             Instance = SingletonHelper.Unassign(Instance, this);
 
-            GameNetworkManager.onStartHostGlobal -= GameNetworkManager_onStartHostGlobal;
-            GameNetworkManager.onStopHostGlobal -= GameNetworkManager_onStopHostGlobal;
+            RoR2.Networking.NetworkManagerSystem.onStartHostGlobal -= GameNetworkManager_onStartHostGlobal;
+            RoR2.Networking.NetworkManagerSystem.onStopHostGlobal -= GameNetworkManager_onStopHostGlobal;
             On.RoR2.Language.GetLocalizedStringByToken -= Language_GetLocalizedStringByToken;
             On.RoR2.Run.OnEnable -= Run_OnEnable;
             On.RoR2.Run.OnDisable -= Run_OnDisable;
@@ -446,7 +441,7 @@ namespace VsTwitch
 
             On.RoR2.ChestBehavior.ItemDrop += ChestBehavior_ItemDrop;
             On.RoR2.ShopTerminalBehavior.DropPickup += ShopTerminalBehavior_DropPickup;
-            On.RoR2.MultiShopController.DisableAllTerminals += MultiShopController_DisableAllTerminals;
+            On.RoR2.MultiShopController.OnPurchase += MultiShopController_OnPurchase;
             On.RoR2.MapZone.TryZoneStart += MapZone_TryZoneStart;
             On.RoR2.HealthComponent.Suicide += HealthComponent_Suicide;
             On.EntityStates.Missions.BrotherEncounter.BrotherEncounterBaseState.KillAllMonsters += BrotherEncounterBaseState_KillAllMonsters;
@@ -465,7 +460,7 @@ namespace VsTwitch
 
             On.RoR2.ChestBehavior.ItemDrop -= ChestBehavior_ItemDrop;
             On.RoR2.ShopTerminalBehavior.DropPickup -= ShopTerminalBehavior_DropPickup;
-            On.RoR2.MultiShopController.DisableAllTerminals -= MultiShopController_DisableAllTerminals;
+            On.RoR2.MultiShopController.OnPurchase -= MultiShopController_OnPurchase;
             On.RoR2.MapZone.TryZoneStart -= MapZone_TryZoneStart;
             On.RoR2.HealthComponent.Suicide -= HealthComponent_Suicide;
             On.EntityStates.Missions.BrotherEncounter.BrotherEncounterBaseState.KillAllMonsters -= BrotherEncounterBaseState_KillAllMonsters;
@@ -484,7 +479,7 @@ namespace VsTwitch
 
         #region "Twitch Integration"
         [ConCommand(commandName = "vs_connect_twitch", flags = ConVarFlags.SenderMustBeServer, helpText = "Connect to Twitch.")]
-        private static void ConnectToTwitch(ConCommandArgs args)
+        private static void CCConnectToTwitch(ConCommandArgs args)
         {
             if (!Instance)
             {
@@ -513,7 +508,7 @@ namespace VsTwitch
         }
 
         [ConCommand(commandName = "vs_add_bits", flags = ConVarFlags.SenderMustBeServer, helpText = "Fake add bits.")]
-        private static void TwitchAddBits(ConCommandArgs args)
+        private static void CCTwitchAddBits(ConCommandArgs args)
         {
             if (!Instance)
             {
@@ -544,7 +539,7 @@ namespace VsTwitch
         }
 
         [ConCommand(commandName = "vs_set_bit_goal", flags = ConVarFlags.SenderMustBeServer, helpText = "Set bit goal.")]
-        private static void TwitchSetBitGoal(ConCommandArgs args)
+        private static void CCTwitchSetBitGoal(ConCommandArgs args)
         {
             if (!Instance)
             {
@@ -978,17 +973,17 @@ namespace VsTwitch
         }
 
         #region "Game Behaviour Changes"
-        private void MultiShopController_DisableAllTerminals(On.RoR2.MultiShopController.orig_DisableAllTerminals orig, MultiShopController self, Interactor interactor)
+        private void MultiShopController_OnPurchase(On.RoR2.MultiShopController.orig_OnPurchase orig, MultiShopController self, Interactor interactor, PurchaseInteraction purchaseInteraction)
         {
             if (!IsRunning())
             {
-                orig(self, interactor);
+                orig(self, interactor, purchaseInteraction);
                 return;
             }
 
             if (!EnableItemVoting.Value)
             {
-                orig(self, interactor);
+                orig(self, interactor, purchaseInteraction);
                 return;
             }
 
@@ -996,13 +991,12 @@ namespace VsTwitch
                 // Grab and add all pickups at terminal
                 List<PickupIndex> indices = new List<PickupIndex>();
 
-                FieldInfo terminalGameObjects = self.GetType().GetField("terminalGameObjects", BindingFlags.Instance | BindingFlags.NonPublic);
-                GameObject[] terminalGameObjectsValue = (GameObject[])terminalGameObjects.GetValue(self);
+                HG.ReadOnlyArray<GameObject> terminalGameObjectsValue = self.terminalGameObjects;
                 foreach (GameObject gameObject in terminalGameObjectsValue)
                 {
                     ShopTerminalBehavior shopTerminalBehavior = gameObject.GetComponent<ShopTerminalBehavior>();
                     FieldInfo dropPickup = shopTerminalBehavior.GetType().GetField("pickupIndex", BindingFlags.Instance | BindingFlags.NonPublic);
-                    PickupIndex dropPickupValue = (PickupIndex)dropPickup.GetValue(shopTerminalBehavior);
+                    PickupIndex dropPickupValue = shopTerminalBehavior.CurrentPickupIndex();
                     if (dropPickupValue != PickupIndex.none)
                     {
                         indices.Add(dropPickupValue);
@@ -1034,7 +1028,7 @@ namespace VsTwitch
                 Debug.LogException(e);
             }
 
-            orig(self, interactor);
+            orig(self, interactor, purchaseInteraction);
         }
 
         private void ShopTerminalBehavior_DropPickup(On.RoR2.ShopTerminalBehavior.orig_DropPickup orig, ShopTerminalBehavior self)
@@ -1107,8 +1101,7 @@ namespace VsTwitch
                     return;
                 }
 
-                FieldInfo dropPickup = self.GetType().GetField("dropPickup", BindingFlags.Instance | BindingFlags.NonPublic);
-                var dropPickupValue = (PickupIndex)dropPickup.GetValue(self);
+                var dropPickupValue = self.dropPickup;
                 if (dropPickupValue != PickupIndex.none)
                 {
                     var itemdef = PickupCatalog.GetPickupDef(dropPickupValue);
@@ -1118,9 +1111,11 @@ namespace VsTwitch
                         orig(self);
                         return;
                     }
-                    List<PickupIndex> indices = new List<PickupIndex>();
-                    // Always make the first choice what was in the chest
-                    indices.Add(dropPickupValue);
+                    List<PickupIndex> indices = new List<PickupIndex>
+                    {
+                        // Always make the first choice what was in the chest
+                        dropPickupValue
+                    };
                     // Choose two more based on chances in run
                     RollForItems(indices, ForceUniqueRolls.Value, 2,
                             () => {
@@ -1133,7 +1128,6 @@ namespace VsTwitch
                                     return RollVoteItem(self);
                                 }
                             });
-
                     itemRollerManager.RollForItem(indices, pickupIndex =>
                     {
                         try
@@ -1155,6 +1149,7 @@ namespace VsTwitch
                     });
 
                     // Clear the item so we don't spawn anything from the object
+                    PropertyInfo dropPickup = self.GetType().GetProperty("dropPickup", BindingFlags.Instance | BindingFlags.Public);
                     dropPickup.SetValue(self, PickupIndex.none);
                 }
                 orig(self);
@@ -1196,7 +1191,7 @@ namespace VsTwitch
             WeightedSelection.AddChoice(Run.instance.availableTier1DropList, self.tier1Chance);
             WeightedSelection.AddChoice(Run.instance.availableTier2DropList, self.tier2Chance);
             WeightedSelection.AddChoice(Run.instance.availableTier3DropList, self.tier3Chance);
-            WeightedSelection.AddChoice(Run.instance.availableLunarDropList, self.lunarChance);
+            WeightedSelection.AddChoice(Run.instance.availableLunarItemDropList, self.lunarChance);
 
             List<PickupIndex> DropList = WeightedSelection.Evaluate(UnityEngine.Random.value);
 

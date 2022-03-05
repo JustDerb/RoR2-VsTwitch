@@ -189,6 +189,14 @@ These console commands are generally for testing purposes. You should never need
 
 # Changelog
 
+### 1.0.11
+
+See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/9?closed=1
+
+* Removed R2API dependency
+* Update code to work with the new Risk of Rain 2 DLC: Survivors of the Void
+* Added a new Twitch configuration: `PublishToChat`
+
 ### 1.0.10
 
 See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/8?closed=1
