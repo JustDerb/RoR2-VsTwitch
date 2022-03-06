@@ -4,7 +4,7 @@
     "website_url": "https://github.com/JustDerb/RoR2-VsTwitch",
     "description": "Fight Twitch chat. Item voting, bit events, channel points integration, and more!",
     "dependencies": [
-        "bbepis-BepInExPack-5.4.9",
-        "RiskofThunder-HookGenPatcher-1.2.1"
+        "bbepis-BepInExPack-5.4.1801",
+        "RiskofThunder-HookGenPatcher-1.2.3"
     ]
 }
