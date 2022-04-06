@@ -1121,18 +1121,8 @@ namespace VsTwitch
                         // Always make the first choice what was in the chest
                         dropPickupValue
                     };
-                    // Choose two more based on chances in run
-                    RollForItems(indices, ForceUniqueRolls.Value, 2,
-                            () => {
-                                if (itemdef.equipmentIndex != EquipmentIndex.None)
-                                {
-                                    return RollVoteEquipment(itemdef);
-                                }
-                                else
-                                {
-                                    return RollVoteItem(self);
-                                }
-                            });
+                    // FIXME: This could still pick an item that is the same as the first one
+                    indices.AddRange(RollVoteChest(self, 2));
                     itemRollerManager.RollForItem(indices, pickupIndex =>
                     {
                         try
@@ -1164,43 +1154,23 @@ namespace VsTwitch
             }
         }
 
-        private void RollForItems(List<PickupIndex> list, bool forceUnique, int number, Func<PickupIndex> roll)
+        private PickupIndex[] RollVoteChest(ChestBehavior self, int maxDrops)
         {
-            int added = 0;
-            while (added < number)
+            FieldInfo rngField = self.GetType().GetField("rng", BindingFlags.Instance | BindingFlags.NonPublic);
+            Xoroshiro128Plus rng = (Xoroshiro128Plus)rngField.GetValue(self);
+            if (ForceUniqueRolls.Value)
             {
-                PickupIndex toAdd = roll();
-                if (forceUnique && list.Exists((item) => { return item == toAdd; }))
-                {
-                    Debug.Log("Rerolling item to guarantee unique items...");
-                    // Roll again...
-                    continue;
-                }
-
-                list.Add(toAdd);
-                added++;
+                return self.dropTable.GenerateUniqueDrops(maxDrops, rng);
             }
-        }
-
-        private PickupIndex RollVoteEquipment(PickupDef pickupDef)
-        {
-            List<PickupIndex> equipmentList = pickupDef.isLunar ? Run.instance.availableLunarEquipmentDropList :
-                Run.instance.availableEquipmentDropList;
-
-            return equipmentList[UnityEngine.Random.Range(0, equipmentList.Count)];
-        }
-
-        private PickupIndex RollVoteItem(ChestBehavior self)
-        {
-            WeightedSelection<List<PickupIndex>> WeightedSelection = new WeightedSelection<List<PickupIndex>>();
-            WeightedSelection.AddChoice(Run.instance.availableTier1DropList, self.tier1Chance);
-            WeightedSelection.AddChoice(Run.instance.availableTier2DropList, self.tier2Chance);
-            WeightedSelection.AddChoice(Run.instance.availableTier3DropList, self.tier3Chance);
-            WeightedSelection.AddChoice(Run.instance.availableLunarItemDropList, self.lunarChance);
-
-            List<PickupIndex> DropList = WeightedSelection.Evaluate(UnityEngine.Random.value);
-
-            return DropList[UnityEngine.Random.Range(0, DropList.Count)];
+            else
+            {
+                PickupIndex[] pickups = new PickupIndex[maxDrops];
+                for (int i = 0; i < maxDrops; i++)
+                {
+                    pickups[i] = self.dropTable.GenerateDrop(rng);
+                }
+                return pickups;
+            }
         }
         #endregion
     }
