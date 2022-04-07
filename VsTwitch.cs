@@ -31,6 +31,8 @@ namespace VsTwitch
         private EventDirector eventDirector;
         private EventFactory eventFactory;
 
+        private TiltifyManager tiltifyManager;
+
         // Twitch
         public static ConfigEntry<string> TwitchChannel { get; set; }
         public static ConfigEntry<string> TwitchClientID { get; set; }
@@ -44,6 +46,9 @@ namespace VsTwitch
         public static ConfigEntry<int> BitsThreshold { get; set; }
         public static ConfigEntry<int> CurrentBits { get; set; }
         public static ConfigEntry<bool> PublishToChat { get; set; }
+
+        // Tiltify
+        public static ConfigEntry<int> TiltifyCampaignId { get; set; }
 
         // Event
         public static ConfigEntry<float> BitStormWeight { get; set; }
@@ -115,6 +120,8 @@ namespace VsTwitch
             BitsThreshold = Config.Bind("Twitch", "BitsThreshold", 1500, "How many Bits are needed before something happens.");
             CurrentBits = Config.Bind("Twitch", "CurrentBits", 0, "(DO NOT EDIT) How many Bits have currently been donated.");
             PublishToChat = Config.Bind("Twitch", "PublishToChat", true, "Publish events (like voting) to Twitch chat.");
+            // Tiltify
+            TiltifyCampaignId = Config.Bind("Tiltify", "CampaignId", 0, "Tiltify Campaign ID to track donations");
             // Event
             BitStormWeight = Config.Bind("Event", "BitStormWeight", 1f, "Weight for the bit storm bit event. Set to 0 to disable.");
             BountyWeight = Config.Bind("Event", "BountyWeight", 1f, "Weight for the doppleganger bit event. Set to 0 to disable.");
@@ -220,6 +227,8 @@ namespace VsTwitch
                 StreamerName = TwitchChannel.Value
             };
 
+            tiltifyManager = new TiltifyManager();
+
             RoR2.Networking.NetworkManagerSystem.onStartHostGlobal += GameNetworkManager_onStartHostGlobal;
             RoR2.Networking.NetworkManagerSystem.onStopHostGlobal += GameNetworkManager_onStopHostGlobal;
             On.RoR2.Language.GetLocalizedStringByToken += Language_GetLocalizedStringByToken;
@@ -242,6 +251,17 @@ namespace VsTwitch
             };
             twitchManager.OnMessageReceived += TwitchManager_OnMessageReceived;
             twitchManager.OnRewardRedeemed += TwitchManager_OnRewardRedeemed;
+
+            tiltifyManager.OnConnected += (sender, e) => {
+                Debug.Log($"Connected to Tiltify!");
+                Chat.AddMessage($"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>Connected to Tiltify!</color>");
+            };
+            tiltifyManager.OnDisconnected += (sender, e) =>
+            {
+                Debug.Log("Disconnected from Tiltify!");
+                Chat.AddMessage($"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>Disconnected from Tiltify!</color>");
+            };
+            tiltifyManager.OnDonationReceived += TiltifyManager_OnDonationReceived;
         }
 
         private void SetUpChannelPoints()
@@ -608,6 +628,20 @@ namespace VsTwitch
                     DumpAssemblies();
                 }
             }
+
+            try
+            {
+                if (TiltifyCampaignId.Value > 0)
+                {
+                    Debug.Log($"Connecting to Tiltify and watching campaign ID {TiltifyCampaignId.Value}...");
+                    tiltifyManager.Connect(TiltifyCampaignId.Value);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                Chat.AddMessage($"Couldn't connect to Tiltify: {e.Message}");
+            }
         }
 
         private void GameNetworkManager_onStopHostGlobal()
@@ -615,6 +649,15 @@ namespace VsTwitch
             try
             {
                 twitchManager.Disconnect();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+
+            try
+            {
+                tiltifyManager.Disconnect();
             }
             catch (Exception e)
             {
@@ -826,6 +869,16 @@ namespace VsTwitch
                 bitsManager.ResetBits(true);
                 RollBitReward();
             }
+        }
+
+        private void TiltifyManager_OnDonationReceived(object sender, OnDonationArgs e)
+        {
+            var rollMessage = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>" +
+                    $"{Util.EscapeRichTextForTextMeshPro(e.Name)} tilts the world in Chats favor: {Util.EscapeRichTextForTextMeshPro(e.Comment)}";
+            Chat.SendBroadcastChat(new Chat.SimpleChatMessage { baseToken = rollMessage });
+
+            Debug.Log($"Recieved donation; rolling Bit Reward");
+            RollBitReward();
         }
         #endregion
 

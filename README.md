@@ -39,6 +39,16 @@ Currently, `Channel`, and `ImplicitOAuth` need to be filled out at a minimum (if
 [1]: https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=q6batx0epp608isickayubi39itsckt&redirect_uri=https://twitchapps.com/tmi/&scope=channel_subscriptions+user_subscriptions+channel_check_subscription+bits:read+chat:read+chat:edit+channel:read:redemptions+channel:read:hype_train
 [2]: https://www.twitch.tv/settings/connections
 
+## Tiltify
+
+This mod supports basic for [Tiltify](https://tiltify.com/) campaigns.
+
+**How do I find my Campaign ID?** Once your campaign is created, navigate to your Campaign Dashboard --> Detail tab and find your campaign ID. It should be a six to seven digit number.
+
+|Config|Type|Default|Notes|
+|------|----|-------|-----|
+|`CampaignId`|number|0|The Campaign ID to track donations; put a `0` to disable Tiltify integration|
+
 ### Vote Strategies
 
 These are the various voting strategies you can use for the `VoteStrategy` setting.
