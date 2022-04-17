@@ -77,6 +77,9 @@ namespace VsTwitch
         public static ConfigEntry<bool> EnableChoosingLunarItems { get; set; }
         public static ConfigEntry<bool> ForceUniqueRolls { get; set; }
 
+        //Language
+        public static ConfigEntry<bool> EnableLanguageEdits { get; set; }
+
         /// <summary>
         /// Provides extrea debug information to help people understand why some Twitch libraries might not load.
         /// This is usually because the TwitchLib libraries are being loaded in two or more locations on the filesystem.
@@ -140,6 +143,8 @@ namespace VsTwitch
             // Behaviour
             EnableChoosingLunarItems = Config.Bind("Behaviour", "EnableChoosingLunarItems", true, "Twitch Chat chooses items when opening lunar chests (pods)");
             ForceUniqueRolls = Config.Bind("Behaviour", "ForceUniqueRolls", false, "Ensure, when rolling for items, that they are always different. This doesn't affect multi-shops.");
+            //Language
+            EnableLanguageEdits = Config.Bind("Language", "EnableLanguageEdits", true, "Enable all Language Edits.");
 
             if (gameObject.GetComponent<EventDirector>() == null)
             {
@@ -827,7 +832,7 @@ namespace VsTwitch
         #region "Localization Overrides"
         private string Language_GetLocalizedStringByToken(On.RoR2.Language.orig_GetLocalizedStringByToken orig, Language self, string token)
         {
-            if (languageOverride.TryGetLocalizedStringByToken(token, out string result))
+            if (EnableLanguageEdits.Value && languageOverride.TryGetLocalizedStringByToken(token, out string result))
             {
                 return result;
             }
