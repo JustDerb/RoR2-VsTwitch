@@ -111,6 +111,12 @@ To disable an event, simply set the weight to 0. Giving a higher weight increase
 |`EnableChoosingLunarItems`|true/false|true|If enabled, Lunar Pod item/equipment drops will be decided by Twitch Chat.|
 |`ForceUniqueRolls`|true/false|false|If enabled, all rolls will be guaranteed to be unique. No more rolls with three rusted keys!|
 
+## Language
+
+|Config|Type|Default|Notes|
+|------|----|-------|-----|
+|`EnableLanguageEdits`|true/false|true|If enabled, some in-game texts will get replaced with Twitch related texts.|
+
 # Events
 
 When your channel hits the defined bit goal (via the `BitsThreshold` config setting), a random in-game event will occur. If enough bits are donated to trigger the goal more than once, the event's will continue to trigger until the bits are reduced under the given goal. For example, if the bit goal is 500 and someone donates 1040 bits, there will be two bit events and the current bit count will reset to 40 bits (1040 - 500 - 500 = 40).
