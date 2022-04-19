@@ -205,6 +205,14 @@ These console commands are generally for testing purposes. You should never need
 
 # Changelog
 
+### 1.0.12
+
+See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/10?closed=1
+
+* Added new option to disable language changes: `EnableLanguageEdits`
+* Added support for Tiltify campaigns
+* Fixed Void cradles always rolling Lunar items when opened. This was due to the Risk of Rain 2 DLC: Survivors of the Void migrating to a new drop table mechanism. Rolling for items now use this new mechanism.
+
 ### 1.0.11
 
 See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/9?closed=1
