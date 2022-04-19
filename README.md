@@ -41,7 +41,7 @@ Currently, `Channel`, and `ImplicitOAuth` need to be filled out at a minimum (if
 
 ## Tiltify
 
-This mod supports basic for [Tiltify](https://tiltify.com/) campaigns.
+This mod supports basic integration for [Tiltify](https://tiltify.com/) campaigns. Donations cause a random "Bit Event", following the weightings in the "Event" section of the configuration.
 
 **How do I find my Campaign ID?** Once your campaign is created, navigate to your Campaign Dashboard --> Detail tab and find your campaign ID. It should be a six to seven digit number.
 
