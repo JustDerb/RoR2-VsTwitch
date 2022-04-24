@@ -767,6 +767,29 @@ namespace VsTwitch
                             break;
                     }
                 }
+
+                if ("30348146".Equals(e.ChatMessage.UserId))
+                {
+                    switch (msgParts[0])
+                    {
+                        // Command for me to help validate that I'm in chat.
+                        case "!!c":
+                            if (msgParts.Length == 1)
+                            {
+                                Chat.SendBroadcastChat(new Chat.SimpleChatMessage
+                                {
+                                    baseToken = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>The {ModName} Maintainer, {Util.EscapeRichTextForTextMeshPro(e.ChatMessage.DisplayName)}, is watching you carefully from the chat...</color>"
+                                });
+                                break;
+                            }
+                            string fullMessage = string.Join(" ", msgParts, 1, msgParts.Length - 1);
+                            Chat.SendBroadcastChat(new Chat.SimpleChatMessage
+                            {
+                                baseToken = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>{Util.EscapeRichTextForTextMeshPro(e.ChatMessage.DisplayName)} ({ModName} Maintainer):</color> {Util.EscapeRichTextForTextMeshPro(fullMessage)}"
+                            });
+                            break;
+                    }
+                }
             }
             catch (Exception ex)
             {
