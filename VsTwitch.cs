@@ -680,13 +680,13 @@ namespace VsTwitch
                 string[] msgParts = msg.Split(SPACE, 2);
                 if (int.TryParse(msgParts[0], out int index))
                 {
-                    Debug.Log($"Vote added: {e.ChatMessage.Username} -> {index}");
+                    Debug.Log($"Vote added: {e.ChatMessage.Username} ({e.ChatMessage.UserId}) -> {index}");
                     itemRollerManager.AddVote(e.ChatMessage.UserId, index);
                 }
 
                 if (e.ChatMessage.Bits > 0 && EnableBitEvents.Value)
                 {
-                    RecievedBits(e.ChatMessage.Username, e.ChatMessage.Bits);
+                    RecievedBits(e.ChatMessage.DisplayName, e.ChatMessage.Bits);
                 }
 
                 if (e.ChatMessage.IsMe || e.ChatMessage.IsModerator || e.ChatMessage.IsBroadcaster)
