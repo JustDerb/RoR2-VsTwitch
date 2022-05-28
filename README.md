@@ -210,6 +210,7 @@ These console commands are generally for testing purposes. You should never need
 See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/11?closed=1
 
 * Overall, minor bug fixes
+* Fixed items not being given to everyone in multiplayer when item voting turned on
 * Added maintainer chat command (to help me verify myself in a channel)
 * Updated the chat to show `DisplayName` instead of `Username`
 

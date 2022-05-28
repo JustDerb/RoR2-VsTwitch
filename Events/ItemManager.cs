@@ -44,8 +44,7 @@ namespace VsTwitch
             }
 
             // Broadcast message that pickup happened
-            MethodInfo sendPickupMessage = typeof(GenericPickupController).GetMethod("SendPickupMessage", BindingFlags.Static | BindingFlags.NonPublic);
-            sendPickupMessage.Invoke(null, new object[] { characterMaster, pickupIndex });
+            GenericPickupController.SendPickupMessage(characterMaster, pickupIndex);
         }
 
         public static void DropToAllPlayers(PickupIndex pickupIndex, Vector3 velocity)
