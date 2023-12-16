@@ -1,18 +1,20 @@
 ﻿using BepInEx;
-using BepInEx.Configuration;
 using RoR2;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Security.Permissions;
 using UnityEngine;
 using UnityEngine.Networking;
 
 // Allow scanning for ConCommand, and other stuff for Risk of Rain 2
 [assembly: HG.Reflection.SearchableAttribute.OptIn]
+[assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
 namespace VsTwitch
 {
     [BepInPlugin(GUID, ModName, Version)]
+    [BepInDependency("com.rune580.riskofoptions")]
     public class VsTwitch : BaseUnityPlugin
     {
         private static readonly char[] SPACE = new char[] { ' ' };
@@ -33,57 +35,7 @@ namespace VsTwitch
 
         private TiltifyManager tiltifyManager;
 
-        // Twitch
-        public static ConfigEntry<string> TwitchChannel { get; set; }
-        public static ConfigEntry<string> TwitchClientID { get; set; }
-        public static ConfigEntry<string> TwitchUsername { get; set; }
-        public static ConfigEntry<string> TwitchOAuth { get; set; }
-        public static ConfigEntry<bool> TwitchDebugLogs { get; set; }
-        public static ConfigEntry<bool> EnableItemVoting { get; set; }
-        public static ConfigEntry<int> VoteDurationSec { get; set; }
-        public static ConfigEntry<string> VoteStrategy { get; set; }
-        public static ConfigEntry<bool> EnableBitEvents { get; set; }
-        public static ConfigEntry<int> BitsThreshold { get; set; }
-        public static ConfigEntry<int> CurrentBits { get; set; }
-        public static ConfigEntry<bool> PublishToChat { get; set; }
-
-        // Tiltify
-        public static ConfigEntry<int> TiltifyCampaignId { get; set; }
-
-        // Event
-        public static ConfigEntry<float> BitStormWeight { get; set; }
-        public static ConfigEntry<float> BountyWeight { get; set; }
-        public static ConfigEntry<float> ShrineOfOrderWeight { get; set; }
-        public static ConfigEntry<float> ShrineOfTheMountainWeight { get; set; }
-        public static ConfigEntry<float> TitanWeight { get; set; }
-        public static ConfigEntry<float> LunarWispWeight { get; set; }
-        public static ConfigEntry<float> MithrixWeight { get; set; }
-        public static ConfigEntry<float> ElderLemurianWeight { get; set; }
-
-        // Channel Points
-        public static ConfigEntry<bool> ChannelPointsEnable { get; set; }
-        public static ConfigEntry<string> ChannelPointsAllyBeetle { get; set; }
-        public static ConfigEntry<string> ChannelPointsAllyLemurian { get; set; }
-        public static ConfigEntry<string> ChannelPointsAllyElderLemurian { get; set; }
-        public static ConfigEntry<string> ChannelPointsRustedKey { get; set; }
-        public static ConfigEntry<string> ChannelPointsBitStorm { get; set; }
-        public static ConfigEntry<string> ChannelPointsBounty { get; set; }
-        public static ConfigEntry<string> ChannelPointsShrineOfOrder { get; set; }
-        public static ConfigEntry<string> ChannelPointsShrineOfTheMountain { get; set; }
-        public static ConfigEntry<string> ChannelPointsTitan { get; set; }
-        public static ConfigEntry<string> ChannelPointsLunarWisp { get; set; }
-        public static ConfigEntry<string> ChannelPointsMithrix { get; set; }
-        public static ConfigEntry<string> ChannelPointsElderLemurian { get; set; }
-
-        // UI
-        public static ConfigEntry<bool> SimpleUI { get; set; }
-
-        // Behaviour
-        public static ConfigEntry<bool> EnableChoosingLunarItems { get; set; }
-        public static ConfigEntry<bool> ForceUniqueRolls { get; set; }
-
-        //Language
-        public static ConfigEntry<bool> EnableLanguageEdits { get; set; }
+        private Configuration configuration;
 
         /// <summary>
         /// Provides extrea debug information to help people understand why some Twitch libraries might not load.
@@ -107,51 +59,7 @@ namespace VsTwitch
         {
             Instance = SingletonHelper.Assign(Instance, this);
 
-            // Twitch
-            TwitchChannel = Config.Bind("Twitch", "Channel", "", "Your Twitch channel name");
-            TwitchClientID = TwitchUsername = Config.Bind("Twitch", "ClientID", "q6batx0epp608isickayubi39itsckt", "Client ID used to get ImplicitOAuth value");
-            TwitchUsername = Config.Bind("Twitch", "Username", "", "Your Twitch username");
-            TwitchOAuth = Config.Bind("Twitch", "ImplicitOAuth", "", "Implicit OAuth code (this is not your password - it's a generated password!). See the README/Mod Description in the thunderstore to see how to get it.");
-            TwitchDebugLogs = Config.Bind("Twitch", "DebugLogs", false, "Enable debug logging for Twitch - will spam to the console!");
-            EnableItemVoting = Config.Bind("Twitch", "EnableItemVoting", true, "Enable item voting on Twitch.");
-            VoteDurationSec = Config.Bind("Twitch", "VoteDurationdSec", 20, "How long to allow twitch voting.");
-            VoteStrategy = Config.Bind("Twitch", "VoteStrategy", "MaxVote", "How to tabulate votes. One of: MaxVote, MaxVoteRandomTie, Percentile");
-            EnableBitEvents = Config.Bind("Twitch", "EnableBitEvents", true, "Enable bit events from Twitch.");
-            BitsThreshold = Config.Bind("Twitch", "BitsThreshold", 1500, "How many Bits are needed before something happens.");
-            CurrentBits = Config.Bind("Twitch", "CurrentBits", 0, "(DO NOT EDIT) How many Bits have currently been donated.");
-            PublishToChat = Config.Bind("Twitch", "PublishToChat", true, "Publish events (like voting) to Twitch chat.");
-            // Tiltify
-            TiltifyCampaignId = Config.Bind("Tiltify", "CampaignId", 0, "Tiltify Campaign ID to track donations");
-            // Event
-            BitStormWeight = Config.Bind("Event", "BitStormWeight", 1f, "Weight for the bit storm bit event. Set to 0 to disable.");
-            BountyWeight = Config.Bind("Event", "BountyWeight", 1f, "Weight for the doppleganger bit event. Set to 0 to disable.");
-            ShrineOfOrderWeight = Config.Bind("Event", "ShrineOfOrderWeight", 1f, "Weight for the Shrine of Order bit event. Set to 0 to disable.");
-            ShrineOfTheMountainWeight = Config.Bind("Event", "ShrineOfTheMountainWeight", 1f, "Weight for the Shrine of the Mountain bit event. Set to 0 to disable.");
-            TitanWeight = Config.Bind("Event", "TitanWeight", 1f, "Weight for the Aurelionite bit event. Set to 0 to disable.");
-            LunarWispWeight = Config.Bind("Event", "LunarWispWeight", 1f, "Weight for the Lunar Chimera (Wisp) bit event. Set to 0 to disable.");
-            MithrixWeight = Config.Bind("Event", "MithrixWeight", 1f, "Weight for the Mithrix bit event. Set to 0 to disable.");
-            ElderLemurianWeight = Config.Bind("Event", "ElderLemurianWeight", 1f, "Weight for the Elder Lemurian bit event. Set to 0 to disable.");
-            // Channel Points
-            ChannelPointsEnable = Config.Bind("ChannelPoints", "Enable", true, "Enable all Channel Point features.");
-            ChannelPointsAllyBeetle = Config.Bind("ChannelPoints", "AllyBeetle", "", "(Case Sensitive!) Channel Points Title to spawn Ally Elite Beetle. Leave empty to disable.");
-            ChannelPointsAllyLemurian = Config.Bind("ChannelPoints", "AllyLemurian", "", "(Case Sensitive!) Channel Points Title to spawn Ally Elite Lemurian. Leave empty to disable.");
-            ChannelPointsAllyElderLemurian = Config.Bind("ChannelPoints", "AllyElderLemurian", "", "(Case Sensitive!) Channel Points Title to spawn Ally Elite Elder Lemurian. Leave empty to disable.");
-            ChannelPointsRustedKey = Config.Bind("ChannelPoints", "RustedKey", "", "(Case Sensitive!) Channel Points Title to give everyone a Rusted Key. Leave empty to disable.");
-            ChannelPointsBitStorm = Config.Bind("ChannelPoints", "BitStorm", "", "(Case Sensitive!) Channel Points Title for the bit storm bit event. Leave empty to disable.");
-            ChannelPointsBounty = Config.Bind("ChannelPoints", "Bounty", "", "(Case Sensitive!) Channel Points Title for the doppleganger bit event. Leave empty to disable.");
-            ChannelPointsShrineOfOrder = Config.Bind("ChannelPoints", "ShrineOfOrder", "", "(Case Sensitive!) Channel Points Title for the Shrine of Order bit event. Leave empty to disable.");
-            ChannelPointsShrineOfTheMountain = Config.Bind("ChannelPoints", "ShrineOfTheMountain", "", "(Case Sensitive!) Channel Points Title for the Shrine of the Mountain bit event. Leave empty to disable.");
-            ChannelPointsTitan = Config.Bind("ChannelPoints", "Titan", "", "(Case Sensitive!) Channel Points Title for the Aurelionite bit event. Leave empty to disable.");
-            ChannelPointsLunarWisp = Config.Bind("ChannelPoints", "LunarWisp", "", "(Case Sensitive!) Channel Points Title for the Lunar Chimera (Wisp) bit event. Leave empty to disable.");
-            ChannelPointsMithrix = Config.Bind("ChannelPoints", "Mithrix", "", "(Case Sensitive!) Channel Points Title for the Mithrix bit event. Leave empty to disable.");
-            ChannelPointsElderLemurian = Config.Bind("ChannelPoints", "ElderLemurian", "", "(Case Sensitive!) Channel Points Title for the Elder Lemurian bit event. Leave empty to disable.");
-            // UI
-            SimpleUI = Config.Bind("UI", "SimpleUI", false, "Simplify the UI. Set to true if you are playing Multiplayer.");
-            // Behaviour
-            EnableChoosingLunarItems = Config.Bind("Behaviour", "EnableChoosingLunarItems", true, "Twitch Chat chooses items when opening lunar chests (pods)");
-            ForceUniqueRolls = Config.Bind("Behaviour", "ForceUniqueRolls", false, "Ensure, when rolling for items, that they are always different. This doesn't affect multi-shops.");
-            //Language
-            EnableLanguageEdits = Config.Bind("Language", "EnableLanguageEdits", true, "Enable all Language Edits.");
+            configuration = new Configuration(this);
 
             if (gameObject.GetComponent<EventDirector>() == null)
             {
@@ -184,47 +92,40 @@ namespace VsTwitch
                 eventFactory = gameObject.AddComponent<EventFactory>();
             }
 
-            bitsManager = new BitsManager(CurrentBits.Value);
+            bitsManager = new BitsManager(configuration.CurrentBits.Value);
             channelPointsManager = new ChannelPointsManager();
-            if (ChannelPointsEnable.Value)
+            if (configuration.ChannelPointsEnable.Value)
             {
                 SetUpChannelPoints();
             }
             twitchManager = new TwitchManager()
             {
-                DebugLogs = TwitchDebugLogs.Value,
+                DebugLogs = configuration.TwitchDebugLogs.Value,
             };
             IVoteStrategy<PickupIndex> strategy;
-            switch (VoteStrategy.Value.ToLower())
+            switch (configuration.VoteStrategy.Value)
             {
-                case "percentile":
-                case "percantile":
+                case Configuration.VoteStrategies.Percentile:
                     Debug.Log("Twitch Voting Strategy: Percentile");
                     strategy = new PercentileVoteStrategy<PickupIndex>();
                     break;
-                case "maxvoterandomtie":
-                case "maxvoterandtie":
-                case "maxvoterandom":
-                case "maxvoterand":
-                case "maxrand":
-                case "maxrandom":
+                case Configuration.VoteStrategies.MaxVoteRandomTie:
                     Debug.Log("Twitch Voting Strategy: MaxVoteRandomTie");
                     strategy = new MaxRandTieVoteStrategy<PickupIndex>();
                     break;
-                case "maxvote":
-                case "max":
+                case Configuration.VoteStrategies.MaxVote:
                     Debug.Log("Twitch Voting Strategy: MaxVote");
                     strategy = new MaxVoteStrategy<PickupIndex>();
                     break;
                 default:
-                    Debug.LogError($"Invalid setting for Twitch.VoteStrategy ({VoteStrategy.Value})! Using MaxVote strategy.");
+                    Debug.LogError($"Invalid setting for Twitch.VoteStrategy ({configuration.VoteStrategy.Value})! Using MaxVote strategy.");
                     strategy = new MaxVoteStrategy<PickupIndex>();
                     break;
             }
             itemRollerManager = new ItemRollerManager(strategy);
             languageOverride = new LanguageOverride
             {
-                StreamerName = TwitchChannel.Value
+                StreamerName = configuration.TwitchChannel.Value
             };
 
             tiltifyManager = new TiltifyManager();
@@ -237,7 +138,7 @@ namespace VsTwitch
 
             itemRollerManager.OnVoteStart += ItemRollerManager_OnVoteStart;
 
-            bitsManager.BitGoal = BitsThreshold.Value;
+            bitsManager.BitGoal = configuration.BitsThreshold.Value;
             bitsManager.OnUpdateBits += BitsManager_OnUpdateBits;
 
             twitchManager.OnConnected += (sender, joinedChannel) => {
@@ -274,7 +175,7 @@ namespace VsTwitch
                 }));
             }
 
-            if (channelPointsManager.RegisterEvent(ChannelPointsAllyBeetle.Value, (manager, e) =>
+            if (channelPointsManager.RegisterEvent(configuration.ChannelPointsAllyBeetle.Value, (manager, e) =>
             {
                 eventDirector.AddEvent(eventFactory.CreateAlly(
                     e.DisplayName,
@@ -289,7 +190,7 @@ namespace VsTwitch
                 Debug.LogWarning("Could not register Channel Points event: Ally Beetle");
             }
 
-            if (channelPointsManager.RegisterEvent(ChannelPointsAllyLemurian.Value, (manager, e) =>
+            if (channelPointsManager.RegisterEvent(configuration.ChannelPointsAllyLemurian.Value, (manager, e) =>
             {
                 eventDirector.AddEvent(eventFactory.CreateAlly(
                     e.DisplayName,
@@ -304,7 +205,7 @@ namespace VsTwitch
                 Debug.LogWarning("Could not register Channel Points event: Ally Lemurian");
             }
 
-            if (channelPointsManager.RegisterEvent(ChannelPointsAllyElderLemurian.Value, (manager, e) =>
+            if (channelPointsManager.RegisterEvent(configuration.ChannelPointsAllyElderLemurian.Value, (manager, e) =>
             {
                 eventDirector.AddEvent(eventFactory.CreateAlly(
                     e.DisplayName,
@@ -319,7 +220,7 @@ namespace VsTwitch
                 Debug.LogWarning("Could not register Channel Points event: Ally Elder Lemurian");
             }
 
-            if (channelPointsManager.RegisterEvent(ChannelPointsRustedKey.Value, (manager, e) =>
+            if (channelPointsManager.RegisterEvent(configuration.ChannelPointsRustedKey.Value, (manager, e) =>
             {
                 GiveRustedKey(e.DisplayName);
             }))
@@ -331,7 +232,7 @@ namespace VsTwitch
                 Debug.LogWarning("Could not register Channel Points event: Rusted Key");
             }
 
-            if (channelPointsManager.RegisterEvent(ChannelPointsBitStorm.Value, (manager, e) =>
+            if (channelPointsManager.RegisterEvent(configuration.ChannelPointsBitStorm.Value, (manager, e) =>
             {
                 UsedChannelPoints(e);
                 eventDirector.AddEvent(eventFactory.CreateBitStorm());
@@ -344,7 +245,7 @@ namespace VsTwitch
                 Debug.LogWarning("Could not register Channel Points event: Bit Storm");
             }
 
-            if (channelPointsManager.RegisterEvent(ChannelPointsBounty.Value, (manager, e) =>
+            if (channelPointsManager.RegisterEvent(configuration.ChannelPointsBounty.Value, (manager, e) =>
             {
                 UsedChannelPoints(e);
                 eventDirector.AddEvent(eventFactory.CreateBounty());
@@ -357,7 +258,7 @@ namespace VsTwitch
                 Debug.LogWarning("Could not register Channel Points event: Bounty");
             }
 
-            if (channelPointsManager.RegisterEvent(ChannelPointsShrineOfOrder.Value, (manager, e) =>
+            if (channelPointsManager.RegisterEvent(configuration.ChannelPointsShrineOfOrder.Value, (manager, e) =>
             {
                 UsedChannelPoints(e);
                 eventDirector.AddEvent(eventFactory.TriggerShrineOfOrder());
@@ -370,7 +271,7 @@ namespace VsTwitch
                 Debug.LogWarning("Could not register Channel Points event: Shrine Of Order");
             }
 
-            if (channelPointsManager.RegisterEvent(ChannelPointsShrineOfTheMountain.Value, (manager, e) =>
+            if (channelPointsManager.RegisterEvent(configuration.ChannelPointsShrineOfTheMountain.Value, (manager, e) =>
             {
                 UsedChannelPoints(e);
                 eventDirector.AddEvent(eventFactory.TriggerShrineOfTheMountain());
@@ -383,7 +284,7 @@ namespace VsTwitch
                 Debug.LogWarning("Could not register Channel Points event: Shrine Of The Mountain");
             }
 
-            if (channelPointsManager.RegisterEvent(ChannelPointsTitan.Value, (manager, e) =>
+            if (channelPointsManager.RegisterEvent(configuration.ChannelPointsTitan.Value, (manager, e) =>
             {
                 UsedChannelPoints(e);
                 eventDirector.AddEvent(eventFactory.CreateMonster(MonsterSpawner.Monsters.TitanGold));
@@ -396,7 +297,7 @@ namespace VsTwitch
                 Debug.LogWarning("Could not register Channel Points event: Aurelionite");
             }
 
-            if (channelPointsManager.RegisterEvent(ChannelPointsLunarWisp.Value, (manager, e) =>
+            if (channelPointsManager.RegisterEvent(configuration.ChannelPointsLunarWisp.Value, (manager, e) =>
             {
                 UsedChannelPoints(e);
                 eventDirector.AddEvent(eventFactory.CreateMonster(MonsterSpawner.Monsters.LunarWisp, 2));
@@ -409,7 +310,7 @@ namespace VsTwitch
                 Debug.LogWarning("Could not register Channel Points event: Lunar Chimera (Wisp)");
             }
 
-            if (channelPointsManager.RegisterEvent(ChannelPointsMithrix.Value, (manager, e) =>
+            if (channelPointsManager.RegisterEvent(configuration.ChannelPointsMithrix.Value, (manager, e) =>
             {
                 UsedChannelPoints(e);
                 eventDirector.AddEvent(eventFactory.CreateMonster(MonsterSpawner.Monsters.Brother));
@@ -422,7 +323,7 @@ namespace VsTwitch
                 Debug.LogWarning("Could not register Channel Points event: Mithrix");
             }
 
-            if (channelPointsManager.RegisterEvent(ChannelPointsElderLemurian.Value, (manager, e) =>
+            if (channelPointsManager.RegisterEvent(configuration.ChannelPointsElderLemurian.Value, (manager, e) =>
             {
                 UsedChannelPoints(e);
                 eventDirector.AddEvent(eventFactory.CreateMonster(MonsterSpawner.Monsters.LemurianBruiser, RollForElite()));
@@ -504,6 +405,7 @@ namespace VsTwitch
 
         #region "Twitch Integration"
         [ConCommand(commandName = "vs_connect_twitch", flags = ConVarFlags.SenderMustBeServer, helpText = "Connect to Twitch.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "ConCommand")]
         private static void CCConnectToTwitch(ConCommandArgs args)
         {
             if (!Instance)
@@ -533,6 +435,7 @@ namespace VsTwitch
         }
 
         [ConCommand(commandName = "vs_add_bits", flags = ConVarFlags.SenderMustBeServer, helpText = "Fake add bits.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "ConCommand")]
         private static void CCTwitchAddBits(ConCommandArgs args)
         {
             if (!Instance)
@@ -564,6 +467,7 @@ namespace VsTwitch
         }
 
         [ConCommand(commandName = "vs_set_bit_goal", flags = ConVarFlags.SenderMustBeServer, helpText = "Set bit goal.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "ConCommand")]
         private static void CCTwitchSetBitGoal(ConCommandArgs args)
         {
             if (!Instance)
@@ -585,7 +489,7 @@ namespace VsTwitch
                     Debug.LogError($"{args[0]} must be positive");
                     return;
                 }
-                BitsThreshold.Value = bits;
+                Instance.configuration.BitsThreshold.Value = bits;
                 Instance.bitsManager.BitGoal = bits;
                 Debug.Log($"Bit goal set to {bits}");
             }
@@ -613,7 +517,12 @@ namespace VsTwitch
             try
             {
                 Debug.Log("Connecting to Twitch...");
-                twitchManager.Connect(TwitchChannel.Value, TwitchOAuth.Value, TwitchUsername.Value, TwitchClientID.Value);
+                twitchManager.Connect(
+                    configuration.TwitchChannel.Value,
+                    configuration.TwitchOAuth.Value,
+                    configuration.TwitchUsername.Value,
+                    configuration.TwitchClientID.Value
+                    );
             }
             catch (Exception e)
             {
@@ -631,10 +540,10 @@ namespace VsTwitch
 
             try
             {
-                if (TiltifyCampaignId.Value > 0)
+                if (configuration.TiltifyCampaignId.Value > 0)
                 {
-                    Debug.Log($"Connecting to Tiltify and watching campaign ID {TiltifyCampaignId.Value}...");
-                    tiltifyManager.Connect(TiltifyCampaignId.Value);
+                    Debug.Log($"Connecting to Tiltify and watching campaign ID {configuration.TiltifyCampaignId.Value}...");
+                    tiltifyManager.Connect(configuration.TiltifyCampaignId.Value);
                 }
             }
             catch (Exception e)
@@ -684,7 +593,7 @@ namespace VsTwitch
                     itemRollerManager.AddVote(e.ChatMessage.UserId, index);
                 }
 
-                if (e.ChatMessage.Bits > 0 && EnableBitEvents.Value)
+                if (e.ChatMessage.Bits > 0 && configuration.EnableBitEvents.Value)
                 {
                     RecievedBits(e.ChatMessage.DisplayName, e.ChatMessage.Bits);
                 }
@@ -839,15 +748,15 @@ namespace VsTwitch
             }
 
             WeightedSelection<Func<EventDirector, IEnumerator>> choices = new WeightedSelection<Func<EventDirector, IEnumerator>>();
-            choices.AddChoice(eventFactory.CreateBitStorm(), Math.Max(0, BitStormWeight.Value));
-            choices.AddChoice(eventFactory.CreateBounty(), Math.Max(0, BountyWeight.Value));
-            choices.AddChoice(eventFactory.TriggerShrineOfOrder(), Math.Max(0, ShrineOfOrderWeight.Value));
+            choices.AddChoice(eventFactory.CreateBitStorm(), Math.Max(0, configuration.BitStormWeight.Value));
+            choices.AddChoice(eventFactory.CreateBounty(), Math.Max(0, configuration.BountyWeight.Value));
+            choices.AddChoice(eventFactory.TriggerShrineOfOrder(), Math.Max(0, configuration.ShrineOfOrderWeight.Value));
             // Make Shrine of the Mountain a bit more difficult compared to Channel Points
-            choices.AddChoice(eventFactory.TriggerShrineOfTheMountain(2), Math.Max(0, ShrineOfTheMountainWeight.Value));
-            choices.AddChoice(eventFactory.CreateMonster(MonsterSpawner.Monsters.TitanGold), Math.Max(0, TitanWeight.Value));
-            choices.AddChoice(eventFactory.CreateMonster(MonsterSpawner.Monsters.LunarWisp, 2), Math.Max(0, LunarWispWeight.Value));
-            choices.AddChoice(eventFactory.CreateMonster(MonsterSpawner.Monsters.Brother), Math.Max(0, MithrixWeight.Value));
-            choices.AddChoice(eventFactory.CreateMonster(MonsterSpawner.Monsters.LemurianBruiser, RollForElite()), Math.Max(0, ElderLemurianWeight.Value));
+            choices.AddChoice(eventFactory.TriggerShrineOfTheMountain(2), Math.Max(0, configuration.ShrineOfTheMountainWeight.Value));
+            choices.AddChoice(eventFactory.CreateMonster(MonsterSpawner.Monsters.TitanGold), Math.Max(0, configuration.TitanWeight.Value));
+            choices.AddChoice(eventFactory.CreateMonster(MonsterSpawner.Monsters.LunarWisp, 2), Math.Max(0, configuration.LunarWispWeight.Value));
+            choices.AddChoice(eventFactory.CreateMonster(MonsterSpawner.Monsters.Brother), Math.Max(0, configuration.MithrixWeight.Value));
+            choices.AddChoice(eventFactory.CreateMonster(MonsterSpawner.Monsters.LemurianBruiser, RollForElite()), Math.Max(0, configuration.ElderLemurianWeight.Value));
             eventDirector.AddEvent(choices.Evaluate(UnityEngine.Random.value));
         }
 
@@ -881,7 +790,7 @@ namespace VsTwitch
 
         private void BitsManager_OnUpdateBits(object sender, UpdateBitsEvent e)
         {
-            CurrentBits.Value = e.Bits;
+            configuration.CurrentBits.Value = e.Bits;
 
             BitsManager bitsManager = (BitsManager)sender;
             Debug.Log($"Recieved bits: {e.Bits:N0} / {bitsManager.BitGoal:N0}");
@@ -908,7 +817,7 @@ namespace VsTwitch
         #region "Localization Overrides"
         private string Language_GetLocalizedStringByToken(On.RoR2.Language.orig_GetLocalizedStringByToken orig, Language self, string token)
         {
-            if (EnableLanguageEdits.Value && languageOverride.TryGetLocalizedStringByToken(token, out string result))
+            if (configuration.EnableLanguageEdits.Value && languageOverride.TryGetLocalizedStringByToken(token, out string result))
             {
                 return result;
             }
@@ -1009,7 +918,7 @@ namespace VsTwitch
                 }
                 try
                 {
-                    if (PublishToChat.Value)
+                    if (configuration.PublishToChat.Value)
                     {
                         twitchManager.SendMessage($"Chest opened! {string.Join(" | ", itemsString)}");
                     }
@@ -1023,17 +932,17 @@ namespace VsTwitch
 
                 // Show notification to local user
                 var gameObject = LocalUserManager.GetFirstLocalUser().cachedMasterObject;
-                if (SimpleUI.Value)
+                if (configuration.SimpleUI.Value)
                 {
                     VoteItems voteItems = gameObject.AddComponent<VoteItems>();
-                    voteItems.SetItems(items, VoteDurationSec.Value);
+                    voteItems.SetItems(items, configuration.VoteDurationSec.Value);
                 }
                 else
                 {
                     foreach (var item in e)
                     {
                         VoteItems voteItems = gameObject.AddComponent<VoteItems>();
-                        voteItems.SetItems(items, VoteDurationSec.Value, item.Key);
+                        voteItems.SetItems(items, configuration.VoteDurationSec.Value, item.Key);
                         voteItems.SetPosition(new Vector3(Screen.width * (640f / 1920f) , Screen.height / 2, 0) + new Vector3(0, ((item.Key - 1) * -128) + 128, 0));
                     }
                 }
@@ -1049,7 +958,7 @@ namespace VsTwitch
 
         private IEnumerator WaitToEndVote()
         {
-            yield return new WaitForSeconds(VoteDurationSec.Value);
+            yield return new WaitForSeconds(configuration.VoteDurationSec.Value);
             itemRollerManager.EndVote();
         }
 
@@ -1062,7 +971,7 @@ namespace VsTwitch
                 return;
             }
 
-            if (!EnableItemVoting.Value)
+            if (!configuration.EnableItemVoting.Value)
             {
                 orig(self, interactor, purchaseInteraction);
                 return;
@@ -1088,7 +997,7 @@ namespace VsTwitch
                 {
                     try
                     {
-                        if (PublishToChat.Value)
+                        if (configuration.PublishToChat.Value)
                         {
                             string name = Language.GetString(PickupCatalog.GetPickupDef(pickupIndex).nameToken);
                             twitchManager.SendMessage($"Item picked: {name}");
@@ -1120,7 +1029,7 @@ namespace VsTwitch
                 return;
             }
 
-            if (!EnableItemVoting.Value)
+            if (!configuration.EnableItemVoting.Value)
             {
                 orig(self);
                 return;
@@ -1161,7 +1070,7 @@ namespace VsTwitch
                     return;
                 }
 
-                if (!EnableItemVoting.Value)
+                if (!configuration.EnableItemVoting.Value)
                 {
                     orig(self);
                     return;
@@ -1176,7 +1085,7 @@ namespace VsTwitch
 
                 var chestName = self.gameObject.name.ToLower();
 
-                if (!EnableChoosingLunarItems.Value && chestName.StartsWith("lunarchest"))
+                if (!configuration.EnableChoosingLunarItems.Value && chestName.StartsWith("lunarchest"))
                 {
                     orig(self);
                     return;
@@ -1203,7 +1112,7 @@ namespace VsTwitch
                     {
                         try
                         {
-                            if (PublishToChat.Value)
+                            if (configuration.PublishToChat.Value)
                             {
                                 string name = Language.GetString(PickupCatalog.GetPickupDef(pickupIndex).nameToken);
                                 twitchManager.SendMessage($"Item picked: {name}");
@@ -1234,7 +1143,7 @@ namespace VsTwitch
         {
             FieldInfo rngField = self.GetType().GetField("rng", BindingFlags.Instance | BindingFlags.NonPublic);
             Xoroshiro128Plus rng = (Xoroshiro128Plus)rngField.GetValue(self);
-            if (ForceUniqueRolls.Value)
+            if (configuration.ForceUniqueRolls.Value)
             {
                 return self.dropTable.GenerateUniqueDrops(maxDrops, rng);
             }
