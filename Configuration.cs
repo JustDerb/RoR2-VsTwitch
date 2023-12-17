@@ -6,6 +6,7 @@ using RiskOfOptions.OptionConfigs;
 using System;
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.Events;
 
 namespace VsTwitch
 {
@@ -71,7 +72,7 @@ namespace VsTwitch
         //Language
         public ConfigEntry<bool> EnableLanguageEdits { get; set; }
 
-        public Configuration(BaseUnityPlugin plugin)
+        public Configuration(BaseUnityPlugin plugin, UnityAction reloadChannelPoints)
 		{
             // Twitch
             TwitchChannel = plugin.Config.Bind("Twitch", "Channel", "", "Your Twitch channel name");
@@ -119,10 +120,10 @@ namespace VsTwitch
             //Language
             EnableLanguageEdits = plugin.Config.Bind("Language", "EnableLanguageEdits", true, "Enable all Language Edits.");
 
-            ApplyRiskOfOptions();
+            ApplyRiskOfOptions(reloadChannelPoints);
         }
 
-        private void ApplyRiskOfOptions()
+        private void ApplyRiskOfOptions(UnityAction reloadChannelPoints)
         {
             try
             {
@@ -167,6 +168,9 @@ namespace VsTwitch
 
                 // Channel Points
                 ModSettingsManager.AddOption(new CheckBoxOption(ChannelPointsEnable));
+                ModSettingsManager.AddOption(new GenericButtonOption("Re-apply Channel Points Config", "ChannelPoints",
+                    "Reload Channel Points settings in the game. You MUST click this button if you've changed any entries on this Channel Points page for it to take effect!",
+                    "Apply", reloadChannelPoints));
                 foreach (var channelPointsAlly in new List<ConfigEntry<string>>() {
                     ChannelPointsAllyBeetle,
                     ChannelPointsAllyLemurian,

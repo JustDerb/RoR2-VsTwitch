@@ -20,7 +20,7 @@ namespace VsTwitch
         private static readonly char[] SPACE = new char[] { ' ' };
         public const string GUID = "com.justinderby.vstwitch";
         public const string ModName = "VsTwitch";
-        public const string Version = "1.0.13";
+        public const string Version = "1.0.14";
 
         // This is only used for ConCommands, since they need to be static...
         public static VsTwitch Instance;
@@ -60,7 +60,10 @@ namespace VsTwitch
             Log.Init(Logger);
             Instance = SingletonHelper.Assign(Instance, this);
 
-            configuration = new Configuration(this);
+            configuration = new Configuration(this, () =>
+            {
+                SetUpChannelPoints();
+            });
 
             if (gameObject.GetComponent<EventDirector>() == null)
             {
@@ -186,7 +189,7 @@ namespace VsTwitch
                     RollForElite(true)));
             }))
             {
-                Log.Info("Successfully registered Channel Points event: Ally Beetle");
+                Log.Info($"Successfully registered Channel Points event: Ally Beetle ({configuration.ChannelPointsAllyBeetle.Value})");
             }
             else
             {
@@ -201,7 +204,7 @@ namespace VsTwitch
                     RollForElite(true)));
             }))
             {
-                Log.Info("Successfully registered Channel Points event: Ally Lemurian");
+                Log.Info($"Successfully registered Channel Points event: Ally Lemurian ({configuration.ChannelPointsAllyLemurian.Value})");
             }
             else
             {
@@ -216,7 +219,7 @@ namespace VsTwitch
                     RollForElite(true)));
             }))
             {
-                Log.Info("Successfully registered Channel Points event: Ally Elder Lemurian");
+                Log.Info($"Successfully registered Channel Points event: Ally Elder Lemurian ({configuration.ChannelPointsAllyElderLemurian.Value})");
             }
             else
             {
@@ -228,7 +231,7 @@ namespace VsTwitch
                 GiveRustedKey(e.DisplayName);
             }))
             {
-                Log.Info("Successfully registered Channel Points event: Rusted Key");
+                Log.Info($"Successfully registered Channel Points event: Rusted Key ({configuration.ChannelPointsRustedKey.Value})");
             }
             else
             {
@@ -241,7 +244,7 @@ namespace VsTwitch
                 eventDirector.AddEvent(eventFactory.CreateBitStorm());
             }))
             {
-                Log.Info("Successfully registered Channel Points event: Bit Storm");
+                Log.Info($"Successfully registered Channel Points event: Bit Storm ({configuration.ChannelPointsBitStorm.Value})");
             }
             else
             {
@@ -254,7 +257,7 @@ namespace VsTwitch
                 eventDirector.AddEvent(eventFactory.CreateBounty());
             }))
             {
-                Log.Info("Successfully registered Channel Points event: Bounty");
+                Log.Info($"Successfully registered Channel Points event: Bounty ({configuration.ChannelPointsBounty.Value})");
             }
             else
             {
@@ -267,7 +270,7 @@ namespace VsTwitch
                 eventDirector.AddEvent(eventFactory.TriggerShrineOfOrder());
             }))
             {
-                Log.Info("Successfully registered Channel Points event: Shrine Of Order");
+                Log.Info($"Successfully registered Channel Points event: Shrine Of Order ({configuration.ChannelPointsShrineOfOrder.Value})");
             }
             else
             {
@@ -280,7 +283,7 @@ namespace VsTwitch
                 eventDirector.AddEvent(eventFactory.TriggerShrineOfTheMountain());
             }))
             {
-                Log.Info("Successfully registered Channel Points event: Shrine Of The Mountain");
+                Log.Info($"Successfully registered Channel Points event: Shrine Of The Mountain ({configuration.ChannelPointsShrineOfTheMountain.Value})");
             }
             else
             {
@@ -293,7 +296,7 @@ namespace VsTwitch
                 eventDirector.AddEvent(eventFactory.CreateMonster(MonsterSpawner.Monsters.TitanGold));
             }))
             {
-                Log.Info("Successfully registered Channel Points event: Aurelionite");
+                Log.Info($"Successfully registered Channel Points event: Aurelionite ({configuration.ChannelPointsTitan.Value})");
             }
             else
             {
@@ -306,7 +309,7 @@ namespace VsTwitch
                 eventDirector.AddEvent(eventFactory.CreateMonster(MonsterSpawner.Monsters.LunarWisp, 2));
             }))
             {
-                Log.Info("Successfully registered Channel Points event: Lunar Chimera (Wisp)");
+                Log.Info($"Successfully registered Channel Points event: Lunar Chimera (Wisp) ({configuration.ChannelPointsLunarWisp.Value})");
             }
             else
             {
@@ -319,7 +322,7 @@ namespace VsTwitch
                 eventDirector.AddEvent(eventFactory.CreateMonster(MonsterSpawner.Monsters.Brother));
             }))
             {
-                Log.Info("Successfully registered Channel Points event: Mithrix");
+                Log.Info($"Successfully registered Channel Points event: Mithrix ({configuration.ChannelPointsMithrix.Value})");
             }
             else
             {
@@ -332,7 +335,7 @@ namespace VsTwitch
                 eventDirector.AddEvent(eventFactory.CreateMonster(MonsterSpawner.Monsters.LemurianBruiser, RollForElite()));
             }))
             {
-                Log.Info("Successfully registered Channel Points event: Elder Lemurian");
+                Log.Info($"Successfully registered Channel Points event: Elder Lemurian ({configuration.ChannelPointsElderLemurian.Value})");
             }
             else
             {

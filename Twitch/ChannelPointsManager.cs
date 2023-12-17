@@ -6,7 +6,7 @@ namespace VsTwitch
 {
     class ChannelPointsManager
     {
-        private Dictionary<string, Action<ChannelPointsManager, OnRewardRedeemedArgs>> channelEvents;
+        private readonly Dictionary<string, Action<ChannelPointsManager, OnRewardRedeemedArgs>> channelEvents;
 
         public ChannelPointsManager()
         {
