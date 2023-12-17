@@ -1,4 +1,4 @@
-# Vs Twitch
+﻿# Vs Twitch
 
 **This is a server-side mod! Only the host needs this mod installed!**
 
@@ -16,25 +16,31 @@ Will your chat help you along your journey, or try to stop your run early? Chat 
 
 Currently, `Channel`, and `ImplicitOAuth` need to be filled out at a minimum (if you use nothing but the default values for the mod) from the "Twitch" section.
 
+## In game editting (via RiskOfOptions)
+
+This mod has a dependency on [RiskOfOptions](https://thunderstore.io/package/Rune580/Risk_Of_Options/) and so many values can be dynamically
+updated while you are in the game. Note that some options need a restart for changes to be fully applied; the options menu will mark this
+accordingly when needed. Below you'll see a column for what configurations can be modified in game via the ✔️ marking; otherwise it'll have a ❌.
+
 ## Twitch
 
 **WARNING:** If the mod continues failing to connect to Twitch, check and/or update your `ImplicitOAuth` token!
 
 **Important note for modpack creators: Ensure your configuration files DO NOT INCLUDE `ImplicitOAuth`!**
 
-|Config|Type|Default|Notes|
-|------|----|-------|-----|
-|`Channel`|text||The channel to monitor Twitch chat|
-|`Username`|text||The username to use when calling Twitch APIs. If you aren't using a secondary account, this should be the same as `Channel`|
-|`ImplicitOAuth`|text||The "password" to access Twitch APIs. **Please visit [twitchapps.com][1] to get the password to put here.** Note that this password is not sent to any servers other than Twitch to authenticate. **DO NOT GIVE THIS TO ANYONE.** To revoke this password, go to [Twitch Connections Settings][2] and Disconnect the app named "Twitch Chat OAuth Token Generator".|
-|`DebugLogs`|true/false|false|Enable debug logging for Twitch - will spam to the console!|
-|`ClientID`|text|q6batx0epp608isickayubi39itsckt|The client ID of the app that you used to populate the `ImplicitOAuth` field. If you used [twitchapps.com][1] this would be the default value. If you used another Twitch app, this needs to be changed accordingly.|
-|`EnableItemVoting`|true/false|true|Enables the main feature of this mod. Disable it if you only want to enable bit interactions.|
-|`VoteDurationdSec`|number (secs)|20|How long to allow Twitch to vote on items. Increase this value if viewers think the voting is going too "fast" - they might have their video delay too great.|
-|`VoteStrategy`|string|MaxVote|How to tabulate votes. See "Voting Strategies" below for the various values this setting may have.|
-|`BitsThreshold`|number|1500|The number of bits needed to cause an in-game event.|
-|`CurrentBits`|number|0|**Do not edit this field.** Used as storage whenever someone donates bits so that restarting the game doesn't clear the donation count.|
-|`PublishToChat`|true/false|true|Publish events (like voting) to Twitch chat.|
+|Config|Type|Default|RiskOfOptions|Notes|
+|------|----|-------|-------------|-----|
+|`Channel`|text||✔️|The channel to monitor Twitch chat|
+|`Username`|text||✔️|The username to use when calling Twitch APIs. If you aren't using a secondary account, this should be the same as `Channel`|
+|`ImplicitOAuth`|text||❌|The "password" to access Twitch APIs. **Please visit [twitchapps.com][1] to get the password to put here.** Note that this password is not sent to any servers other than Twitch to authenticate. **DO NOT GIVE THIS TO ANYONE.** To revoke this password, go to [Twitch Connections Settings][2] and Disconnect the app named "Twitch Chat OAuth Token Generator".|
+|`DebugLogs`|true/false|false|✔️|Enable debug logging for Twitch - will spam to the console!|
+|`ClientID`|text|q6batx0epp608isickayubi39itsckt|❌|The client ID of the app that you used to populate the `ImplicitOAuth` field. If you used [twitchapps.com][1] this would be the default value. If you used another Twitch app, this needs to be changed accordingly.|
+|`EnableItemVoting`|true/false|true|✔️|Enables the main feature of this mod. Disable it if you only want to enable bit interactions.|
+|`VoteDurationdSec`|number (secs)|20|✔️|How long to allow Twitch to vote on items. Increase this value if viewers think the voting is going too "fast" - they might have their video delay too great.|
+|`VoteStrategy`|string|MaxVote|✔️|How to tabulate votes. See "Voting Strategies" below for the various values this setting may have.|
+|`BitsThreshold`|number|1500|✔️|The number of bits needed to cause an in-game event.|
+|`CurrentBits`|number|0|❌|**Do not edit this field.** Used as storage whenever someone donates bits so that restarting the game doesn't clear the donation count.|
+|`PublishToChat`|true/false|true|✔️|Publish events (like voting) to Twitch chat.|
 
 [1]: https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=q6batx0epp608isickayubi39itsckt&redirect_uri=https://twitchapps.com/tmi/&scope=channel_subscriptions+user_subscriptions+channel_check_subscription+bits:read+chat:read+chat:edit+channel:read:redemptions+channel:read:hype_train
 [2]: https://www.twitch.tv/settings/connections
@@ -45,9 +51,9 @@ This mod supports basic integration for [Tiltify](https://tiltify.com/) campaign
 
 **How do I find my Campaign ID?** Once your campaign is created, navigate to your Campaign Dashboard --> Detail tab and find your campaign ID. It should be a six to seven digit number.
 
-|Config|Type|Default|Notes|
-|------|----|-------|-----|
-|`CampaignId`|number|0|The Campaign ID to track donations; put a `0` to disable Tiltify integration|
+|Config|Type|Default|RiskOfOptions|Notes|
+|------|----|-------|-------------|-----|
+|`CampaignId`|string||✔️|The Campaign ID to track donations; put a `0` to disable Tiltify integration|
 
 ### Vote Strategies
 
@@ -77,55 +83,55 @@ See the [Twitch Channel Points Guide][3] (section "Custom Rewards") for how to c
 
 [3]: https://help.twitch.tv/s/article/channel-points-guide?language=en_US
 
-|Config|Type|Default|Notes|
-|------|----|-------|-----|
-|`Enable`|true/false|true|Enable all Channel Point features|
-|`AllyBeetle`|text||**(Case Sensitive!)** Channel Points Title to spawn Ally Elite Beetle. Leave empty to disable.|
-|`AllyLemurian`|text||**(Case Sensitive!)** Channel Points Title to spawn Ally Elite Lemurian. Leave empty to disable.|
-|`AllyElderLemurian`|text||**(Case Sensitive!)** Channel Points Title to spawn Ally Elite Elder Lemurian. Leave empty to disable.|
-|`RustedKey`|text||**(Case Sensitive!)** Channel Points Title to give everyone a Rusted Key. Leave empty to disable.|
-|`BitStorm`|text||**(Case Sensitive!)** Channel Points Title for the bit storm bit event.|
-|`Bounty`|text||**(Case Sensitive!)** Channel Points Title for the doppleganger bit event.|
-|`ShrineOfOrder`|text||**(Case Sensitive!)** Channel Points Title for the Shrine of Order bit event.|
-|`ShrineOfTheMountain`|text||**(Case Sensitive!)** Channel Points Title for the Shrine of the Mountain bit event.|
-|`Titan`|text||**(Case Sensitive!)** Channel Points Title for the Aurelionite bit event.|
-|`LunarWisp`|text||**(Case Sensitive!)** Channel Points Title for the Lunar Chimera (Wisp) bit event.|
-|`Mithrix`|text||**(Case Sensitive!)** Channel Points Title for the Mithrix bit event.|
-|`ElderLemurian`|text||**(Case Sensitive!)** Channel Points Title for the Elder Lemurian bit event.|
+|Config|Type|Default|RiskOfOptions|Notes|
+|------|----|-------|-------------|-----|
+|`Enable`|true/false|true|✔️|Enable all Channel Point features|
+|`AllyBeetle`|text||✔️|**(Case Sensitive!)** Channel Points Title to spawn Ally Elite Beetle. Leave empty to disable.|
+|`AllyLemurian`|text||✔️|**(Case Sensitive!)** Channel Points Title to spawn Ally Elite Lemurian. Leave empty to disable.|
+|`AllyElderLemurian`|text||✔️|**(Case Sensitive!)** Channel Points Title to spawn Ally Elite Elder Lemurian. Leave empty to disable.|
+|`RustedKey`|text||✔️|**(Case Sensitive!)** Channel Points Title to give everyone a Rusted Key. Leave empty to disable.|
+|`BitStorm`|text||✔️|**(Case Sensitive!)** Channel Points Title for the bit storm bit event.|
+|`Bounty`|text||✔️|**(Case Sensitive!)** Channel Points Title for the doppleganger bit event.|
+|`ShrineOfOrder`|text||✔️|**(Case Sensitive!)** Channel Points Title for the Shrine of Order bit event.|
+|`ShrineOfTheMountain`|text||✔️|**(Case Sensitive!)** Channel Points Title for the Shrine of the Mountain bit event.|
+|`Titan`|text||✔️|**(Case Sensitive!)** Channel Points Title for the Aurelionite bit event.|
+|`LunarWisp`|text||✔️|**(Case Sensitive!)** Channel Points Title for the Lunar Chimera (Wisp) bit event.|
+|`Mithrix`|text||✔️|**(Case Sensitive!)** Channel Points Title for the Mithrix bit event.|
+|`ElderLemurian`|text||✔️|**(Case Sensitive!)** Channel Points Title for the Elder Lemurian bit event.|
 
 ## Event
 
 To disable an event, simply set the weight to 0. Giving a higher weight increases the probability that the event will occur.
 
-|Config|Type|Default|Notes|
-|------|----|-------|-----|
-|`BitStormWeight`|number|1|Weight for the bit storm bit event.|
-|`BountyWeight`|number|1|Weight for the doppleganger bit event.|
-|`ShrineOfOrderWeight`|number|1|Weight for the Shrine of Order bit event.|
-|`ShrineOfTheMountainWeight`|number|1|Weight for the Shrine of the Mountain bit event.|
-|`TitanWeight`|number|1|Weight for the Aurelionite bit event.|
-|`LunarWispWeight`|number|1|Weight for the Lunar Chimera (Wisp) bit event.|
-|`MithrixWeight`|number|1|Weight for the Mithrix bit event.|
-|`ElderLemurianWeight`|number|1|Weight for the Elder Lemurian bit event.|
+|Config|Type|Default|RiskOfOptions|Notes|
+|------|----|-------|-------------|-----|
+|`BitStormWeight`|number|1|✔️|Weight for the bit storm bit event.|
+|`BountyWeight`|number|1|✔️|Weight for the doppleganger bit event.|
+|`ShrineOfOrderWeight`|number|1|✔️|Weight for the Shrine of Order bit event.|
+|`ShrineOfTheMountainWeight`|number|1|✔️|Weight for the Shrine of the Mountain bit event.|
+|`TitanWeight`|number|1|✔️|Weight for the Aurelionite bit event.|
+|`LunarWispWeight`|number|1|✔️|Weight for the Lunar Chimera (Wisp) bit event.|
+|`MithrixWeight`|number|1|✔️|Weight for the Mithrix bit event.|
+|`ElderLemurianWeight`|number|1|✔️|Weight for the Elder Lemurian bit event.|
 
 ## UI
 
-|Config|Type|Default|Notes|
-|------|----|-------|-----|
-|`SimpleUI`|true/false|false|If enabled, simplifies the item vote UI by putting a single popup in the top-middle of the game screen. If you are playing with multiple people, or generally have a lot of drones, enabling this option can help with clutter on the left side of the game window.|
+|Config|Type|Default|RiskOfOptions|Notes|
+|------|----|-------|-------------|-----|
+|`SimpleUI`|true/false|false|✔️|If enabled, simplifies the item vote UI by putting a single popup in the top-middle of the game screen. If you are playing with multiple people, or generally have a lot of drones, enabling this option can help with clutter on the left side of the game window.|
 
 ## Behaviour
 
-|Config|Type|Default|Notes|
-|------|----|-------|-----|
-|`EnableChoosingLunarItems`|true/false|true|If enabled, Lunar Pod item/equipment drops will be decided by Twitch Chat.|
-|`ForceUniqueRolls`|true/false|false|If enabled, all rolls will be guaranteed to be unique. No more rolls with three rusted keys!|
+|Config|Type|Default|RiskOfOptions|Notes|
+|------|----|-------|-------------|-----|
+|`EnableChoosingLunarItems`|true/false|true|✔️|If enabled, Lunar Pod item/equipment drops will be decided by Twitch Chat.|
+|`ForceUniqueRolls`|true/false|false|✔️|If enabled, all rolls will be guaranteed to be unique. No more rolls with three rusted keys!|
 
 ## Language
 
-|Config|Type|Default|Notes|
-|------|----|-------|-----|
-|`EnableLanguageEdits`|true/false|true|If enabled, some in-game texts will get replaced with Twitch related texts.|
+|Config|Type|Default|RiskOfOptions|Notes|
+|------|----|-------|-------------|-----|
+|`EnableLanguageEdits`|true/false|true|✔️|If enabled, some in-game texts will get replaced with Twitch related texts.|
 
 # Events
 
@@ -204,6 +210,15 @@ These console commands are generally for testing purposes. You should never need
 * `vs_set_bit_goal <bits>` - Sets the bit goal and saves it to the config file.
 
 # Changelog
+
+### 1.0.14
+
+See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/12?closed=1
+
+* Added new dependency: [RiskOfOptions](https://thunderstore.io/package/Rune580/Risk_Of_Options/)
+* Refactored configurations to hook into RiskOfOptions
+* Allowed ChannelPoints to be dynamically updated in game (previously they were coded that you needed a restart)
+* Unified the logging system. You should now be able to filter all of Vs Twitch logs easily via the mod launcher.
 
 ### 1.0.13
 
