@@ -10,11 +10,10 @@ Will your chat help you along your journey, or try to stop your run early? Chat 
 
 1. Launch the game so that the configuration file is created for the first time. **Exit the game.**
 2. Edit the configuration file to suite your needs. See the Configuration tables below for more info.
-3. Launch the game (hint: you might want to watch the intro scene one more time...)
+   * Currently, `Channel`, and `ImplicitOAuth` need to be filled out at a minimum (if you use nothing but the default values for the mod) from the "Twitch" section.
+4. Launch the game (hint: you might want to watch the intro scene one more time...)
 
 # Configurations
-
-Currently, `Channel`, and `ImplicitOAuth` need to be filled out at a minimum (if you use nothing but the default values for the mod) from the "Twitch" section.
 
 ## In game editting (via RiskOfOptions)
 
