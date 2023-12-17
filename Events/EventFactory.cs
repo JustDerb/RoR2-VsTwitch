@@ -87,7 +87,7 @@ namespace VsTwitch
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
+                Log.Exception(e);
             }
             yield break;
         }
@@ -125,7 +125,7 @@ namespace VsTwitch
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
+                Log.Exception(e);
             }
             yield break;
         }
@@ -178,7 +178,7 @@ namespace VsTwitch
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
+                Log.Exception(e);
             }
             yield break;
         }
@@ -264,7 +264,7 @@ namespace VsTwitch
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
+                Log.Exception(e);
             }
             yield break;
         }

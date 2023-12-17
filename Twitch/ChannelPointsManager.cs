@@ -48,7 +48,7 @@ namespace VsTwitch
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                Log.Exception(ex);
                 return false;
             }
         }

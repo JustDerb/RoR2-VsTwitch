@@ -73,7 +73,7 @@ namespace VsTwitch
                 if (response.Result.Users.Length == 1)
                 {
                     channelId = response.Result.Users[0].Id;
-                    Console.WriteLine($"[Twitch API] Channel ID for {channel} = {channelId}");
+                    Log.Info($"[Twitch API] Channel ID for {channel} = {channelId}");
                 }
                 else
                 {
@@ -86,7 +86,7 @@ namespace VsTwitch
                 {
                     throw ex;
                 }
-                Console.WriteLine(ex);
+                Log.Exception(ex);
             }
 
             LogDebug("[Twitch Client] Creating...");
@@ -108,31 +108,31 @@ namespace VsTwitch
                 TwitchPubSub.OnLog += TwitchPubSub_OnLog;
                 TwitchPubSub.OnPubSubServiceConnected += (sender, e) =>
                 {
-                    Console.WriteLine("[Twitch PubSub] Sending topics to listen too...");
+                    Log.Info("[Twitch PubSub] Sending topics to listen too...");
                     TwitchPubSub.ListenToRewards(channelId);
                     TwitchPubSub.SendTopics(twitchApiOauthToken);
                 };
                 TwitchPubSub.OnPubSubServiceError += (sender, e) =>
                 {
-                    Console.WriteLine($"[Twitch PubSub] ERROR: {e.Exception}");
+                    Log.Error($"[Twitch PubSub] ERROR: {e.Exception}");
                 };
                 TwitchPubSub.OnPubSubServiceClosed += (sender, e) =>
                 {
-                    Console.WriteLine($"[Twitch PubSub] Connection closed");
+                    Log.Info($"[Twitch PubSub] Connection closed");
                 };
                 TwitchPubSub.OnListenResponse += (sender, e) =>
                 {
                     if (!e.Successful)
                     {
-                        Console.WriteLine($"[Twitch PubSub] Failed to listen! Response: {e.Response}");
+                        Log.Error($"[Twitch PubSub] Failed to listen! Response: {e.Response}");
                     }
                     else
                     {
-                        Console.WriteLine($"[Twitch PubSub] Listening to {e.Topic} - {e.Response}");
+                        Log.Info($"[Twitch PubSub] Listening to {e.Topic} - {e.Response}");
                     }
                 };
                 TwitchPubSub.OnRewardRedeemed += OnRewardRedeemed;
-                Console.WriteLine("[Twitch PubSub] Connecting...");
+                Log.Info("[Twitch PubSub] Connecting...");
                 TwitchPubSub.Connect();
             }
         }
@@ -165,7 +165,7 @@ namespace VsTwitch
         {
             if (!IsConnected())
             {
-                Console.WriteLine("[Twitch Client] Not connected to Twitch!");
+                Log.Warning("[Twitch Client] Not connected to Twitch!");
                 return;
             }
             TwitchClient.SendMessage(Channel, message);
@@ -173,7 +173,7 @@ namespace VsTwitch
 
         private void TwitchClient_OnConnected(object sender, OnConnectedArgs e)
         {
-            Console.WriteLine("[Twitch Client] Connected to Twitch using username: " + e.BotUsername);
+            Log.Info("[Twitch Client] Connected to Twitch using username: " + e.BotUsername);
         }
 
         private void TwitchPubSub_OnLog(object sender, TwitchLib.PubSub.Events.OnLogArgs e)
@@ -190,7 +190,7 @@ namespace VsTwitch
         {
             if (DebugLogs)
             {
-                Console.WriteLine(message);
+                Log.Debug(message);
             }
         }
     }

@@ -62,7 +62,7 @@ namespace VsTwitch
                 }
                 catch (Exception e)
                 {
-                    Debug.LogException(e);
+                    Log.Exception(e);
                 }
             }
 
@@ -78,7 +78,7 @@ namespace VsTwitch
                 }
                 catch (Exception e)
                 {
-                    Debug.LogException(e);
+                    Log.Exception(e);
                 }
             }
         }
@@ -130,10 +130,10 @@ namespace VsTwitch
         {
             int newValue = Interlocked.Increment(ref forceChargingCount);
                 
-            Debug.LogError($"EventDirector::ForceChargingState::Count = {newValue}");
+            Log.Error($"EventDirector::ForceChargingState::Count = {newValue}");
             if (newValue == 1)
             {
-                Debug.LogError("EventDirector::ForceChargingState::Enabled = true");
+                Log.Error("EventDirector::ForceChargingState::Enabled = true");
                 On.RoR2.TeleporterInteraction.UpdateMonstersClear += TeleporterInteraction_UpdateMonstersClear;
                 SetTeleporterCrystals(true);
             }
@@ -242,16 +242,16 @@ namespace VsTwitch
                 int newValue = Interlocked.Decrement(ref eventDirector.forceChargingCount);
                 if (newValue < 0)
                 {
-                    Debug.LogError("Something didn't correctly ref count ForceChargingState!");
-                    Debug.LogException(new Exception());
+                    Log.Error("Something didn't correctly ref count ForceChargingState!");
+                    Log.Exception(new Exception());
                     Interlocked.Exchange(ref eventDirector.forceChargingCount, 0);
                     newValue = 0;
                 }
 
-                Debug.LogError($"EventDirector::ForceChargingState::Count = {newValue}");
+                Log.Error($"EventDirector::ForceChargingState::Count = {newValue}");
                 if (newValue == 0)
                 {
-                    Debug.LogError("EventDirector::ForceChargingState::Enabled = false");
+                    Log.Error("EventDirector::ForceChargingState::Enabled = false");
                     On.RoR2.TeleporterInteraction.UpdateMonstersClear -= eventDirector.TeleporterInteraction_UpdateMonstersClear;
                     eventDirector.SetTeleporterCrystals(false);
                 }

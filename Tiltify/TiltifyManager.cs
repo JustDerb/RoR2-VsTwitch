@@ -5,7 +5,7 @@ namespace VsTwitch
     class TiltifyManager
     {
         private Tiltify.TiltifyWebSocket tiltifyWebsocket;
-        private int campaignId;
+        private string campaignId;
 
         //private long lastDonationTime;
 
@@ -17,11 +17,11 @@ namespace VsTwitch
         {
         }
 
-        public void Connect(int campaignId)
+        public void Connect(string campaignId)
         {
             Disconnect();
 
-            if (campaignId <= 0)
+            if (string.IsNullOrWhiteSpace(campaignId))
             {
                 throw new ArgumentException("Tiltify campaign ID must be specified!", "campaignId");
             }
@@ -48,7 +48,7 @@ namespace VsTwitch
 
         private void TiltifyWebsocket_OnLog(object sender, Tiltify.Events.OnLogArgs e)
         {
-            Console.WriteLine($"[Tiltify Websocket] {e.Data}");
+            Log.Info($"[Tiltify Websocket] {e.Data}");
         }
 
         private void TiltifyWebsocket_OnCampaignDonation(object sender, Tiltify.Events.OnCampaignDonationArgs e)
@@ -68,9 +68,9 @@ namespace VsTwitch
 
         private void TiltifyWebsocket_OnTiltifyServiceConnected(object sender, EventArgs e)
         {
-            if (campaignId > 0)
+            if (!string.IsNullOrWhiteSpace(campaignId))
             {
-                tiltifyWebsocket.ListenToCampaignDonations(campaignId.ToString());
+                tiltifyWebsocket.ListenToCampaignDonations(campaignId);
                 tiltifyWebsocket.SendTopics();
             }
             OnConnected.Invoke(this, e);
@@ -83,7 +83,7 @@ namespace VsTwitch
                 tiltifyWebsocket.Disconnect();
             }
             tiltifyWebsocket = null;
-            campaignId = 0;
+            campaignId = null;
             OnDisconnected.Invoke(this, EventArgs.Empty);
         }
 

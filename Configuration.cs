@@ -1,8 +1,11 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
 using RiskOfOptions;
+using RiskOfOptions.Options;
+using RiskOfOptions.OptionConfigs;
 using System;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace VsTwitch
 {
@@ -31,7 +34,7 @@ namespace VsTwitch
         public ConfigEntry<bool> PublishToChat { get; set; }
 
         // Tiltify
-        public ConfigEntry<int> TiltifyCampaignId { get; set; }
+        public ConfigEntry<string> TiltifyCampaignId { get; set; }
 
         // Event
         public ConfigEntry<float> BitStormWeight { get; set; }
@@ -84,7 +87,7 @@ namespace VsTwitch
             CurrentBits = plugin.Config.Bind("Twitch", "CurrentBits", 0, "(DO NOT EDIT) How many Bits have currently been donated.");
             PublishToChat = plugin.Config.Bind("Twitch", "PublishToChat", true, "Publish events (like voting) to Twitch chat.");
             // Tiltify
-            TiltifyCampaignId = plugin.Config.Bind("Tiltify", "CampaignId", 0, "Tiltify Campaign ID to track donations");
+            TiltifyCampaignId = plugin.Config.Bind("Tiltify", "CampaignId", "", "Tiltify Campaign ID to track donations");
             // Event
             BitStormWeight = plugin.Config.Bind("Event", "BitStormWeight", 1f, "Weight for the bit storm bit event. Set to 0 to disable.");
             BountyWeight = plugin.Config.Bind("Event", "BountyWeight", 1f, "Weight for the doppleganger bit event. Set to 0 to disable.");
@@ -125,23 +128,78 @@ namespace VsTwitch
             {
                 ModSettingsManager.SetModDescription("Fight Twitch chat. Item voting, bit events, channel points integration, and more!");
                 // Twitch
-                ModSettingsManager.AddOption(new RiskOfOptions.Options.StringInputFieldOption(TwitchChannel));
-                ModSettingsManager.AddOption(new RiskOfOptions.Options.StringInputFieldOption(TwitchUsername));
-                ModSettingsManager.AddOption(new RiskOfOptions.Options.CheckBoxOption(TwitchDebugLogs));
-                ModSettingsManager.AddOption(new RiskOfOptions.Options.CheckBoxOption(EnableItemVoting));
-                ModSettingsManager.AddOption(new RiskOfOptions.Options.IntSliderOption(VoteDurationSec,
-                    new RiskOfOptions.OptionConfigs.IntSliderConfig() { min = 1, max = 120}));
-                ModSettingsManager.AddOption(new RiskOfOptions.Options.ChoiceOption(VoteStrategy,
-                    new RiskOfOptions.OptionConfigs.ChoiceConfig() { restartRequired = true }));
-                ModSettingsManager.AddOption(new RiskOfOptions.Options.CheckBoxOption(EnableBitEvents));
-                ModSettingsManager.AddOption(new RiskOfOptions.Options.IntSliderOption(BitsThreshold,
+                ModSettingsManager.AddOption(new StringInputFieldOption(TwitchChannel,
+                    new InputFieldConfig() { restartRequired = true }));
+                ModSettingsManager.AddOption(new StringInputFieldOption(TwitchUsername,
+                    new InputFieldConfig() { restartRequired = true }));
+                ModSettingsManager.AddOption(new CheckBoxOption(TwitchDebugLogs));
+                ModSettingsManager.AddOption(new CheckBoxOption(EnableItemVoting));
+                ModSettingsManager.AddOption(new IntSliderOption(VoteDurationSec,
+                    new IntSliderConfig() { min = 1, max = 120, checkIfDisabled = () => !EnableItemVoting.Value }));
+                ModSettingsManager.AddOption(new ChoiceOption(VoteStrategy,
+                    new ChoiceConfig() { restartRequired = true, checkIfDisabled = () => !EnableItemVoting.Value }));
+                ModSettingsManager.AddOption(new CheckBoxOption(PublishToChat,
+                    new CheckBoxConfig() { checkIfDisabled = () => !EnableItemVoting.Value }));
+                ModSettingsManager.AddOption(new CheckBoxOption(EnableBitEvents));
+                ModSettingsManager.AddOption(new IntSliderOption(BitsThreshold,
                     // $1 to $1000
-                    new RiskOfOptions.OptionConfigs.IntSliderConfig() { min = 100, max = 100 * 1000 }));
-                ModSettingsManager.AddOption(new RiskOfOptions.Options.CheckBoxOption(PublishToChat));
+                    new IntSliderConfig() { min = 100, max = 100 * 1000 }));
+
+                // Tiltify
+                ModSettingsManager.AddOption(new StringInputFieldOption(TiltifyCampaignId,
+                    new InputFieldConfig() { restartRequired = true }));
+
+                // Event
+                foreach (var bitEvent in new List<ConfigEntry<float>>() {
+                    BitStormWeight,
+                    BountyWeight,
+                    ShrineOfOrderWeight,
+                    ShrineOfTheMountainWeight,
+                    TitanWeight,
+                    LunarWispWeight,
+                    MithrixWeight,
+                    ElderLemurianWeight,
+                })
+                {
+                    ModSettingsManager.AddOption(new StepSliderOption(bitEvent,
+                        new StepSliderConfig() { min = 0f, max = 10f, increment = 1f }));
+                }
+
+                // Channel Points
+                ModSettingsManager.AddOption(new CheckBoxOption(ChannelPointsEnable));
+                foreach (var channelPointsAlly in new List<ConfigEntry<string>>() {
+                    ChannelPointsAllyBeetle,
+                    ChannelPointsAllyLemurian,
+                    ChannelPointsAllyElderLemurian,
+                    ChannelPointsRustedKey,
+                    ChannelPointsBitStorm,
+                    ChannelPointsBounty,
+                    ChannelPointsShrineOfOrder,
+                    ChannelPointsShrineOfTheMountain,
+                    ChannelPointsTitan,
+                    ChannelPointsLunarWisp,
+                    ChannelPointsMithrix,
+                    ChannelPointsElderLemurian,
+                })
+                {
+                    ModSettingsManager.AddOption(new StringInputFieldOption(channelPointsAlly,
+                        new InputFieldConfig() { checkIfDisabled = () => !ChannelPointsEnable.Value }));
+                }
+
+                // UI
+                ModSettingsManager.AddOption(new CheckBoxOption(SimpleUI));
+
+                // Behaviour
+                ModSettingsManager.AddOption(new CheckBoxOption(EnableChoosingLunarItems));
+                ModSettingsManager.AddOption(new CheckBoxOption(ForceUniqueRolls));
+
+                //Language
+                ModSettingsManager.AddOption(new CheckBoxOption(EnableLanguageEdits,
+                    new CheckBoxConfig() { restartRequired = true }));
             }
             catch (Exception ex)
             {
-                Debug.LogException(ex);
+                Log.Exception(ex);
             }
         }
     }

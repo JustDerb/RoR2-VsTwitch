@@ -14,7 +14,7 @@ namespace VsTwitch
         {
             if (!NetworkServer.active)
             {
-                Debug.LogWarning("[Server] function 'System.Void ItemManager::GiveToAllPlayers()' called on client");
+                Log.Warning("[Server] function 'System.Void ItemManager::GiveToAllPlayers()' called on client");
                 return;
             }
 
@@ -29,7 +29,7 @@ namespace VsTwitch
         {
             if (!NetworkServer.active)
             {
-                Debug.LogWarning("[Server] function 'System.Void ItemManager::GiveToPlayer()' called on client");
+                Log.Warning("[Server] function 'System.Void ItemManager::GiveToPlayer()' called on client");
                 return;
             }
 
@@ -51,7 +51,7 @@ namespace VsTwitch
         {
             if (!NetworkServer.active)
             {
-                Debug.LogWarning("[Server] function 'System.Void ItemManager::DropToAllPlayers()' called on client");
+                Log.Warning("[Server] function 'System.Void ItemManager::DropToAllPlayers()' called on client");
                 return;
             }
 
@@ -66,7 +66,7 @@ namespace VsTwitch
         {
             if (!NetworkServer.active)
             {
-                Debug.LogWarning("[Server] function 'System.Void ItemManager::DropToPlayer()' called on client");
+                Log.Warning("[Server] function 'System.Void ItemManager::DropToPlayer()' called on client");
                 return;
             }
 

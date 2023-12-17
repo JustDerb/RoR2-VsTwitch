@@ -45,18 +45,19 @@ namespace VsTwitch
         /// </summary>
         private static void DumpAssemblies()
         {
-            Debug.LogError("===== DUMPING ASSEMBLY INFORMATION =====");
+            Log.Error("===== DUMPING ASSEMBLY INFORMATION =====");
             AppDomain currentDomain = AppDomain.CurrentDomain;
             foreach (var assembly in currentDomain.GetAssemblies())
             {
-                Debug.LogError($"{assembly.FullName}, {assembly.Location}");
+                Log.Error($"{assembly.FullName}, {assembly.Location}");
             }
-            Debug.LogError("===== FINISHED DUMPING ASSEMBLY INFORMATION =====");
+            Log.Error("===== FINISHED DUMPING ASSEMBLY INFORMATION =====");
         }
 
         #region "Constructors/Destructors"
         public void Awake()
         {
+            Log.Init(Logger);
             Instance = SingletonHelper.Assign(Instance, this);
 
             configuration = new Configuration(this);
@@ -83,7 +84,7 @@ namespace VsTwitch
                     }
                     catch (Exception ex)
                     {
-                        Debug.LogException(ex);
+                        Log.Error(ex);
                     }
                 };
             }
@@ -93,32 +94,32 @@ namespace VsTwitch
             }
 
             bitsManager = new BitsManager(configuration.CurrentBits.Value);
-            channelPointsManager = new ChannelPointsManager();
-            if (configuration.ChannelPointsEnable.Value)
-            {
-                SetUpChannelPoints();
-            }
+            
+            SetUpChannelPoints();
+
             twitchManager = new TwitchManager()
             {
                 DebugLogs = configuration.TwitchDebugLogs.Value,
             };
+            configuration.TwitchDebugLogs.SettingChanged += (sender, e) => twitchManager.DebugLogs = configuration.TwitchDebugLogs.Value;
+
             IVoteStrategy<PickupIndex> strategy;
             switch (configuration.VoteStrategy.Value)
             {
                 case Configuration.VoteStrategies.Percentile:
-                    Debug.Log("Twitch Voting Strategy: Percentile");
+                    Log.Info("Twitch Voting Strategy: Percentile");
                     strategy = new PercentileVoteStrategy<PickupIndex>();
                     break;
                 case Configuration.VoteStrategies.MaxVoteRandomTie:
-                    Debug.Log("Twitch Voting Strategy: MaxVoteRandomTie");
+                    Log.Info("Twitch Voting Strategy: MaxVoteRandomTie");
                     strategy = new MaxRandTieVoteStrategy<PickupIndex>();
                     break;
                 case Configuration.VoteStrategies.MaxVote:
-                    Debug.Log("Twitch Voting Strategy: MaxVote");
+                    Log.Info("Twitch Voting Strategy: MaxVote");
                     strategy = new MaxVoteStrategy<PickupIndex>();
                     break;
                 default:
-                    Debug.LogError($"Invalid setting for Twitch.VoteStrategy ({configuration.VoteStrategy.Value})! Using MaxVote strategy.");
+                    Log.Error($"Invalid setting for Twitch.VoteStrategy ({configuration.VoteStrategy.Value})! Using MaxVote strategy.");
                     strategy = new MaxVoteStrategy<PickupIndex>();
                     break;
             }
@@ -142,24 +143,24 @@ namespace VsTwitch
             bitsManager.OnUpdateBits += BitsManager_OnUpdateBits;
 
             twitchManager.OnConnected += (sender, joinedChannel) => {
-                Debug.Log($"Connected to Twitch! Watching {joinedChannel.Channel}...");
+                Log.Info($"Connected to Twitch! Watching {joinedChannel.Channel}...");
                 Chat.AddMessage($"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>Connected to Twitch!</color> Watching {joinedChannel.Channel}...");
             };
             twitchManager.OnDisconnected += (sender, disconnect) =>
             {
-                Debug.Log("Disconnected from Twitch!");
+                Log.Info("Disconnected from Twitch!");
                 Chat.AddMessage($"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>Disconnected from Twitch!</color>");
             };
             twitchManager.OnMessageReceived += TwitchManager_OnMessageReceived;
             twitchManager.OnRewardRedeemed += TwitchManager_OnRewardRedeemed;
 
             tiltifyManager.OnConnected += (sender, e) => {
-                Debug.Log($"Connected to Tiltify!");
+                Log.Info($"Connected to Tiltify!");
                 Chat.AddMessage($"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>Connected to Tiltify!</color>");
             };
             tiltifyManager.OnDisconnected += (sender, e) =>
             {
-                Debug.Log("Disconnected from Tiltify!");
+                Log.Info("Disconnected from Tiltify!");
                 Chat.AddMessage($"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>Disconnected from Tiltify!</color>");
             };
             tiltifyManager.OnDonationReceived += TiltifyManager_OnDonationReceived;
@@ -175,6 +176,8 @@ namespace VsTwitch
                 }));
             }
 
+            channelPointsManager = new ChannelPointsManager();
+
             if (channelPointsManager.RegisterEvent(configuration.ChannelPointsAllyBeetle.Value, (manager, e) =>
             {
                 eventDirector.AddEvent(eventFactory.CreateAlly(
@@ -183,11 +186,11 @@ namespace VsTwitch
                     RollForElite(true)));
             }))
             {
-                Debug.Log("Successfully registered Channel Points event: Ally Beetle");
+                Log.Info("Successfully registered Channel Points event: Ally Beetle");
             }
             else
             {
-                Debug.LogWarning("Could not register Channel Points event: Ally Beetle");
+                Log.Warning("Could not register Channel Points event: Ally Beetle");
             }
 
             if (channelPointsManager.RegisterEvent(configuration.ChannelPointsAllyLemurian.Value, (manager, e) =>
@@ -198,11 +201,11 @@ namespace VsTwitch
                     RollForElite(true)));
             }))
             {
-                Debug.Log("Successfully registered Channel Points event: Ally Lemurian");
+                Log.Info("Successfully registered Channel Points event: Ally Lemurian");
             }
             else
             {
-                Debug.LogWarning("Could not register Channel Points event: Ally Lemurian");
+                Log.Warning("Could not register Channel Points event: Ally Lemurian");
             }
 
             if (channelPointsManager.RegisterEvent(configuration.ChannelPointsAllyElderLemurian.Value, (manager, e) =>
@@ -213,11 +216,11 @@ namespace VsTwitch
                     RollForElite(true)));
             }))
             {
-                Debug.Log("Successfully registered Channel Points event: Ally Elder Lemurian");
+                Log.Info("Successfully registered Channel Points event: Ally Elder Lemurian");
             }
             else
             {
-                Debug.LogWarning("Could not register Channel Points event: Ally Elder Lemurian");
+                Log.Warning("Could not register Channel Points event: Ally Elder Lemurian");
             }
 
             if (channelPointsManager.RegisterEvent(configuration.ChannelPointsRustedKey.Value, (manager, e) =>
@@ -225,11 +228,11 @@ namespace VsTwitch
                 GiveRustedKey(e.DisplayName);
             }))
             {
-                Debug.Log("Successfully registered Channel Points event: Rusted Key");
+                Log.Info("Successfully registered Channel Points event: Rusted Key");
             }
             else
             {
-                Debug.LogWarning("Could not register Channel Points event: Rusted Key");
+                Log.Warning("Could not register Channel Points event: Rusted Key");
             }
 
             if (channelPointsManager.RegisterEvent(configuration.ChannelPointsBitStorm.Value, (manager, e) =>
@@ -238,11 +241,11 @@ namespace VsTwitch
                 eventDirector.AddEvent(eventFactory.CreateBitStorm());
             }))
             {
-                Debug.Log("Successfully registered Channel Points event: Bit Storm");
+                Log.Info("Successfully registered Channel Points event: Bit Storm");
             }
             else
             {
-                Debug.LogWarning("Could not register Channel Points event: Bit Storm");
+                Log.Warning("Could not register Channel Points event: Bit Storm");
             }
 
             if (channelPointsManager.RegisterEvent(configuration.ChannelPointsBounty.Value, (manager, e) =>
@@ -251,11 +254,11 @@ namespace VsTwitch
                 eventDirector.AddEvent(eventFactory.CreateBounty());
             }))
             {
-                Debug.Log("Successfully registered Channel Points event: Bounty");
+                Log.Info("Successfully registered Channel Points event: Bounty");
             }
             else
             {
-                Debug.LogWarning("Could not register Channel Points event: Bounty");
+                Log.Warning("Could not register Channel Points event: Bounty");
             }
 
             if (channelPointsManager.RegisterEvent(configuration.ChannelPointsShrineOfOrder.Value, (manager, e) =>
@@ -264,11 +267,11 @@ namespace VsTwitch
                 eventDirector.AddEvent(eventFactory.TriggerShrineOfOrder());
             }))
             {
-                Debug.Log("Successfully registered Channel Points event: Shrine Of Order");
+                Log.Info("Successfully registered Channel Points event: Shrine Of Order");
             }
             else
             {
-                Debug.LogWarning("Could not register Channel Points event: Shrine Of Order");
+                Log.Warning("Could not register Channel Points event: Shrine Of Order");
             }
 
             if (channelPointsManager.RegisterEvent(configuration.ChannelPointsShrineOfTheMountain.Value, (manager, e) =>
@@ -277,11 +280,11 @@ namespace VsTwitch
                 eventDirector.AddEvent(eventFactory.TriggerShrineOfTheMountain());
             }))
             {
-                Debug.Log("Successfully registered Channel Points event: Shrine Of The Mountain");
+                Log.Info("Successfully registered Channel Points event: Shrine Of The Mountain");
             }
             else
             {
-                Debug.LogWarning("Could not register Channel Points event: Shrine Of The Mountain");
+                Log.Warning("Could not register Channel Points event: Shrine Of The Mountain");
             }
 
             if (channelPointsManager.RegisterEvent(configuration.ChannelPointsTitan.Value, (manager, e) =>
@@ -290,11 +293,11 @@ namespace VsTwitch
                 eventDirector.AddEvent(eventFactory.CreateMonster(MonsterSpawner.Monsters.TitanGold));
             }))
             {
-                Debug.Log("Successfully registered Channel Points event: Aurelionite");
+                Log.Info("Successfully registered Channel Points event: Aurelionite");
             }
             else
             {
-                Debug.LogWarning("Could not register Channel Points event: Aurelionite");
+                Log.Warning("Could not register Channel Points event: Aurelionite");
             }
 
             if (channelPointsManager.RegisterEvent(configuration.ChannelPointsLunarWisp.Value, (manager, e) =>
@@ -303,11 +306,11 @@ namespace VsTwitch
                 eventDirector.AddEvent(eventFactory.CreateMonster(MonsterSpawner.Monsters.LunarWisp, 2));
             }))
             {
-                Debug.Log("Successfully registered Channel Points event: Lunar Chimera (Wisp)");
+                Log.Info("Successfully registered Channel Points event: Lunar Chimera (Wisp)");
             }
             else
             {
-                Debug.LogWarning("Could not register Channel Points event: Lunar Chimera (Wisp)");
+                Log.Warning("Could not register Channel Points event: Lunar Chimera (Wisp)");
             }
 
             if (channelPointsManager.RegisterEvent(configuration.ChannelPointsMithrix.Value, (manager, e) =>
@@ -316,11 +319,11 @@ namespace VsTwitch
                 eventDirector.AddEvent(eventFactory.CreateMonster(MonsterSpawner.Monsters.Brother));
             }))
             {
-                Debug.Log("Successfully registered Channel Points event: Mithrix");
+                Log.Info("Successfully registered Channel Points event: Mithrix");
             }
             else
             {
-                Debug.LogWarning("Could not register Channel Points event: Mithrix");
+                Log.Warning("Could not register Channel Points event: Mithrix");
             }
 
             if (channelPointsManager.RegisterEvent(configuration.ChannelPointsElderLemurian.Value, (manager, e) =>
@@ -329,11 +332,11 @@ namespace VsTwitch
                 eventDirector.AddEvent(eventFactory.CreateMonster(MonsterSpawner.Monsters.LemurianBruiser, RollForElite()));
             }))
             {
-                Debug.Log("Successfully registered Channel Points event: Elder Lemurian");
+                Log.Info("Successfully registered Channel Points event: Elder Lemurian");
             }
             else
             {
-                Debug.LogWarning("Could not register Channel Points event: Elder Lemurian");
+                Log.Warning("Could not register Channel Points event: Elder Lemurian");
             }
         }
 
@@ -416,7 +419,7 @@ namespace VsTwitch
             
             if (args.Count < 2)
             {
-                Debug.LogError("Requires two args: <channel> <access_token> [username]");
+                Log.Error("Requires two args: <channel> <access_token> [username]");
                 return;
             }
 
@@ -425,12 +428,12 @@ namespace VsTwitch
             string username = args.Count > 2 ? args[2] : args[0];
             try
             {
-                Debug.Log("Connecting to Twitch...");
+                Log.Info("Connecting to Twitch...");
                 Instance.twitchManager.Connect(channel, oauthToken, username, null);
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
+                Log.Error(e);
             }
         }
 
@@ -446,7 +449,7 @@ namespace VsTwitch
 
             if (args.Count < 1)
             {
-                Debug.LogError("Requires one arg: <bits>");
+                Log.Error("Requires one arg: <bits>");
                 return;
             }
 
@@ -454,7 +457,7 @@ namespace VsTwitch
             {
                 if (bits <= 0)
                 {
-                    Debug.LogError($"{args[0]} must be positive");
+                    Log.Error($"{args[0]} must be positive");
                     return;
                 }
 
@@ -462,7 +465,7 @@ namespace VsTwitch
             }
             else
             {
-                Debug.LogError($"{args[0]} is not a number");
+                Log.Error($"{args[0]} is not a number");
             }
         }
 
@@ -478,7 +481,7 @@ namespace VsTwitch
 
             if (args.Count < 1)
             {
-                Debug.LogError("Requires one arg: <bits>");
+                Log.Error("Requires one arg: <bits>");
                 return;
             }
 
@@ -486,16 +489,16 @@ namespace VsTwitch
             {
                 if (bits <= 0)
                 {
-                    Debug.LogError($"{args[0]} must be positive");
+                    Log.Error($"{args[0]} must be positive");
                     return;
                 }
                 Instance.configuration.BitsThreshold.Value = bits;
                 Instance.bitsManager.BitGoal = bits;
-                Debug.Log($"Bit goal set to {bits}");
+                Log.Info($"Bit goal set to {bits}");
             }
             else
             {
-                Debug.LogError($"{args[0]} is not a number");
+                Log.Error($"{args[0]} is not a number");
             }
         }
 
@@ -507,7 +510,7 @@ namespace VsTwitch
             }
             catch (Exception ex)
             {
-                Debug.LogException(ex);
+                Log.Error(ex);
                 return false;
             }
         }
@@ -516,7 +519,7 @@ namespace VsTwitch
         {
             try
             {
-                Debug.Log("Connecting to Twitch...");
+                Log.Info("Connecting to Twitch...");
                 twitchManager.Connect(
                     configuration.TwitchChannel.Value,
                     configuration.TwitchOAuth.Value,
@@ -526,7 +529,7 @@ namespace VsTwitch
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
+                Log.Error(e);
                 Chat.AddMessage($"Couldn't connect to Twitch: {e.Message}");
                 if (e is ArgumentException)
                 {
@@ -540,15 +543,15 @@ namespace VsTwitch
 
             try
             {
-                if (configuration.TiltifyCampaignId.Value > 0)
+                if (!string.IsNullOrWhiteSpace(configuration.TiltifyCampaignId.Value))
                 {
-                    Debug.Log($"Connecting to Tiltify and watching campaign ID {configuration.TiltifyCampaignId.Value}...");
+                    Log.Info($"Connecting to Tiltify and watching campaign ID {configuration.TiltifyCampaignId.Value}...");
                     tiltifyManager.Connect(configuration.TiltifyCampaignId.Value);
                 }
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
+                Log.Error(e);
                 Chat.AddMessage($"Couldn't connect to Tiltify: {e.Message}");
             }
         }
@@ -561,7 +564,7 @@ namespace VsTwitch
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
+                Log.Error(e);
             }
 
             try
@@ -570,7 +573,7 @@ namespace VsTwitch
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
+                Log.Error(e);
             }
         }
 
@@ -580,7 +583,7 @@ namespace VsTwitch
             {
                 if (!NetworkServer.active)
                 {
-                    Debug.LogWarning("[Server] Server not active");
+                    Log.Warning("[Server] Server not active");
                     return;
                 }
 
@@ -589,7 +592,7 @@ namespace VsTwitch
                 string[] msgParts = msg.Split(SPACE, 2);
                 if (int.TryParse(msgParts[0], out int index))
                 {
-                    Debug.Log($"Vote added: {e.ChatMessage.Username} ({e.ChatMessage.UserId}) -> {index}");
+                    Log.Info($"Vote added: {e.ChatMessage.Username} ({e.ChatMessage.UserId}) -> {index}");
                     itemRollerManager.AddVote(e.ChatMessage.UserId, index);
                 }
 
@@ -702,7 +705,7 @@ namespace VsTwitch
             }
             catch (Exception ex)
             {
-                Debug.LogException(ex);
+                Log.Error(ex);
             }
         }
 
@@ -719,14 +722,20 @@ namespace VsTwitch
         {
             try
             {
-                if (!channelPointsManager.TriggerEvent(e))
+                if (!configuration.ChannelPointsEnable.Value)
                 {
-                    Debug.LogWarning($"Could not trigger event for Channel Points Redemption: {e.RewardTitle}");
+                    Log.Warning($"Channel points disabled - Could not trigger event for Channel Points Redemption: {e.RewardTitle}");
+                    return;
+                }
+                if (channelPointsManager != null)
+                {
+                    bool triggered = channelPointsManager.TriggerEvent(e);
+                    Log.Info($"Channel Points Redemption: {e.RewardTitle} (Event triggered: {triggered})");
                 }
             }
             catch (Exception ex)
             {
-                Debug.LogException(ex);
+                Log.Error(ex);
             }
         }
 
@@ -784,7 +793,7 @@ namespace VsTwitch
             }
             catch (Exception ex)
             {
-                Debug.LogException(ex);
+                Log.Error(ex);
             }
         }
 
@@ -793,7 +802,7 @@ namespace VsTwitch
             configuration.CurrentBits.Value = e.Bits;
 
             BitsManager bitsManager = (BitsManager)sender;
-            Debug.Log($"Recieved bits: {e.Bits:N0} / {bitsManager.BitGoal:N0}");
+            Log.Info($"Recieved bits: {e.Bits:N0} / {bitsManager.BitGoal:N0}");
             // FIXME: Add credits to spawn director
             if (e.Bits >= bitsManager.BitGoal)
             {
@@ -809,7 +818,7 @@ namespace VsTwitch
                     $"{Util.EscapeRichTextForTextMeshPro(e.Name)} tilts the world in Chats favor: {Util.EscapeRichTextForTextMeshPro(e.Comment)}";
             Chat.SendBroadcastChat(new Chat.SimpleChatMessage { baseToken = rollMessage });
 
-            Debug.Log($"Recieved donation; rolling Bit Reward");
+            Log.Info($"Recieved donation; rolling Bit Reward");
             RollBitReward();
         }
         #endregion
@@ -854,7 +863,7 @@ namespace VsTwitch
             {
                 // Don't actually suicide
                 spawned.suicideProtection--;
-                Debug.Log($"Prevented suicide of {self.body.master}");
+                Log.Info($"Prevented suicide of {self.body.master}");
                 return;
             }
             else
@@ -904,7 +913,7 @@ namespace VsTwitch
             {
                 if (sender is Vote vote)
                 {
-                    Debug.LogWarning($"Starting vote for {string.Join(", ", vote.GetCandidates().Values)} with id {vote.GetId()}");
+                    Log.Warning($"Starting vote for {string.Join(", ", vote.GetCandidates().Values)} with id {vote.GetId()}");
                 }
                 List<PickupIndex> items = new List<PickupIndex>();
                 List<string> inGameItemsString = new List<string>();
@@ -925,7 +934,7 @@ namespace VsTwitch
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogException(ex);
+                    Log.Error(ex);
                 }
                 var rollMessage = $"Choices: {String.Join(" | ", inGameItemsString)}";
                 Chat.SendBroadcastChat(new Chat.SimpleChatMessage { baseToken = rollMessage });
@@ -949,7 +958,7 @@ namespace VsTwitch
             }
             catch (Exception ex)
             {
-                Debug.LogException(ex);
+                Log.Error(ex);
             }
 
             // FIMXE: Make RollManager a MonoBeheviour and let it manage the ending of votes.
@@ -1005,7 +1014,7 @@ namespace VsTwitch
                     }
                     catch (Exception ex)
                     {
-                        Debug.LogException(ex);
+                        Log.Error(ex);
                     }
                     if (eventDirector && eventFactory)
                     {
@@ -1015,7 +1024,7 @@ namespace VsTwitch
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
+                Log.Error(e);
             }
 
             orig(self, interactor, purchaseInteraction);
@@ -1120,7 +1129,7 @@ namespace VsTwitch
                         }
                         catch (Exception ex)
                         {
-                            Debug.LogException(ex);
+                            Log.Error(ex);
                         }
                         if (eventDirector && eventFactory)
                         {
@@ -1135,7 +1144,7 @@ namespace VsTwitch
                 orig(self);
             } catch (Exception e)
             {
-                Debug.LogException(e);
+                Log.Error(e);
             }
         }
 

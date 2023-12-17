@@ -39,7 +39,7 @@ namespace VsTwitch
             }
             else
             {
-                Debug.LogError("Could not load Prefabs/NotificationPanel2, object is null!");
+                Log.Error("Could not load Prefabs/NotificationPanel2, object is null!");
             }
 
             voteIndex = 0;
@@ -100,7 +100,7 @@ namespace VsTwitch
         {
             if (notification == null)
             {
-                Debug.LogError("Cannot set items for notification, object is null!");
+                Log.Error("Cannot set items for notification, object is null!");
                 return;
             }
 

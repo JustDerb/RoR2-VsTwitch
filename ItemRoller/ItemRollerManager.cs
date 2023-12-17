@@ -82,7 +82,7 @@ namespace VsTwitch
                 TryStartVote();
             } catch (Exception e)
             {
-                System.Console.WriteLine(e);
+                Log.Exception(e);
             }
         }
 
@@ -100,12 +100,12 @@ namespace VsTwitch
             {
                 if (isSameVote(vote, currentVote))
                 {
-                    System.Console.WriteLine($"WARNING: Not adding roll for {string.Join(", ", vote.GetCandidates().Values)} with id {vote.GetId()} " +
+                    Log.Warning($"WARNING: Not adding roll for {string.Join(", ", vote.GetCandidates().Values)} with id {vote.GetId()} " +
                         $"because the previous vote was exactly that. There might be another mod causing issues making rolling busted.");
                     return;
                 }
 
-                System.Console.WriteLine($"Adding roll for {string.Join(", ", vote.GetCandidates().Values)} with id {vote.GetId()}");
+                Log.Info($"Adding roll for {string.Join(", ", vote.GetCandidates().Values)} with id {vote.GetId()}");
                 voteQueue.Add(vote);
             }
             finally
@@ -156,7 +156,7 @@ namespace VsTwitch
 
                         if (isSameVote(previousVote, currentVote))
                         {
-                            System.Console.WriteLine($"WARNING: Not starting vote for {string.Join(", ", currentVote.GetCandidates().Values)} with id {currentVote.GetId()} " +
+                            Log.Warning($"WARNING: Not starting vote for {string.Join(", ", currentVote.GetCandidates().Values)} with id {currentVote.GetId()} " +
                                 $"because the previous vote was exactly that. There might be another mod causing issues making rolling busted.");
                             continue;
                         }
