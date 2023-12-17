@@ -11,6 +11,7 @@ Will your chat help you along your journey, or try to stop your run early? Chat 
 1. Launch the game so that the configuration file is created for the first time. **Exit the game.**
 2. Edit the configuration file to suite your needs. See the Configuration tables below for more info.
    * Currently, `Channel`, and `ImplicitOAuth` need to be filled out at a minimum (if you use nothing but the default values for the mod) from the "Twitch" section.
+   * `ImplicitOAuth` is a password and **SHOULD NOT** be shown on stream!
 4. Launch the game (hint: you might want to watch the intro scene one more time...)
 
 # Configurations
@@ -43,6 +44,10 @@ accordingly when needed. Below you'll see a column for what configurations can b
 
 [1]: https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=q6batx0epp608isickayubi39itsckt&redirect_uri=https://twitchapps.com/tmi/&scope=channel_subscriptions+user_subscriptions+channel_check_subscription+bits:read+chat:read+chat:edit+channel:read:redemptions+channel:read:hype_train
 [2]: https://www.twitch.tv/settings/connections
+
+### Help, I accidentally gave someone my `ImplicitOAuth` token!
+
+To revoke this password, go to [Twitch Connections Settings][2] and Disconnect the app named "Twitch Chat OAuth Token Generator". You can then regenerate a new token via [twitchapps.com][1] and put it in the config; but, keep it safe this time!
 
 ## Tiltify
 
@@ -100,18 +105,20 @@ See the [Twitch Channel Points Guide][3] (section "Custom Rewards") for how to c
 
 ## Event
 
+When your channel hits the defined bit goal (via the `BitsThreshold` config setting), a random in-game event will occur. If enough bits are donated to trigger the goal more than once, the event's will continue to trigger until the bits are reduced under the given goal. For example, if the bit goal is 500 and someone donates 1040 bits, there will be two bit events and the current bit count will reset to 40 bits (1040 - 500 - 500 = 40).
+
 To disable an event, simply set the weight to 0. Giving a higher weight increases the probability that the event will occur.
 
 |Config|Type|Default|RiskOfOptions|Notes|
 |------|----|-------|-------------|-----|
-|`BitStormWeight`|number|1|✔️|Weight for the bit storm bit event.|
-|`BountyWeight`|number|1|✔️|Weight for the doppleganger bit event.|
-|`ShrineOfOrderWeight`|number|1|✔️|Weight for the Shrine of Order bit event.|
-|`ShrineOfTheMountainWeight`|number|1|✔️|Weight for the Shrine of the Mountain bit event.|
-|`TitanWeight`|number|1|✔️|Weight for the Aurelionite bit event.|
-|`LunarWispWeight`|number|1|✔️|Weight for the Lunar Chimera (Wisp) bit event.|
-|`MithrixWeight`|number|1|✔️|Weight for the Mithrix bit event.|
-|`ElderLemurianWeight`|number|1|✔️|Weight for the Elder Lemurian bit event.|
+|`BitStormWeight`|number|1|✔️|Weight for the bit storm bit event. Dodge the meteors while trying to move ahead in the stage!|
+|`BountyWeight`|number|1|✔️|Weight for the doppleganger bit event. Your Doppleganger has come to try to stop you!|
+|`ShrineOfOrderWeight`|number|1|✔️|Weight for the Shrine of Order bit event. What's this? You see a Shrine that looks rare, and seems to emit a purple hue. You can't help yourself, but you offer a Lunar coin to it...|
+|`ShrineOfTheMountainWeight`|number|1|✔️|Weight for the Shrine of the Mountain bit event. You have angered the Twitch Chat gods. Prepare for your final battle at the teleporter.|
+|`TitanWeight`|number|1|✔️|Weight for the Aurelionite bit event. Aurelionite comes from the void to try to stop you! **(Until this monster is killed, the teleporter will not fully charge)**|
+|`LunarWispWeight`|number|1|✔️|Weight for the Lunar Chimera (Wisp) bit event. Lunar Chimera's come from the void to try to stop you! **(Until these monsters are killed, the teleporter will not fully charge)**|
+|`MithrixWeight`|number|1|✔️|Weight for the Mithrix bit event. Twitch Chat decides to enter your stage to stop you a little earlier in the run... **(Until this monster is killed, the teleporter will not fully charge)**|
+|`ElderLemurianWeight`|number|1|✔️|Weight for the Elder Lemurian bit event. Elder Lumerian's come from the void to try to stop you! **(Until these monsters are killed, the teleporter will not fully charge)**|
 
 ## UI
 
@@ -132,41 +139,6 @@ To disable an event, simply set the weight to 0. Giving a higher weight increase
 |------|----|-------|-------------|-----|
 |`EnableLanguageEdits`|true/false|true|✔️|If enabled, some in-game texts will get replaced with Twitch related texts.|
 
-# Events
-
-When your channel hits the defined bit goal (via the `BitsThreshold` config setting), a random in-game event will occur. If enough bits are donated to trigger the goal more than once, the event's will continue to trigger until the bits are reduced under the given goal. For example, if the bit goal is 500 and someone donates 1040 bits, there will be two bit events and the current bit count will reset to 40 bits (1040 - 500 - 500 = 40).
-
-## Bit Storm
-
-Dodge the meteors while trying to move ahead in the stage!
-
-## Bounty
-
-Your Doppleganger has come to try to stop you!
-
-## Shrine of Order
-
-What's this? You see a Shrine that looks rare, and seems to emit a purple hue. You can't help yourself, but you offer a Lunar coin to it...
-
-## Shrine of the Mountain
-
-You have angered the Twitch Chat gods. Prepare for your final battle at the teleporter.
-
-## Aurelionite
-
-Aurelionite comes from the void to try to stop you! (Until this monster is killed, the teleporter will not fully charge)
-
-## Lunar Chimera (Wisp)
-
-Lunar Chimera's come from the void to try to stop you! (Until these monsters are killed, the teleporter will not fully charge)
-
-## Mithrix (Twitch Chat)
-
-Twitch Chat decides to enter your stage to stop you a little earlier in the run... (Until this monster is killed, the teleporter will not fully charge)
-
-## Elder Lemurian
-
-Elder Lumerian's come from the void to try to stop you! (Until these monsters are killed, the teleporter will not fully charge)
 
 # Chat Commands
 
@@ -187,8 +159,6 @@ Chat commands can only be executed by Moderators or the Broadcaster of the chann
 
 ## Ally Events
 
-These will eventually be hooked into Channel Points; but for know you can manually run these for your chat.
-
 * `!allychip <name>` - Spawn ally Beetle with the given name.
 * `!allysuperchip <name>` - Spawn random elite ally Beetle with the given name.
 * `!allydino <name>` - Spawn ally Lemurian with the given name.
@@ -198,7 +168,7 @@ These will eventually be hooked into Channel Points; but for know you can manual
 
 ## Other
 
-* `!rustedkey <name>` - Give all players a rusted key.
+* `!rustedkey <name>` - Give all players a rusted key (with the given name being who gave it).
 
 # Console Commands
 
