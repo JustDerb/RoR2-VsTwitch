@@ -1,4 +1,4 @@
-﻿# Vs Twitch
+# Vs Twitch
 
 **This is a server-side mod! Only the host needs this mod installed!**
 
