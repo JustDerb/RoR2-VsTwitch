@@ -93,6 +93,7 @@
 		<Exec Command="copy /Y $(ProjectDir)icon.png $(ProjectDir)..\..\..\..\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Testing\BepInEx\plugins\JustDerb-Vs_Twitch\" />
 		<Exec Command="copy /Y $(ProjectDir)manifest.json $(ProjectDir)..\..\..\..\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Testing\BepInEx\plugins\JustDerb-Vs_Twitch\" />
 		<Exec Command="copy /Y $(ProjectDir)README.md $(ProjectDir)..\..\..\..\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Testing\BepInEx\plugins\JustDerb-Vs_Twitch\" />
+		<Exec Command="copy /Y $(ProjectDir)CHANGELOG.md $(ProjectDir)..\..\..\..\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Testing\BepInEx\plugins\JustDerb-Vs_Twitch\" />
 	</Target>
 
 </Project>
