@@ -180,6 +180,12 @@ These console commands are generally for testing purposes. You should never need
 
 # Changelog
 
+### 1.0.15
+
+See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/13?closed=1
+
+* Truly made `Risk_Of_Options` a soft dependency! The mod will now correctly work with the mod not installed.
+
 ### 1.0.14
 
 See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/12?closed=1
