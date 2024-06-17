@@ -14,7 +14,7 @@ using UnityEngine.Networking;
 namespace VsTwitch
 {
     [BepInPlugin(GUID, ModName, Version)]
-    [BepInDependency("com.rune580.riskofoptions")]
+    [BepInDependency(ModCompatibility.RiskOfOptions.ModGUID, BepInDependency.DependencyFlags.SoftDependency)]
     public class VsTwitch : BaseUnityPlugin
     {
         private static readonly char[] SPACE = new char[] { ' ' };

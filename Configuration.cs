@@ -1,11 +1,5 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
-using RiskOfOptions;
-using RiskOfOptions.Options;
-using RiskOfOptions.OptionConfigs;
-using System;
-using UnityEngine;
-using System.Collections.Generic;
 using UnityEngine.Events;
 
 namespace VsTwitch
@@ -75,9 +69,9 @@ namespace VsTwitch
         public Configuration(BaseUnityPlugin plugin, UnityAction reloadChannelPoints)
 		{
             // Twitch
-            TwitchChannel = plugin.Config.Bind("Twitch", "Channel", "", "Your Twitch channel name");
+            TwitchChannel = plugin.Config.Bind("Twitch", "Channel", "", "Your Twitch channel name. The channel to monitor Twitch chat.");
             TwitchClientID = TwitchUsername = plugin.Config.Bind("Twitch", "ClientID", "q6batx0epp608isickayubi39itsckt", "Client ID used to get ImplicitOAuth value");
-            TwitchUsername = plugin.Config.Bind("Twitch", "Username", "", "Your Twitch username");
+            TwitchUsername = plugin.Config.Bind("Twitch", "Username", "", "Your Twitch username. The username to use when calling Twitch APIs. If you aren't using a secondary account, this should be the same as 'Channel'.");
             TwitchOAuth = plugin.Config.Bind("Twitch", "ImplicitOAuth", "", "Implicit OAuth code (this is not your password - it's a generated password!). See the README/Mod Description in the thunderstore to see how to get it.");
             TwitchDebugLogs = plugin.Config.Bind("Twitch", "DebugLogs", false, "Enable debug logging for Twitch - will spam to the console!");
             EnableItemVoting = plugin.Config.Bind("Twitch", "EnableItemVoting", true, "Enable item voting on Twitch.");
@@ -120,90 +114,9 @@ namespace VsTwitch
             //Language
             EnableLanguageEdits = plugin.Config.Bind("Language", "EnableLanguageEdits", true, "Enable all Language Edits.");
 
-            ApplyRiskOfOptions(reloadChannelPoints);
-        }
-
-        private void ApplyRiskOfOptions(UnityAction reloadChannelPoints)
-        {
-            try
+            if (ModCompatibility.RiskOfOptions.Enabled)
             {
-                ModSettingsManager.SetModDescription("Fight Twitch chat. Item voting, bit events, channel points integration, and more!");
-                // Twitch
-                ModSettingsManager.AddOption(new StringInputFieldOption(TwitchChannel,
-                    new InputFieldConfig() { restartRequired = true }));
-                ModSettingsManager.AddOption(new StringInputFieldOption(TwitchUsername,
-                    new InputFieldConfig() { restartRequired = true }));
-                ModSettingsManager.AddOption(new CheckBoxOption(TwitchDebugLogs));
-                ModSettingsManager.AddOption(new CheckBoxOption(EnableItemVoting));
-                ModSettingsManager.AddOption(new IntSliderOption(VoteDurationSec,
-                    new IntSliderConfig() { min = 1, max = 120, checkIfDisabled = () => !EnableItemVoting.Value }));
-                ModSettingsManager.AddOption(new ChoiceOption(VoteStrategy,
-                    new ChoiceConfig() { restartRequired = true, checkIfDisabled = () => !EnableItemVoting.Value }));
-                ModSettingsManager.AddOption(new CheckBoxOption(PublishToChat,
-                    new CheckBoxConfig() { checkIfDisabled = () => !EnableItemVoting.Value }));
-                ModSettingsManager.AddOption(new CheckBoxOption(EnableBitEvents));
-                ModSettingsManager.AddOption(new IntSliderOption(BitsThreshold,
-                    // $1 to $1000
-                    new IntSliderConfig() { min = 100, max = 100 * 1000 }));
-
-                // Tiltify
-                ModSettingsManager.AddOption(new StringInputFieldOption(TiltifyCampaignId,
-                    new InputFieldConfig() { restartRequired = true }));
-
-                // Event
-                foreach (var bitEvent in new List<ConfigEntry<float>>() {
-                    BitStormWeight,
-                    BountyWeight,
-                    ShrineOfOrderWeight,
-                    ShrineOfTheMountainWeight,
-                    TitanWeight,
-                    LunarWispWeight,
-                    MithrixWeight,
-                    ElderLemurianWeight,
-                })
-                {
-                    ModSettingsManager.AddOption(new StepSliderOption(bitEvent,
-                        new StepSliderConfig() { min = 0f, max = 10f, increment = 1f }));
-                }
-
-                // Channel Points
-                ModSettingsManager.AddOption(new CheckBoxOption(ChannelPointsEnable));
-                ModSettingsManager.AddOption(new GenericButtonOption("Re-apply Channel Points Config", "ChannelPoints",
-                    "Reload Channel Points settings in the game. You MUST click this button if you've changed any entries on this Channel Points page for it to take effect!",
-                    "Apply", reloadChannelPoints));
-                foreach (var channelPointsAlly in new List<ConfigEntry<string>>() {
-                    ChannelPointsAllyBeetle,
-                    ChannelPointsAllyLemurian,
-                    ChannelPointsAllyElderLemurian,
-                    ChannelPointsRustedKey,
-                    ChannelPointsBitStorm,
-                    ChannelPointsBounty,
-                    ChannelPointsShrineOfOrder,
-                    ChannelPointsShrineOfTheMountain,
-                    ChannelPointsTitan,
-                    ChannelPointsLunarWisp,
-                    ChannelPointsMithrix,
-                    ChannelPointsElderLemurian,
-                })
-                {
-                    ModSettingsManager.AddOption(new StringInputFieldOption(channelPointsAlly,
-                        new InputFieldConfig() { checkIfDisabled = () => !ChannelPointsEnable.Value }));
-                }
-
-                // UI
-                ModSettingsManager.AddOption(new CheckBoxOption(SimpleUI));
-
-                // Behaviour
-                ModSettingsManager.AddOption(new CheckBoxOption(EnableChoosingLunarItems));
-                ModSettingsManager.AddOption(new CheckBoxOption(ForceUniqueRolls));
-
-                //Language
-                ModSettingsManager.AddOption(new CheckBoxOption(EnableLanguageEdits,
-                    new CheckBoxConfig() { restartRequired = true }));
-            }
-            catch (Exception ex)
-            {
-                Log.Exception(ex);
+                ModCompatibility.RiskOfOptions.ApplyRiskOfOptions(this, reloadChannelPoints);
             }
         }
     }

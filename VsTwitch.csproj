@@ -29,9 +29,8 @@
 
 	<ItemGroup>
 		<Reference Include="RiskOfOptions">
-			<!-- Pull from RoR2 Mod Manager -->
-			<HintPath>..\..\..\..\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Testing\BepInEx\plugins\Rune580-Risk_Of_Options\RiskOfOptions.dll</HintPath>
-			<Private>False</Private>
+		  <!-- Pull from RoR2 Mod Manager -->
+		  <HintPath>..\..\..\..\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Testing\BepInEx\plugins\Rune580-Risk_Of_Options\RiskOfOptions\RiskOfOptions.dll</HintPath>
 		</Reference>
 		<Reference Include="Tiltify-Client">
 			<!-- Compile from https://github.com/JustDerb/Tiltify-Client -->
