@@ -19,7 +19,6 @@ namespace VsTwitch
     {
         private BlockingCollection<Func<EventDirector, IEnumerator>> eventQueue;
         private bool previousState;
-        private int forceChargingCount;
 
         /// <summary>
         /// Event that fires when the event director changes states between processing events, to pausing processing events.
@@ -31,7 +30,6 @@ namespace VsTwitch
         {
             eventQueue = new BlockingCollection<Func<EventDirector, IEnumerator>>();
             previousState = false;
-            forceChargingCount = 0;
 
             //Stage.onServerStageBegin += Stage_onServerStageBegin;
             //Stage.onServerStageComplete += Stage_onServerStageComplete;
@@ -43,11 +41,6 @@ namespace VsTwitch
             //Stage.onServerStageBegin -= Stage_onServerStageBegin;
             //Stage.onServerStageComplete -= Stage_onServerStageComplete;
             //TeleporterInteraction.onTeleporterFinishGlobal -= TeleporterInteraction_onTeleporterFinishGlobal;
-
-            if (Interlocked.Exchange(ref forceChargingCount, 0) > 0)
-            {
-                On.RoR2.TeleporterInteraction.UpdateMonstersClear -= TeleporterInteraction_UpdateMonstersClear;
-            }
         }
 
         public void Update()
@@ -96,51 +89,6 @@ namespace VsTwitch
             while(eventQueue.TryTake(out _)) {}
         }
 
-        private void SetTeleporterCrystals(bool enabled)
-        {
-            if (TeleporterInteraction.instance)
-            {
-                ChildLocator component = TeleporterInteraction.instance.GetComponent<ModelLocator>().modelTransform.GetComponent<ChildLocator>();
-                if (component)
-                {
-                    if (enabled)
-                    {
-                        // Only enable, never disable
-                        component.FindChild("TimeCrystalProps").gameObject.SetActive(true);
-                    }
-
-                    Transform transform = component.FindChild("TimeCrystalBeaconBlocker");
-                    EffectManager.SpawnEffect(LegacyResourcesAPI.Load<GameObject>("Prefabs/Effects/TimeCrystalDeath"), new EffectData
-                    {
-                        origin = transform.transform.position
-                    }, true);
-                    transform.gameObject.SetActive(enabled);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Force the current stages teleporter to not fully charge until the returned handle is disposed.
-        /// <br/>
-        /// <b>Important:</b> You must ensure the returned <c>IDisposable</c> is invoked to not risk locking the player into a stage,
-        /// because the teleporter is set to never fully charge.
-        /// </summary>
-        /// <returns>A handle to the state. Call the <c>IDisposable.Dispose()</c> when you are done.</returns>
-        public IDisposable CreateOpenTeleporterObjectiveHandle()
-        {
-            int newValue = Interlocked.Increment(ref forceChargingCount);
-                
-            Log.Error($"EventDirector::ForceChargingState::Count = {newValue}");
-            if (newValue == 1)
-            {
-                Log.Error("EventDirector::ForceChargingState::Enabled = true");
-                On.RoR2.TeleporterInteraction.UpdateMonstersClear += TeleporterInteraction_UpdateMonstersClear;
-                SetTeleporterCrystals(true);
-            }
-
-            return new ForceChargingHandle(this);
-        }
-
         private IEnumerator Wrap(IEnumerator coroutine)
         {
             while (true)
@@ -157,15 +105,6 @@ namespace VsTwitch
                 }
                 yield return coroutine.Current;
             }
-        }
-
-        private void TeleporterInteraction_UpdateMonstersClear(On.RoR2.TeleporterInteraction.orig_UpdateMonstersClear orig, TeleporterInteraction self)
-        {
-            // We don't call the original to keep monstersCleared from flapping between True and False
-            // orig(self);
-
-            FieldInfo monstersCleared = typeof(TeleporterInteraction).GetField("monstersCleared", BindingFlags.NonPublic | BindingFlags.Instance);
-            monstersCleared.SetValue(self, false);
         }
 
         private bool ShouldProcessEvents()
@@ -218,44 +157,6 @@ namespace VsTwitch
             }
 
             return true;
-        }
-
-        private class ForceChargingHandle : IDisposable
-        {
-            private readonly EventDirector eventDirector;
-            private int disposed;
-
-            public ForceChargingHandle(EventDirector eventDirector)
-            {
-                this.eventDirector = eventDirector;
-                this.disposed = 0;
-            }
-
-            public void Dispose()
-            {
-                int previouslyDisposed = Interlocked.Exchange(ref disposed, 1);
-                if (previouslyDisposed == 1)
-                {
-                    return;
-                }
-
-                int newValue = Interlocked.Decrement(ref eventDirector.forceChargingCount);
-                if (newValue < 0)
-                {
-                    Log.Error("Something didn't correctly ref count ForceChargingState!");
-                    Log.Exception(new Exception());
-                    Interlocked.Exchange(ref eventDirector.forceChargingCount, 0);
-                    newValue = 0;
-                }
-
-                Log.Error($"EventDirector::ForceChargingState::Count = {newValue}");
-                if (newValue == 0)
-                {
-                    Log.Error("EventDirector::ForceChargingState::Enabled = false");
-                    On.RoR2.TeleporterInteraction.UpdateMonstersClear -= eventDirector.TeleporterInteraction_UpdateMonstersClear;
-                    eventDirector.SetTeleporterCrystals(false);
-                }
-            }
         }
     }
 }

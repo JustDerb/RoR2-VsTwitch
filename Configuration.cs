@@ -70,7 +70,7 @@ namespace VsTwitch
 		{
             // Twitch
             TwitchChannel = plugin.Config.Bind("Twitch", "Channel", "", "Your Twitch channel name. The channel to monitor Twitch chat.");
-            TwitchClientID = TwitchUsername = plugin.Config.Bind("Twitch", "ClientID", "q6batx0epp608isickayubi39itsckt", "Client ID used to get ImplicitOAuth value");
+            TwitchClientID = plugin.Config.Bind("Twitch", "ClientID", "q6batx0epp608isickayubi39itsckt", "Client ID used to get ImplicitOAuth value");
             TwitchUsername = plugin.Config.Bind("Twitch", "Username", "", "Your Twitch username. The username to use when calling Twitch APIs. If you aren't using a secondary account, this should be the same as 'Channel'.");
             TwitchOAuth = plugin.Config.Bind("Twitch", "ImplicitOAuth", "", "Implicit OAuth code (this is not your password - it's a generated password!). See the README/Mod Description in the thunderstore to see how to get it.");
             TwitchDebugLogs = plugin.Config.Bind("Twitch", "DebugLogs", false, "Enable debug logging for Twitch - will spam to the console!");

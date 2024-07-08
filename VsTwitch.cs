@@ -523,6 +523,11 @@ namespace VsTwitch
             try
             {
                 Log.Info("Connecting to Twitch...");
+                if (string.IsNullOrWhiteSpace(configuration.TwitchUsername.Value))
+                {
+                    configuration.TwitchUsername.Value = configuration.TwitchChannel.Value;
+                }
+
                 twitchManager.Connect(
                     configuration.TwitchChannel.Value,
                     configuration.TwitchOAuth.Value,

@@ -115,10 +115,10 @@ To disable an event, simply set the weight to 0. Giving a higher weight increase
 |`BountyWeight`|number|1|✔️|Weight for the doppleganger bit event. Your Doppleganger has come to try to stop you!|
 |`ShrineOfOrderWeight`|number|1|✔️|Weight for the Shrine of Order bit event. What's this? You see a Shrine that looks rare, and seems to emit a purple hue. You can't help yourself, but you offer a Lunar coin to it...|
 |`ShrineOfTheMountainWeight`|number|1|✔️|Weight for the Shrine of the Mountain bit event. You have angered the Twitch Chat gods. Prepare for your final battle at the teleporter.|
-|`TitanWeight`|number|1|✔️|Weight for the Aurelionite bit event. Aurelionite comes from the void to try to stop you! **(Until this monster is killed, the teleporter will not fully charge)**|
-|`LunarWispWeight`|number|1|✔️|Weight for the Lunar Chimera (Wisp) bit event. Lunar Chimera's come from the void to try to stop you! **(Until these monsters are killed, the teleporter will not fully charge)**|
-|`MithrixWeight`|number|1|✔️|Weight for the Mithrix bit event. Twitch Chat decides to enter your stage to stop you a little earlier in the run... **(Until this monster is killed, the teleporter will not fully charge)**|
-|`ElderLemurianWeight`|number|1|✔️|Weight for the Elder Lemurian bit event. Elder Lumerian's come from the void to try to stop you! **(Until these monsters are killed, the teleporter will not fully charge)**|
+|`TitanWeight`|number|1|✔️|Weight for the Aurelionite bit event. Aurelionite comes from the void to try to stop you!|
+|`LunarWispWeight`|number|1|✔️|Weight for the Lunar Chimera (Wisp) bit event. Lunar Chimera's come from the void to try to stop you!|
+|`MithrixWeight`|number|1|✔️|Weight for the Mithrix bit event. Twitch Chat decides to enter your stage to stop you a little earlier in the run...|
+|`ElderLemurianWeight`|number|1|✔️|Weight for the Elder Lemurian bit event. Elder Lumerian's come from the void to try to stop you!|
 
 ## UI
 

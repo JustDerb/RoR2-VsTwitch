@@ -39,16 +39,10 @@ namespace VsTwitch
         {
             CombatSquad group = gameObject.AddComponent<CombatSquad>();
 
-            IDisposable chargingHandle = null;
-            if (director)
-            {
-                chargingHandle = director.CreateOpenTeleporterObjectiveHandle();
-            }
             group.onMemberLost += (master) =>
             {
                 if (group.memberCount == 0)
                 {
-                    chargingHandle?.Dispose();
                     Destroy(group);
                 }
             };
@@ -131,7 +125,6 @@ namespace VsTwitch
             if (!spawnedAny)
             {
                 Log.Error("Couldn't spawn any monster!");
-                chargingHandle?.Dispose();
                 Destroy(group);
                 return null;
             }
