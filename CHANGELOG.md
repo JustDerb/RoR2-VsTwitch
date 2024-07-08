@@ -1,5 +1,11 @@
 # Changelog
 
+### 1.0.16
+
+See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/14?closed=1
+
+* Removed teleporter lock for monster events. It was too confusing for people and sometimes it bugged out and ruined runs.
+
 ### 1.0.15
 
 See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/13?closed=1
