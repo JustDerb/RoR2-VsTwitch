@@ -6,6 +6,7 @@ using System.Collections;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.Networking;
+using VsTwitch.Events;
 
 namespace VsTwitch
 {

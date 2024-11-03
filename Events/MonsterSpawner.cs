@@ -1,8 +1,7 @@
 ﻿using RoR2;
-using System;
 using UnityEngine;
 
-namespace VsTwitch
+namespace VsTwitch.Events
 {
     /// <summary>
     /// Spawns monsters, as enemies or as allies. Iterate the <c>CombatSquad</c> to update individual monsters (like giving them items).
@@ -10,7 +9,7 @@ namespace VsTwitch
     /// </summary>
     class MonsterSpawner : MonoBehaviour
     {
-        public CombatSquad SpawnAllies(
+        public CombatSquad? SpawnAllies(
             string spawnCard,
             EliteIndex eliteIndex = EliteIndex.None,
             CharacterBody targetBody = null,
@@ -19,7 +18,7 @@ namespace VsTwitch
             return SpawnMonstersInternal(spawnCard, eliteIndex, targetBody, numMonsters, null, TeamIndex.Player);
         }
 
-        public CombatSquad SpawnMonsters(
+        public CombatSquad? SpawnMonsters(
             string spawnCard,
             EliteIndex eliteIndex = EliteIndex.None,
             CharacterBody targetBody = null,
@@ -29,12 +28,12 @@ namespace VsTwitch
             return SpawnMonstersInternal(spawnCard, eliteIndex, targetBody, numMonsters, director, TeamIndex.Monster);
         }
 
-        private CombatSquad SpawnMonstersInternal(
+        private CombatSquad? SpawnMonstersInternal(
             string spawnCard,
             EliteIndex eliteIndex,
             CharacterBody targetBody,
             int numMonsters,
-            EventDirector director,
+            EventDirector? director,
             TeamIndex teamIndex)
         {
             CombatSquad group = gameObject.AddComponent<CombatSquad>();
@@ -117,7 +116,8 @@ namespace VsTwitch
                     obj = DirectorCore.instance.TrySpawnObject(randomRequest);
                 }
 
-                if (obj) {
+                if (obj)
+                {
                     spawnedAny = true;
                 }
             }
@@ -154,7 +154,7 @@ namespace VsTwitch
                 }
 
                 EliteDef eliteDef = EliteCatalog.GetEliteDef(EliteIndex);
-                EquipmentIndex equipmentIndex = (eliteDef != null) ? eliteDef.eliteEquipmentDef.equipmentIndex : EquipmentIndex.None;
+                EquipmentIndex equipmentIndex = eliteDef != null ? eliteDef.eliteEquipmentDef.equipmentIndex : EquipmentIndex.None;
                 if (equipmentIndex != EquipmentIndex.None)
                 {
                     monster.inventory.SetEquipmentIndex(equipmentIndex);
@@ -171,7 +171,7 @@ namespace VsTwitch
                 monster.isBoss = IsBoss;
             }
         }
-        
+
 
         public class Monsters
         {

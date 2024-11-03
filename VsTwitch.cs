@@ -5,8 +5,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Security.Permissions;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
+using VsTwitch.Events;
 
 // Allow scanning for ConCommand, and other stuff for Risk of Rain 2
 [assembly: HG.Reflection.SearchableAttribute.OptIn]
@@ -25,9 +27,6 @@ namespace VsTwitch
         // This is only used for ConCommands, since they need to be static...
         public static VsTwitch Instance;
 
-        private TwitchManager twitchManager;
-        private BitsManager bitsManager;
-        private ChannelPointsManager channelPointsManager;
         private ItemRollerManager itemRollerManager;
         private LanguageOverride languageOverride;
         private EventDirector eventDirector;
@@ -148,11 +147,13 @@ namespace VsTwitch
             twitchManager.OnConnected += (sender, joinedChannel) => {
                 Log.Info($"Connected to Twitch! Watching {joinedChannel.Channel}...");
                 Chat.AddMessage($"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>Connected to Twitch!</color> Watching {joinedChannel.Channel}...");
+                return Task.CompletedTask;
             };
             twitchManager.OnDisconnected += (sender, disconnect) =>
             {
                 Log.Info("Disconnected from Twitch!");
                 Chat.AddMessage($"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>Disconnected from Twitch!</color>");
+                return Task.CompletedTask;
             };
             twitchManager.OnMessageReceived += TwitchManager_OnMessageReceived;
             twitchManager.OnRewardRedeemed += TwitchManager_OnRewardRedeemed;
@@ -402,10 +403,7 @@ namespace VsTwitch
             {
                 eventDirector.ClearEvents();
             }
-            if (itemRollerManager != null)
-            {
-                itemRollerManager.ClearVotes();
-            }
+            itemRollerManager?.ClearVotes();
         }
         #endregion
 
@@ -585,14 +583,14 @@ namespace VsTwitch
             }
         }
 
-        private void TwitchManager_OnMessageReceived(object sender, TwitchLib.Client.Events.OnMessageReceivedArgs e)
+        private Task TwitchManager_OnMessageReceived(object sender, TwitchLib.Client.Events.OnMessageReceivedArgs e)
         {
             try
             {
                 if (!NetworkServer.active)
                 {
                     Log.Warning("[Server] Server not active");
-                    return;
+                    return Task.CompletedTask;
                 }
 
                 string msg = e.ChatMessage.Message.Trim();
@@ -613,7 +611,7 @@ namespace VsTwitch
                 {
                     if (!eventDirector || !eventFactory)
                     {
-                        return;
+                        return Task.CompletedTask;
                     }
 
                     switch (msgParts[0])
@@ -715,6 +713,7 @@ namespace VsTwitch
             {
                 Log.Error(ex);
             }
+            return Task.CompletedTask;
         }
 
         private void GiveRustedKey(string name)
@@ -752,7 +751,7 @@ namespace VsTwitch
             var name = msgParts.Length > 1 ? msgParts[1] : defaultUsername;
             if (name.StartsWith("@"))
             {
-                name = name.Substring(1);
+                name = name[1..];
             }
             return name;
         }
@@ -858,7 +857,7 @@ namespace VsTwitch
             }
         }
 
-        private void HealthComponent_Suicide(On.RoR2.HealthComponent.orig_Suicide orig, HealthComponent self, GameObject killerOverride, GameObject inflictorOverride, DamageType damageType)
+        private void HealthComponent_Suicide(On.RoR2.HealthComponent.orig_Suicide orig, HealthComponent self, GameObject killerOverride, GameObject inflictorOverride, DamageTypeCombo damageType)
         {
             if (!NetworkServer.active)
             {
@@ -866,12 +865,12 @@ namespace VsTwitch
                 return;
             }
 
-            SpawnedMonster spawned = self.body?.master?.GetComponent<SpawnedMonster>();
-            if (spawned && spawned.suicideProtection > 0)
+            SpawnedMonster? spawned = self.body?.master?.GetComponent<SpawnedMonster>();
+            if (spawned != null && spawned.suicideProtection > 0)
             {
                 // Don't actually suicide
                 spawned.suicideProtection--;
-                Log.Info($"Prevented suicide of {self.body.master}");
+                Log.Info($"Prevented suicide of {self.body?.master}");
                 return;
             }
             else
@@ -885,8 +884,8 @@ namespace VsTwitch
             CharacterBody body = other.GetComponent<CharacterBody>();
             if (body && body.currentVehicle == null)
             {
-                SpawnedMonster spawnedMonster = body.master?.GetComponent<SpawnedMonster>();
-                if (spawnedMonster && spawnedMonster.teleportWhenOOB &&
+                SpawnedMonster? spawnedMonster = body.master?.GetComponent<SpawnedMonster>();
+                if (spawnedMonster != null && spawnedMonster.teleportWhenOOB &&
                     NetworkServer.active &&
                     self.zoneType == MapZone.ZoneType.OutOfBounds &&
                     body.teamComponent.teamIndex == TeamIndex.Monster &&

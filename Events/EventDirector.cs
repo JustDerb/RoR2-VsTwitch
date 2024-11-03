@@ -2,12 +2,10 @@
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
-using System.Reflection;
-using System.Threading;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace VsTwitch
+namespace VsTwitch.Events
 {
     /// <summary>
     /// The Event Director handles async events and ensures that they fire only during active stage runs.
@@ -64,7 +62,8 @@ namespace VsTwitch
                 return;
             }
 
-            if (eventQueue.TryTake(out Func<EventDirector, IEnumerator> currentEvent)) {
+            if (eventQueue.TryTake(out Func<EventDirector, IEnumerator> currentEvent))
+            {
                 try
                 {
                     StartCoroutine(Wrap(currentEvent(this)));
@@ -80,13 +79,14 @@ namespace VsTwitch
         /// Add event to be processed by the director
         /// </summary>
         /// <param name="eventToQueue">Function, that when called, will return an iterable that can be processed.</param>
-        public void AddEvent(Func<EventDirector, IEnumerator> eventToQueue) {
+        public void AddEvent(Func<EventDirector, IEnumerator> eventToQueue)
+        {
             eventQueue.Add(eventToQueue);
         }
 
         public void ClearEvents()
         {
-            while(eventQueue.TryTake(out _)) {}
+            while (eventQueue.TryTake(out _)) { }
         }
 
         private IEnumerator Wrap(IEnumerator coroutine)
