@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
+		<TargetFramework>netstandard2.1</TargetFramework>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
 		<AssemblyName>VsTwitch</AssemblyName>
@@ -11,84 +11,100 @@
 		<PackageReference Include="BepInEx.Analyzers" Version="1.0.*">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<ExcludeAssets></ExcludeAssets>
 		</PackageReference>
 		<PackageReference Include="BepInEx.Core" Version="5.4.21">
 			<PrivateAssets></PrivateAssets>
+			<ExcludeAssets>runtime</ExcludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
-		<PackageReference Include="R2API.Items" Version="1.0.*" />
-		<PackageReference Include="R2API.Language" Version="1.0.*" />
-		<PackageReference Include="RiskOfRain2.GameLibs" Version="1.2.4-r.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.0" />
+		<PackageReference Include="RiskOfRain2.GameLibs" Version="1.3.4-r.1">
+		  <ExcludeAssets>runtime</ExcludeAssets>
+		</PackageReference>
+		<PackageReference Include="Unity.Microsoft.Logging" Version="5.11.1" />
 		<PackageReference Include="UnityEngine.Modules" Version="2019.4.26">
 			<PrivateAssets>none</PrivateAssets>
+			<ExcludeAssets>runtime</ExcludeAssets>
 		</PackageReference>
-		<PackageReference Include="MMHOOK.RoR2" Version="2022.9.20">
+		<PackageReference Include="MMHOOK.RoR2" Version="2024.9.18">
 			<NoWarn>NU1701</NoWarn>
+			<ExcludeAssets>runtime</ExcludeAssets>
 		</PackageReference>
 	</ItemGroup>
 
 	<ItemGroup>
+		<Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
+		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+		</Reference>
+		<Reference Include="Microsoft.Extensions.Logging.Abstractions">
+		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+		</Reference>
 		<Reference Include="RiskOfOptions">
 		  <!-- Pull from RoR2 Mod Manager -->
 		  <HintPath>..\..\..\..\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Testing\BepInEx\plugins\Rune580-Risk_Of_Options\RiskOfOptions\RiskOfOptions.dll</HintPath>
+		  <Private>False</Private>
+		</Reference>
+		<Reference Include="System.Diagnostics.DiagnosticSource">
+		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\System.Diagnostics.DiagnosticSource.dll</HintPath>
+		</Reference>
+		<Reference Include="System.Runtime.CompilerServices.Unsafe">
+		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+		</Reference>
+		<Reference Include="System.Runtime.Numerics">
+		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\System.Runtime.Numerics.dll</HintPath>
+		</Reference>
+		<Reference Include="System.Security.Cryptography.OpenSsl">
+		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\System.Security.Cryptography.OpenSsl.dll</HintPath>
 		</Reference>
 		<Reference Include="Tiltify-Client">
 			<!-- Compile from https://github.com/JustDerb/Tiltify-Client -->
 			<HintPath>..\Tiltify-Client\bin\Release\netstandard2.0\Tiltify-Client.dll</HintPath>
+			<Private>True</Private>
 		</Reference>
 		<Reference Include="TwitchLib.Api">
-			<HintPath>lib\TwitchLib.Api.dll</HintPath>
+		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.Api.dll</HintPath>
 		</Reference>
 		<Reference Include="TwitchLib.Api.Core">
-			<HintPath>lib\TwitchLib.Api.Core.dll</HintPath>
+		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.Api.Core.dll</HintPath>
 		</Reference>
 		<Reference Include="TwitchLib.Api.Core.Enums">
-			<HintPath>lib\TwitchLib.Api.Core.Enums.dll</HintPath>
+		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.Api.Core.Enums.dll</HintPath>
 		</Reference>
 		<Reference Include="TwitchLib.Api.Core.Interfaces">
-			<HintPath>lib\TwitchLib.Api.Core.Interfaces.dll</HintPath>
+		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.Api.Core.Interfaces.dll</HintPath>
 		</Reference>
 		<Reference Include="TwitchLib.Api.Core.Models">
-			<HintPath>lib\TwitchLib.Api.Core.Models.dll</HintPath>
+		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.Api.Core.Models.dll</HintPath>
 		</Reference>
 		<Reference Include="TwitchLib.Api.Helix">
-			<HintPath>lib\TwitchLib.Api.Helix.dll</HintPath>
+		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.Api.Helix.dll</HintPath>
 		</Reference>
 		<Reference Include="TwitchLib.Api.Helix.Models">
-			<HintPath>lib\TwitchLib.Api.Helix.Models.dll</HintPath>
-		</Reference>
-		<Reference Include="TwitchLib.Api.V5">
-			<HintPath>lib\TwitchLib.Api.V5.dll</HintPath>
-		</Reference>
-		<Reference Include="TwitchLib.Api.V5.Models">
-			<HintPath>lib\TwitchLib.Api.V5.Models.dll</HintPath>
+		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.Api.Helix.Models.dll</HintPath>
 		</Reference>
 		<Reference Include="TwitchLib.Client">
-			<HintPath>lib\TwitchLib.Client.dll</HintPath>
+		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.Client.dll</HintPath>
 		</Reference>
 		<Reference Include="TwitchLib.Client.Enums">
-			<HintPath>lib\TwitchLib.Client.Enums.dll</HintPath>
+		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.Client.Enums.dll</HintPath>
 		</Reference>
 		<Reference Include="TwitchLib.Client.Models">
-			<HintPath>lib\TwitchLib.Client.Models.dll</HintPath>
+		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.Client.Models.dll</HintPath>
 		</Reference>
 		<Reference Include="TwitchLib.Communication">
-			<HintPath>lib\TwitchLib.Communication.dll</HintPath>
+		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.Communication.dll</HintPath>
 		</Reference>
 		<Reference Include="TwitchLib.PubSub">
-			<HintPath>lib\TwitchLib.PubSub.dll</HintPath>
+		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.PubSub.dll</HintPath>
 		</Reference>
 		<Reference Include="TwitchLib.Unity">
-			<HintPath>lib\TwitchLib.Unity.dll</HintPath>
+		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.Unity.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Exec Command="echo &quot;Installing mod in Testing profile&quot;" />
-		<Exec Command="copy /Y $(ProjectDir)$(OutDir)VsTwitch.dll $(ProjectDir)..\..\..\..\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Testing\BepInEx\plugins\JustDerb-Vs_Twitch\" />
-		<Exec Command="copy /Y $(ProjectDir)$(OutDir)TwitchLib.* $(ProjectDir)..\..\..\..\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Testing\BepInEx\plugins\JustDerb-Vs_Twitch\" />
-		<Exec Command="copy /Y $(ProjectDir)$(OutDir)Tiltify-Client.dll $(ProjectDir)..\..\..\..\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Testing\BepInEx\plugins\JustDerb-Vs_Twitch\" />
-		<Exec Command="copy /Y $(ProjectDir)$(OutDir)Microsoft.Extensions.Logging.Abstractions.dll $(ProjectDir)..\..\..\..\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Testing\BepInEx\plugins\JustDerb-Vs_Twitch\" />
+		<Exec Command="copy /Y $(ProjectDir)$(OutDir)*.dll $(ProjectDir)..\..\..\..\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Testing\BepInEx\plugins\JustDerb-Vs_Twitch\" />
 
 		<Exec Command="copy /Y $(ProjectDir)icon.png $(ProjectDir)..\..\..\..\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Testing\BepInEx\plugins\JustDerb-Vs_Twitch\" />
 		<Exec Command="copy /Y $(ProjectDir)manifest.json $(ProjectDir)..\..\..\..\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Testing\BepInEx\plugins\JustDerb-Vs_Twitch\" />

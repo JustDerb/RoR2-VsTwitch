@@ -72,7 +72,7 @@ namespace VsTwitch
                 Destroy(group);
                 return null;
             }
-            card.directorCreditCost = 0;
+            
             SpawnFinalizer finalizer = new SpawnFinalizer()
             {
                 CombatSquad = group,

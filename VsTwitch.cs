@@ -4,9 +4,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Security.Permissions;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
+using static UnityEngine.UIElements.MeshGenerationContextUtils;
+using UnityEngine.XR;
+using System.Text;
 
 // Allow scanning for ConCommand, and other stuff for Risk of Rain 2
 [assembly: HG.Reflection.SearchableAttribute.OptIn]
@@ -32,9 +37,7 @@ namespace VsTwitch
         private LanguageOverride languageOverride;
         private EventDirector eventDirector;
         private EventFactory eventFactory;
-
         private TiltifyManager tiltifyManager;
-
         private Configuration configuration;
 
         /// <summary>
@@ -45,13 +48,15 @@ namespace VsTwitch
         /// </summary>
         private static void DumpAssemblies()
         {
-            Log.Error("===== DUMPING ASSEMBLY INFORMATION =====");
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("===== DUMPING ASSEMBLY INFORMATION =====");
             AppDomain currentDomain = AppDomain.CurrentDomain;
             foreach (var assembly in currentDomain.GetAssemblies())
             {
-                Log.Error($"{assembly.FullName}, {assembly.Location}");
+                sb.AppendLine($"{assembly.FullName}, {assembly.Location}");
             }
-            Log.Error("===== FINISHED DUMPING ASSEMBLY INFORMATION =====");
+            sb.AppendLine("===== FINISHED DUMPING ASSEMBLY INFORMATION =====");
+            Log.Error(sb.ToString());
         }
 
         #region "Constructors/Destructors"
@@ -145,19 +150,23 @@ namespace VsTwitch
             bitsManager.BitGoal = configuration.BitsThreshold.Value;
             bitsManager.OnUpdateBits += BitsManager_OnUpdateBits;
 
-            twitchManager.OnConnected += (sender, joinedChannel) => {
+            twitchManager.OnConnected += (sender, joinedChannel) =>
+            {
                 Log.Info($"Connected to Twitch! Watching {joinedChannel.Channel}...");
                 Chat.AddMessage($"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>Connected to Twitch!</color> Watching {joinedChannel.Channel}...");
+                return Task.CompletedTask;
             };
             twitchManager.OnDisconnected += (sender, disconnect) =>
             {
                 Log.Info("Disconnected from Twitch!");
                 Chat.AddMessage($"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>Disconnected from Twitch!</color>");
+                return Task.CompletedTask;
             };
             twitchManager.OnMessageReceived += TwitchManager_OnMessageReceived;
             twitchManager.OnRewardRedeemed += TwitchManager_OnRewardRedeemed;
 
-            tiltifyManager.OnConnected += (sender, e) => {
+            tiltifyManager.OnConnected += (sender, e) => 
+            {
                 Log.Info($"Connected to Tiltify!");
                 Chat.AddMessage($"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>Connected to Tiltify!</color>");
             };
@@ -171,11 +180,11 @@ namespace VsTwitch
 
         private void SetUpChannelPoints()
         {
-            void UsedChannelPoints(TwitchLib.PubSub.Events.OnRewardRedeemedArgs e)
+            void UsedChannelPoints(TwitchLib.PubSub.Events.OnChannelPointsRewardRedeemedArgs e)
             {
                 eventDirector.AddEvent(eventFactory.BroadcastChat(new Chat.SimpleChatMessage()
                 {
-                    baseToken = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>{Util.EscapeRichTextForTextMeshPro(e.DisplayName)} used their channel points ({e.RewardCost:N0}).</color>"
+                    baseToken = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>{Util.EscapeRichTextForTextMeshPro(e.RewardRedeemed.Redemption.User.DisplayName)} used their channel points ({e.RewardRedeemed.Redemption.Reward.Cost:N0}).</color>"
                 }));
             }
 
@@ -184,7 +193,7 @@ namespace VsTwitch
             if (channelPointsManager.RegisterEvent(configuration.ChannelPointsAllyBeetle.Value, (manager, e) =>
             {
                 eventDirector.AddEvent(eventFactory.CreateAlly(
-                    e.DisplayName,
+                    e.RewardRedeemed.Redemption.User.DisplayName,
                     MonsterSpawner.Monsters.Beetle,
                     RollForElite(true)));
             }))
@@ -199,7 +208,7 @@ namespace VsTwitch
             if (channelPointsManager.RegisterEvent(configuration.ChannelPointsAllyLemurian.Value, (manager, e) =>
             {
                 eventDirector.AddEvent(eventFactory.CreateAlly(
-                    e.DisplayName,
+                    e.RewardRedeemed.Redemption.User.DisplayName,
                     MonsterSpawner.Monsters.Lemurian,
                     RollForElite(true)));
             }))
@@ -214,7 +223,7 @@ namespace VsTwitch
             if (channelPointsManager.RegisterEvent(configuration.ChannelPointsAllyElderLemurian.Value, (manager, e) =>
             {
                 eventDirector.AddEvent(eventFactory.CreateAlly(
-                    e.DisplayName,
+                    e.RewardRedeemed.Redemption.User.DisplayName,
                     MonsterSpawner.Monsters.LemurianBruiser,
                     RollForElite(true)));
             }))
@@ -228,7 +237,7 @@ namespace VsTwitch
 
             if (channelPointsManager.RegisterEvent(configuration.ChannelPointsRustedKey.Value, (manager, e) =>
             {
-                GiveRustedKey(e.DisplayName);
+                GiveRustedKey(e.RewardRedeemed.Redemption.User.DisplayName);
             }))
             {
                 Log.Info($"Successfully registered Channel Points event: Rusted Key ({configuration.ChannelPointsRustedKey.Value})");
@@ -585,14 +594,14 @@ namespace VsTwitch
             }
         }
 
-        private void TwitchManager_OnMessageReceived(object sender, TwitchLib.Client.Events.OnMessageReceivedArgs e)
+        private Task TwitchManager_OnMessageReceived(object sender, TwitchLib.Client.Events.OnMessageReceivedArgs e)
         {
             try
             {
                 if (!NetworkServer.active)
                 {
                     Log.Warning("[Server] Server not active");
-                    return;
+                    return Task.CompletedTask;
                 }
 
                 string msg = e.ChatMessage.Message.Trim();
@@ -609,11 +618,11 @@ namespace VsTwitch
                     RecievedBits(e.ChatMessage.DisplayName, e.ChatMessage.Bits);
                 }
 
-                if (e.ChatMessage.IsMe || e.ChatMessage.IsModerator || e.ChatMessage.IsBroadcaster)
+                if (e.ChatMessage.IsMe || e.ChatMessage.UserDetail.IsModerator || e.ChatMessage.IsBroadcaster)
                 {
                     if (!eventDirector || !eventFactory)
                     {
-                        return;
+                        return Task.CompletedTask;
                     }
 
                     switch (msgParts[0])
@@ -715,6 +724,7 @@ namespace VsTwitch
             {
                 Log.Error(ex);
             }
+            return Task.CompletedTask;
         }
 
         private void GiveRustedKey(string name)
@@ -726,19 +736,19 @@ namespace VsTwitch
             eventDirector.AddEvent(eventFactory.SpawnItem(PickupCatalog.FindPickupIndex(RoR2Content.Items.TreasureCache.itemIndex)));
         }
 
-        private void TwitchManager_OnRewardRedeemed(object sender, TwitchLib.PubSub.Events.OnRewardRedeemedArgs e)
+        private void TwitchManager_OnRewardRedeemed(object sender, TwitchLib.PubSub.Events.OnChannelPointsRewardRedeemedArgs e)
         {
             try
             {
                 if (!configuration.ChannelPointsEnable.Value)
                 {
-                    Log.Warning($"Channel points disabled - Could not trigger event for Channel Points Redemption: {e.RewardTitle}");
+                    Log.Warning($"Channel points disabled - Could not trigger event for Channel Points Redemption: {e.RewardRedeemed.Redemption.Reward.Title}");
                     return;
                 }
                 if (channelPointsManager != null)
                 {
                     bool triggered = channelPointsManager.TriggerEvent(e);
-                    Log.Info($"Channel Points Redemption: {e.RewardTitle} (Event triggered: {triggered})");
+                    Log.Info($"Channel Points Redemption: {e.RewardRedeemed.Redemption.Reward.Title} (Event triggered: {triggered})");
                 }
             }
             catch (Exception ex)
@@ -858,7 +868,7 @@ namespace VsTwitch
             }
         }
 
-        private void HealthComponent_Suicide(On.RoR2.HealthComponent.orig_Suicide orig, HealthComponent self, GameObject killerOverride, GameObject inflictorOverride, DamageType damageType)
+        private void HealthComponent_Suicide(On.RoR2.HealthComponent.orig_Suicide orig, HealthComponent self, GameObject killerOverride, GameObject inflictorOverride, DamageTypeCombo damageType)
         {
             if (!NetworkServer.active)
             {

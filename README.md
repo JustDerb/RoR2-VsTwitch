@@ -32,7 +32,7 @@ accordingly when needed. Below you'll see a column for what configurations can b
 |------|----|-------|-------------|-----|
 |`Channel`|text||✔️|The channel to monitor Twitch chat|
 |`Username`|text||✔️|The username to use when calling Twitch APIs. If you aren't using a secondary account, this should be the same as `Channel`|
-|`ImplicitOAuth`|text||❌|The "password" to access Twitch APIs. **Please visit [twitchapps.com][1] to get the password to put here.** Note that this password is not sent to any servers other than Twitch to authenticate. **DO NOT GIVE THIS TO ANYONE.** To revoke this password, go to [Twitch Connections Settings][2] and Disconnect the app named "Twitch Chat OAuth Token Generator".|
+|`ImplicitOAuth`|text||❌|The "password" to access Twitch APIs. **Please visit [twitchapps.com][1] to get the password to put here.** Note that this password is not sent to any servers other than Twitch to authenticate. **DO NOT GIVE THIS TO ANYONE.** To revoke this password, go to [Twitch Connections Settings][2] and Disconnect the app named "Twitch Token Generator by swiftyspiffy".|
 |`DebugLogs`|true/false|false|✔️|Enable debug logging for Twitch - will spam to the console!|
 |`ClientID`|text|q6batx0epp608isickayubi39itsckt|❌|The client ID of the app that you used to populate the `ImplicitOAuth` field. If you used [twitchapps.com][1] this would be the default value. If you used another Twitch app, this needs to be changed accordingly.|
 |`EnableItemVoting`|true/false|true|✔️|Enables the main feature of this mod. Disable it if you only want to enable bit interactions.|
@@ -42,12 +42,12 @@ accordingly when needed. Below you'll see a column for what configurations can b
 |`CurrentBits`|number|0|❌|**Do not edit this field.** Used as storage whenever someone donates bits so that restarting the game doesn't clear the donation count.|
 |`PublishToChat`|true/false|true|✔️|Publish events (like voting) to Twitch chat.|
 
-[1]: https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=q6batx0epp608isickayubi39itsckt&redirect_uri=https://twitchapps.com/tmi/&scope=channel_subscriptions+user_subscriptions+channel_check_subscription+bits:read+chat:read+chat:edit+channel:read:redemptions+channel:read:hype_train
+[1]: https://twitchtokengenerator.com/quick/Bt3H1fq9dl
 [2]: https://www.twitch.tv/settings/connections
 
 ### Help, I accidentally gave someone my `ImplicitOAuth` token!
 
-To revoke this password, go to [Twitch Connections Settings][2] and Disconnect the app named "Twitch Chat OAuth Token Generator". You can then regenerate a new token via [twitchapps.com][1] and put it in the config; but, keep it safe this time!
+To revoke this password, go to [Twitch Connections Settings][2] and Disconnect the app named "Twitch Token Generator by swiftyspiffy". You can then regenerate a new token via [twitchapps.com][1] and put it in the config; but, keep it safe this time!
 
 ## Tiltify
 

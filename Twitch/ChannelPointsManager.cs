@@ -6,14 +6,14 @@ namespace VsTwitch
 {
     class ChannelPointsManager
     {
-        private readonly Dictionary<string, Action<ChannelPointsManager, OnRewardRedeemedArgs>> channelEvents;
+        private readonly Dictionary<string, Action<ChannelPointsManager, OnChannelPointsRewardRedeemedArgs>> channelEvents;
 
         public ChannelPointsManager()
         {
-            channelEvents = new Dictionary<string, Action<ChannelPointsManager, OnRewardRedeemedArgs>>();
+            channelEvents = new Dictionary<string, Action<ChannelPointsManager, OnChannelPointsRewardRedeemedArgs>>();
         }
 
-        public bool RegisterEvent(string eventName, Action<ChannelPointsManager, OnRewardRedeemedArgs> e) {
+        public bool RegisterEvent(string eventName, Action<ChannelPointsManager, OnChannelPointsRewardRedeemedArgs> e) {
             if (string.IsNullOrWhiteSpace(eventName))
             {
                 return false;
@@ -34,16 +34,17 @@ namespace VsTwitch
             return true;
         }
 
-        public bool TriggerEvent(OnRewardRedeemedArgs e)
+        public bool TriggerEvent(OnChannelPointsRewardRedeemedArgs e)
         {
-            if (!channelEvents.ContainsKey(e.RewardTitle))
+            string title = e.RewardRedeemed.Redemption.Reward.Title;
+            if (!channelEvents.ContainsKey(title))
             {
                 return false;
             }
 
             try
             {
-                channelEvents[e.RewardTitle](this, e);
+                channelEvents[title](this, e);
                 return true;
             }
             catch (Exception ex)
