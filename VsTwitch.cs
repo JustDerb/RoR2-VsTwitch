@@ -4,13 +4,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Security.Permissions;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
-using static UnityEngine.UIElements.MeshGenerationContextUtils;
-using UnityEngine.XR;
 using System.Text;
 
 // Allow scanning for ConCommand, and other stuff for Risk of Rain 2
@@ -25,7 +22,7 @@ namespace VsTwitch
         private static readonly char[] SPACE = new char[] { ' ' };
         public const string GUID = "com.justinderby.vstwitch";
         public const string ModName = "VsTwitch";
-        public const string Version = "1.0.16";
+        public const string Version = "1.0.17";
 
         // This is only used for ConCommands, since they need to be static...
         public static VsTwitch Instance;
