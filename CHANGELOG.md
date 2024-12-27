@@ -1,5 +1,13 @@
 # Changelog
 
+### 1.0.17
+
+See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/15?closed=1
+
+* Fixed Channel Points not working.
+* Fixed monster spawns reducing the cost for the Director to 0, which would cause an explosion of enemies of that type to spawn (in elite form).
+* 
+
 ### 1.0.16
 
 See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/14?closed=1

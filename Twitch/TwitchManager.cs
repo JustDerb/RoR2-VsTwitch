@@ -10,6 +10,7 @@ using TwitchLib.Communication.Events;
 using TwitchLib.PubSub.Events;
 using TwitchLib.Unity;
 using UnityEngine;
+using VsTwitch.Twitch.Auth;
 
 namespace VsTwitch
 {
@@ -19,7 +20,8 @@ namespace VsTwitch
     class TwitchManager
     {
         private Client TwitchClient = null;
-        private Api TwitchApi = null;
+        //private Api TwitchApi = null;
+        private AuthManager Auth = null;
         private PubSub TwitchPubSub = null;
         private string Channel;
         public string Username { get; private set; }
@@ -58,17 +60,21 @@ namespace VsTwitch
             Username = username;
 
             LogDebug("[Twitch API] Creating...");
-            TwitchApi = new Api();
-            string twitchApiOauthToken = oauthToken;
-            if (twitchApiOauthToken.StartsWith("oauth:"))
-            {
-                twitchApiOauthToken = twitchApiOauthToken.Substring("oauth:".Length);
-            }
-            TwitchApi.Settings.AccessToken = twitchApiOauthToken;
-            TwitchApi.Settings.ClientId = clientId;
+            ILoggerFactory loggerFactory = Log.CreateLoggerFactory((type, category, logLevel) => DebugLogs);
+            // TwitchApi = new Api();
+            Auth = new AuthManager("", loggerFactory);
+            //string twitchApiOauthToken = oauthToken;
+            //if (twitchApiOauthToken.StartsWith("oauth:"))
+            //{
+            //    twitchApiOauthToken = twitchApiOauthToken.Substring("oauth:".Length);
+            //}
+            //TwitchApi.Settings.AccessToken = twitchApiOauthToken;
+            //TwitchApi.Settings.ClientId = clientId;
+            LogDebug("Authing...");
+            Auth.MaybeAuthUser().GetAwaiter().GetResult();
             string channelId = null;
             LogDebug("[Twitch API] Trying to find channel ID...");
-            Task<TwitchLib.Api.Helix.Models.Users.GetUsers.GetUsersResponse> response = TwitchApi.Helix.Users.GetUsersAsync(null,
+            Task<TwitchLib.Api.Helix.Models.Users.GetUsers.GetUsersResponse> response = Auth.TwitchAPI.Helix.Users.GetUsersAsync(null,
                 new List<string>(new string[] { channel }));
             response.Wait(5000);
 
@@ -82,7 +88,7 @@ namespace VsTwitch
             {
                 throw new ArgumentException($"Couldn't find Twitch user/channel {channel}!");
             }
-
+            
             LogDebug("[Twitch Client] Creating...");
             ConnectionCredentials credentials = new ConnectionCredentials(username, oauthToken);
             TwitchClient = new Client();
@@ -101,12 +107,6 @@ namespace VsTwitch
 
             if (channelId != null && channelId.Trim().Length != 0)
             {
-                ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
-                {
-                    builder
-                        .AddFilter((type, category, logLevel) => this.DebugLogs)
-                        .AddConsole();
-                });
                 ILogger<PubSub> logger = loggerFactory.CreateLogger<PubSub>();
                 logger.LogError("Created internal Twitch PubSub logger");
 
@@ -118,7 +118,7 @@ namespace VsTwitch
                     Log.Info("[Twitch PubSub] Sending topics to listen too...");
                     TwitchPubSub.ListenToChannelPoints(channelId);
                     TwitchPubSub.ListenToBitsEventsV2(channelId);
-                    TwitchPubSub.SendTopicsAsync(twitchApiOauthToken);
+                    TwitchPubSub.SendTopicsAsync(Auth.TwitchAPI.Settings.AccessToken);
                 };
                 TwitchPubSub.OnPubSubServiceError += (sender, e) =>
                 {
@@ -161,10 +161,10 @@ namespace VsTwitch
                 TwitchClient.DisconnectAsync();
                 TwitchClient = null;
             }
-            if (TwitchApi != null)
-            {
-                TwitchApi = null;
-            }
+            //if (TwitchApi != null)
+            //{
+            //    TwitchApi = null;
+            //}
         }
 
         public bool IsConnected()

@@ -1,5 +1,7 @@
 ﻿
+using System;
 using BepInEx.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace VsTwitch
 {
@@ -10,6 +12,17 @@ namespace VsTwitch
         internal static void Init(ManualLogSource logSource)
         {
             _logSource = logSource;
+        }
+
+        internal static ILoggerFactory CreateLoggerFactory(Func<string?, string?, Microsoft.Extensions.Logging.LogLevel, bool> filter)
+        {
+            ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder
+                    .AddFilter(filter)
+                    .AddConsole();
+            });
+            return loggerFactory;
         }
 
         internal static void Debug(object data) => _logSource.LogDebug(data);
