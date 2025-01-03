@@ -63,29 +63,29 @@ namespace VsTwitch.Twitch.Auth
             "channel:read:hype_train",
         }.AsReadOnly();
 
-        public readonly static string TwitchClientId = "ms931m917okbj4hu8l230hejiagie0";
         private readonly static string TwitchRedirectUri = "http://localhost:9876/auth/redirect/";
 
-        private HttpListener listener;
+        private readonly string twitchClientId;
+        private readonly HttpListener listener;
 
-        public WebServer()
+        public WebServer(string twitchClientId)
         {
+            this.twitchClientId = twitchClientId;
             listener = new HttpListener();
             listener.Prefixes.Add(TwitchRedirectUri);
         }
 
         public void Listen()
         {
+            Log.Info($"Web Server listening on {string.Join(", ", listener.Prefixes)}");
             listener.Start();
         }
 
-        public async Task<Models.Authorization> OnRequest()
+        public async Task<Models.Authorization> GetAuthorization()
         {
             while (listener.IsListening)
             {
-                Log.Info($"Waiting for callback");
                 var ctx = await listener.GetContextAsync().ConfigureAwait(false);
-                Log.Info($"Got request!");
                 var req = ctx.Request;
                 var res = ctx.Response;
 
@@ -93,18 +93,17 @@ namespace VsTwitch.Twitch.Auth
 
                 if (req.QueryString.AllKeys.Any("error".Contains))
                 {
-                    Log.Info($"Got error from Twitch");
+                    Log.Info($"Got error from Twitch: {req.QueryString["error_description"]}");
                     WriteResponse(res, responseContent.Replace("{{content}}",
                         "<h1>Error!</h1>\n" +
                         $"<p>The VS Twitch integration authorization encountered a problem: {HttpUtility.HtmlEncode(req.QueryString["error_description"])}<p>\n"
                     ), 400);
-                    throw new InvalidOperationException($"error authorizing app: {req.QueryString["error_description"]}");
+                    throw new InvalidOperationException($"Error authorizing app: {req.QueryString["error_description"]}");
                 }
 
                 string hashHeader = req.Headers["hash"];
                 if (hashHeader == null) {
                     // First page load, coming from Twitch
-                    Log.Info($"First page!");
                     WriteResponse(res, responseContent.Replace("{{content}}", MainBodyResponse));
                     continue;
                 }
@@ -113,7 +112,6 @@ namespace VsTwitch.Twitch.Auth
                 // Make sure we've POST'd it
                 if (!string.Equals(req.HttpMethod, "post", StringComparison.OrdinalIgnoreCase))
                 {
-                    Log.Info($"Second load not a POST!");
                     WriteResponse(res, "", 405);
                     continue;
                 }
@@ -133,7 +131,6 @@ namespace VsTwitch.Twitch.Auth
                     continue;
                 }
 
-                Log.Info($"GOT IT!");
                 WriteResponse(res, "{}", 200, "application/json");
                 return new Models.Authorization(accessToken);
             }
@@ -153,6 +150,8 @@ namespace VsTwitch.Twitch.Auth
 
         public void Dispose()
         {
+            Log.Info("Web Server stopping");
+            listener.Abort();
             listener.Close();
         }
 
@@ -166,7 +165,7 @@ namespace VsTwitch.Twitch.Auth
             var scopesStr = string.Join('+', MinimumScopes);
 
             return "https://id.twitch.tv/oauth2/authorize" +
-                   $"?client_id={TwitchClientId}" +
+                   $"?client_id={twitchClientId}" +
                    $"&redirect_uri={HttpUtility.UrlEncode(TwitchRedirectUri)}" +
                    "&response_type=token" +
                    $"&scope={scopesStr}" +

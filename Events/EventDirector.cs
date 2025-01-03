@@ -2,8 +2,6 @@
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
-using System.Reflection;
-using System.Threading;
 using UnityEngine;
 using UnityEngine.Networking;
 

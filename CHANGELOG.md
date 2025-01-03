@@ -1,12 +1,16 @@
 # Changelog
 
-### 1.0.17
+### 1.1.0
 
 See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/15?closed=1
 
-* Fixed Channel Points not working.
+* **Major Change**: Twitch authorization is now done via a new process: the web browser! Your OAuth token should never be exposed in any UI (or the mod manager)!
+* `Risk_Of_Options` is now a hard dependency.
+* `R2API_Language` is now a hard dependency.
+* Removed old Twitch OAuth config values.
+* Fixed Channel Points not working. Previously: The client listened to the new topic, but the code registered only to the old one, making it completely broken.
 * Fixed monster spawns reducing the cost for the Director to 0, which would cause an explosion of enemies of that type to spawn (in elite form).
-* 
+* Removed Language override feature - this was messing up translations and was a fun thing during v0, but was more of a nusance then anything.
 
 ### 1.0.16
 

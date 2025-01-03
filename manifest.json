@@ -1,11 +1,12 @@
 ﻿{
     "name": "Vs_Twitch",
-    "version_number": "1.0.17",
+    "version_number": "1.1.0",
     "website_url": "https://github.com/JustDerb/RoR2-VsTwitch",
     "description": "Fight Twitch chat. Item voting, bit events, channel points integration, and more! Now with Tiltify support!",
     "dependencies": [
         "bbepis-BepInExPack-5.4.2114",
         "RiskofThunder-HookGenPatcher-1.2.3",
-        "Rune580-Risk_Of_Options-2.8.2"
+        "Rune580-Risk_Of_Options-2.8.2",
+        "RiskofThunder-R2API_Language-1.0.1"
     ]
 }

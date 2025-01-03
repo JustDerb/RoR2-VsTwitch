@@ -2,62 +2,37 @@
 
 **This is a server-side mod! Only the host needs this mod installed!**
 
-Tired of having your Twitch audience watch run after run after run without them being able to meaningful interact with you in-game? Look no further, as this mod allows your audience to become the "randomness", the "aggressor", and... Mithrix.
+Tired of having your Twitch audience watch run after run after run without them being able to meaningful interact with you in-game? Look no further, as this mod allows your audience to become the "randomness", the "aggressor", or the "savior".
 
-Will your chat help you along your journey, or try to stop your run early? Chat can influence what drops you get from chests, as well as donating [Twitch Bits](https://www.twitch.tv/bits) to create random events you must fight through to survive.
+Will your chat help you along your journey, or try to stop your run early? Chat can influence what drops you get from chests, as well as donating [Twitch Bits](https://www.twitch.tv/bits) or using Channel Points (for Twitch Affiliates) to create random events you must fight through to survive.
 
 ## First Time Setup
 
-1. Launch the game so that the configuration file is created for the first time. **Exit the game.**
-2. Edit the configuration file to suite your needs. See the Configuration tables below for more info.
-   * Currently, `Channel`, and `ImplicitOAuth` need to be filled out at a minimum (if you use nothing but the default values for the mod) from the "Twitch" section.
-   * `ImplicitOAuth` is a password and **SHOULD NOT** be shown on stream!
-4. Launch the game (hint: you might want to watch the intro scene one more time...)
+1. Launch the game and once you load into a single player or multiplayer lobby (as host), the mod will walk you through authorizing to Twitch. Part of this set up requires launching your web browser to authorize the game with Twitch!
 
 # Configurations
 
-## In game editting (via RiskOfOptions)
+## In game editing (via RiskOfOptions)
 
 This mod has a dependency on [RiskOfOptions](https://thunderstore.io/package/Rune580/Risk_Of_Options/) and so many values can be dynamically
-updated while you are in the game. Note that some options need a restart for changes to be fully applied; the options menu will mark this
+updated while you are in the game via the Settings UI. Note that some options need a restart for changes to be fully applied; the options menu will mark this
 accordingly when needed. Below you'll see a column for what configurations can be modified in game via the ✔️ marking; otherwise it'll have a ❌.
 
 ## Twitch
 
-**WARNING:** If the mod continues failing to connect to Twitch, check and/or update your `ImplicitOAuth` token!
-
-**Important note for modpack creators: Ensure your configuration files DO NOT INCLUDE `ImplicitOAuth`!**
-
 |Config|Type|Default|RiskOfOptions|Notes|
 |------|----|-------|-------------|-----|
-|`Channel`|text||✔️|The channel to monitor Twitch chat|
-|`Username`|text||✔️|The username to use when calling Twitch APIs. If you aren't using a secondary account, this should be the same as `Channel`|
-|`ImplicitOAuth`|text||❌|The "password" to access Twitch APIs. **Please visit [twitchapps.com][1] to get the password to put here.** Note that this password is not sent to any servers other than Twitch to authenticate. **DO NOT GIVE THIS TO ANYONE.** To revoke this password, go to [Twitch Connections Settings][2] and Disconnect the app named "Twitch Token Generator by swiftyspiffy".|
 |`DebugLogs`|true/false|false|✔️|Enable debug logging for Twitch - will spam to the console!|
-|`ClientID`|text|q6batx0epp608isickayubi39itsckt|❌|The client ID of the app that you used to populate the `ImplicitOAuth` field. If you used [twitchapps.com][1] this would be the default value. If you used another Twitch app, this needs to be changed accordingly.|
 |`EnableItemVoting`|true/false|true|✔️|Enables the main feature of this mod. Disable it if you only want to enable bit interactions.|
-|`VoteDurationdSec`|number (secs)|20|✔️|How long to allow Twitch to vote on items. Increase this value if viewers think the voting is going too "fast" - they might have their video delay too great.|
+|`VoteDurationdSec`|number (secs)|10|✔️|How long to allow Twitch to vote on items. Increase this value if viewers think the voting is going too "fast" - they might have their video delay too great.|
 |`VoteStrategy`|string|MaxVote|✔️|How to tabulate votes. See "Voting Strategies" below for the various values this setting may have.|
 |`BitsThreshold`|number|1500|✔️|The number of bits needed to cause an in-game event.|
 |`CurrentBits`|number|0|❌|**Do not edit this field.** Used as storage whenever someone donates bits so that restarting the game doesn't clear the donation count.|
 |`PublishToChat`|true/false|true|✔️|Publish events (like voting) to Twitch chat.|
 
-[1]: https://twitchtokengenerator.com/quick/Bt3H1fq9dl
-[2]: https://www.twitch.tv/settings/connections
+### Revoking permissions to Twitch
 
-### Help, I accidentally gave someone my `ImplicitOAuth` token!
-
-To revoke this password, go to [Twitch Connections Settings][2] and Disconnect the app named "Twitch Token Generator by swiftyspiffy". You can then regenerate a new token via [twitchapps.com][1] and put it in the config; but, keep it safe this time!
-
-## Tiltify
-
-This mod supports basic integration for [Tiltify](https://tiltify.com/) campaigns. Donations cause a random "Bit Event", following the weightings in the "Event" section of the configuration.
-
-**How do I find my Campaign ID?** Once your campaign is created, navigate to your Campaign Dashboard --> Detail tab and find your campaign ID. It should be a six to seven digit number.
-
-|Config|Type|Default|RiskOfOptions|Notes|
-|------|----|-------|-------------|-----|
-|`CampaignId`|string||✔️|The Campaign ID to track donations; put a `0` to disable Tiltify integration|
+To revoke, go to https://www.twitch.tv/settings/connections and Disconnect the app named "RoR2-VsApp". Next time you start the game with this mod enabled, it will run you through first-time setup again.
 
 ### Vote Strategies
 
@@ -79,13 +54,21 @@ Item is chosen by a weighted random selection. If item 1 has 3 votes, item 2 has
 * Item 2: 4 / 8 = 50.00% chance
 * Item 3: 1 / 8 = 12.50% chance
 
+## Tiltify
+
+This mod supports basic integration for [Tiltify](https://tiltify.com/) campaigns. Donations cause a random "Bit Event", following the weightings in the "Event" section of the configuration.
+
+**How do I find my Campaign ID?** Once your campaign is created, navigate to your Campaign Dashboard --> Detail tab and find your campaign ID. It should be a six to seven digit number.
+
+|Config|Type|Default|RiskOfOptions|Notes|
+|------|----|-------|-------------|-----|
+|`CampaignId`|string||✔️|The Campaign ID to track donations; clear it to disable Tiltify integration|
+
 ## ChannelPoints
 
 **WARNING:** Not typing the Channel Points title in exactly will cause the specific feature not to work! You should see a warning in the console if this happens.
 
-See the [Twitch Channel Points Guide][3] (section "Custom Rewards") for how to create custom rewards. The Reward Name/Channel Points Title needs to be pasted into the configuration exactly as entered (case sensitive).
-
-[3]: https://help.twitch.tv/s/article/channel-points-guide?language=en_US
+See the [Twitch Channel Points Guide](https://help.twitch.tv/s/article/channel-points-guide?language=en_US) (section "Custom Rewards") for how to create custom rewards. The Reward Name/Channel Points Title needs to be pasted into the configuration exactly as entered (case sensitive).
 
 |Config|Type|Default|RiskOfOptions|Notes|
 |------|----|-------|-------------|-----|
@@ -133,13 +116,6 @@ To disable an event, simply set the weight to 0. Giving a higher weight increase
 |`EnableChoosingLunarItems`|true/false|true|✔️|If enabled, Lunar Pod item/equipment drops will be decided by Twitch Chat.|
 |`ForceUniqueRolls`|true/false|false|✔️|If enabled, all rolls will be guaranteed to be unique. No more rolls with three rusted keys!|
 
-## Language
-
-|Config|Type|Default|RiskOfOptions|Notes|
-|------|----|-------|-------------|-----|
-|`EnableLanguageEdits`|true/false|true|✔️|If enabled, some in-game texts will get replaced with Twitch related texts.|
-
-
 # Chat Commands
 
 Chat commands can only be executed by Moderators or the Broadcaster of the channel. All other users will be ignored silently.
@@ -172,8 +148,7 @@ Chat commands can only be executed by Moderators or the Broadcaster of the chann
 
 # Console Commands
 
-These console commands are generally for testing purposes. You should never need to use them during a run.
+_These console commands are generally for testing purposes. You should never need to use them during a run._
 
-* `vs_connect_twitch <channel> <access_token> [username]` - Connect to Twitch. Note that this automatically happens when starting a new run.
 * `vs_add_bits <bits>` - Force add bits to the game. Going over the bit goal will trigger an in-game event.
 * `vs_set_bit_goal <bits>` - Sets the bit goal and saves it to the config file.

@@ -1,20 +1,17 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
+using System.Collections.Generic;
 using UnityEngine.Events;
 
 namespace VsTwitch
 {
-	public class Configuration
+    public class Configuration
 	{
         // Twitch
-        public ConfigEntry<string> TwitchChannel { get; set; }
-        public ConfigEntry<string> TwitchClientID { get; set; }
-        public ConfigEntry<string> TwitchUsername { get; set; }
-        public ConfigEntry<string> TwitchOAuth { get; set; }
-        public ConfigEntry<bool> TwitchDebugLogs { get; set; }
-        public ConfigEntry<bool> EnableItemVoting { get; set; }
-        public ConfigEntry<int> VoteDurationSec { get; set; }
-        public ConfigEntry<VoteStrategies> VoteStrategy { get; set; }
+        public ConfigEntry<bool> TwitchDebugLogs { get; }
+        public ConfigEntry<bool> EnableItemVoting { get; }
+        public ConfigEntry<int> VoteDurationSec { get; }
+        public ConfigEntry<VoteStrategies> VoteStrategy { get; }
 
         public enum VoteStrategies
         {
@@ -23,59 +20,61 @@ namespace VsTwitch
             Percentile
         }
 
-        public ConfigEntry<bool> EnableBitEvents { get; set; }
-        public ConfigEntry<int> BitsThreshold { get; set; }
-        public ConfigEntry<int> CurrentBits { get; set; }
-        public ConfigEntry<bool> PublishToChat { get; set; }
+        public ConfigEntry<bool> EnableBitEvents { get; }
+        public ConfigEntry<int> BitsThreshold { get; }
+        public ConfigEntry<int> CurrentBits { get; }
+        public ConfigEntry<bool> PublishToChat { get; }
 
         // Tiltify
-        public ConfigEntry<string> TiltifyCampaignId { get; set; }
+        public ConfigEntry<string> TiltifyCampaignId { get; }
 
         // Event
-        public ConfigEntry<float> BitStormWeight { get; set; }
-        public ConfigEntry<float> BountyWeight { get; set; }
-        public ConfigEntry<float> ShrineOfOrderWeight { get; set; }
-        public ConfigEntry<float> ShrineOfTheMountainWeight { get; set; }
-        public ConfigEntry<float> TitanWeight { get; set; }
-        public ConfigEntry<float> LunarWispWeight { get; set; }
-        public ConfigEntry<float> MithrixWeight { get; set; }
-        public ConfigEntry<float> ElderLemurianWeight { get; set; }
+        public ConfigEntry<float> BitStormWeight { get; }
+        public ConfigEntry<float> BountyWeight { get; }
+        public ConfigEntry<float> ShrineOfOrderWeight { get; }
+        public ConfigEntry<float> ShrineOfTheMountainWeight { get; }
+        public ConfigEntry<float> TitanWeight { get; }
+        public ConfigEntry<float> LunarWispWeight { get; }
+        public ConfigEntry<float> MithrixWeight { get; }
+        public ConfigEntry<float> ElderLemurianWeight { get; }
 
         // Channel Points
-        public ConfigEntry<bool> ChannelPointsEnable { get; set; }
-        public ConfigEntry<string> ChannelPointsAllyBeetle { get; set; }
-        public ConfigEntry<string> ChannelPointsAllyLemurian { get; set; }
-        public ConfigEntry<string> ChannelPointsAllyElderLemurian { get; set; }
-        public ConfigEntry<string> ChannelPointsRustedKey { get; set; }
-        public ConfigEntry<string> ChannelPointsBitStorm { get; set; }
-        public ConfigEntry<string> ChannelPointsBounty { get; set; }
-        public ConfigEntry<string> ChannelPointsShrineOfOrder { get; set; }
-        public ConfigEntry<string> ChannelPointsShrineOfTheMountain { get; set; }
-        public ConfigEntry<string> ChannelPointsTitan { get; set; }
-        public ConfigEntry<string> ChannelPointsLunarWisp { get; set; }
-        public ConfigEntry<string> ChannelPointsMithrix { get; set; }
-        public ConfigEntry<string> ChannelPointsElderLemurian { get; set; }
+        public ConfigEntry<bool> ChannelPointsEnable { get; }
+        public ConfigEntry<string> ChannelPointsAllyBeetle { get; }
+        public ConfigEntry<string> ChannelPointsAllyLemurian { get; }
+        public ConfigEntry<string> ChannelPointsAllyElderLemurian { get; }
+        public ConfigEntry<string> ChannelPointsRustedKey { get; }
+        public ConfigEntry<string> ChannelPointsBitStorm { get; }
+        public ConfigEntry<string> ChannelPointsBounty { get; }
+        public ConfigEntry<string> ChannelPointsShrineOfOrder { get; }
+        public ConfigEntry<string> ChannelPointsShrineOfTheMountain { get; }
+        public ConfigEntry<string> ChannelPointsTitan { get; }
+        public ConfigEntry<string> ChannelPointsLunarWisp { get; }
+        public ConfigEntry<string> ChannelPointsMithrix { get; }
+        public ConfigEntry<string> ChannelPointsElderLemurian { get; }
 
         // UI
-        public ConfigEntry<bool> SimpleUI { get; set; }
+        public ConfigEntry<bool> SimpleUI { get; }
 
         // Behaviour
-        public ConfigEntry<bool> EnableChoosingLunarItems { get; set; }
-        public ConfigEntry<bool> ForceUniqueRolls { get; set; }
-
-        //Language
-        public ConfigEntry<bool> EnableLanguageEdits { get; set; }
+        public ConfigEntry<bool> EnableChoosingLunarItems { get; }
+        public ConfigEntry<bool> ForceUniqueRolls { get; }
 
         public Configuration(BaseUnityPlugin plugin, UnityAction reloadChannelPoints)
 		{
+            // These are old settings; be sure to remove them to curb confusion
+            EnsureConfigsRemoved(plugin.Config, new List<ConfigDefinition>() {
+                new ConfigDefinition("Twitch", "Channel"),
+                new ConfigDefinition("Twitch", "ClientID"),
+                new ConfigDefinition("Twitch", "Username"),
+                new ConfigDefinition("Twitch", "ImplicitOAuth"),
+                new ConfigDefinition("Language", "EnableLanguageEdits"),
+            });
+
             // Twitch
-            TwitchChannel = plugin.Config.Bind("Twitch", "Channel", "", "Your Twitch channel name. The channel to monitor Twitch chat.");
-            TwitchClientID = plugin.Config.Bind("Twitch", "ClientID", "q6batx0epp608isickayubi39itsckt", "Client ID used to get ImplicitOAuth value");
-            TwitchUsername = plugin.Config.Bind("Twitch", "Username", "", "Your Twitch username. The username to use when calling Twitch APIs. If you aren't using a secondary account, this should be the same as 'Channel'.");
-            TwitchOAuth = plugin.Config.Bind("Twitch", "ImplicitOAuth", "", "Implicit OAuth code (this is not your password - it's a generated password!). See the README/Mod Description in the thunderstore to see how to get it.");
             TwitchDebugLogs = plugin.Config.Bind("Twitch", "DebugLogs", false, "Enable debug logging for Twitch - will spam to the console!");
             EnableItemVoting = plugin.Config.Bind("Twitch", "EnableItemVoting", true, "Enable item voting on Twitch.");
-            VoteDurationSec = plugin.Config.Bind("Twitch", "VoteDurationdSec", 20, "How long to allow twitch voting.");
+            VoteDurationSec = plugin.Config.Bind("Twitch", "VoteDurationdSec", 10, "How long to allow twitch voting.");
             VoteStrategy = plugin.Config.Bind("Twitch", "VoteStrategy", VoteStrategies.MaxVote, "How to tabulate votes. One of: MaxVote, MaxVoteRandomTie, Percentile");
             EnableBitEvents = plugin.Config.Bind("Twitch", "EnableBitEvents", true, "Enable bit events from Twitch.");
             BitsThreshold = plugin.Config.Bind("Twitch", "BitsThreshold", 1500, "How many Bits are needed before something happens.");
@@ -111,13 +110,22 @@ namespace VsTwitch
             // Behaviour
             EnableChoosingLunarItems = plugin.Config.Bind("Behaviour", "EnableChoosingLunarItems", true, "Twitch Chat chooses items when opening lunar chests (pods)");
             ForceUniqueRolls = plugin.Config.Bind("Behaviour", "ForceUniqueRolls", false, "Ensure, when rolling for items, that they are always different. This doesn't affect multi-shops.");
-            //Language
-            EnableLanguageEdits = plugin.Config.Bind("Language", "EnableLanguageEdits", true, "Enable all Language Edits.");
 
             if (ModCompatibility.RiskOfOptions.Enabled)
             {
                 ModCompatibility.RiskOfOptions.ApplyRiskOfOptions(this, reloadChannelPoints);
             }
+        }
+
+        private static void EnsureConfigsRemoved(ConfigFile config, List<ConfigDefinition> configDefinitions)
+        {
+            foreach (var configDefinition in configDefinitions)
+            {
+                // Need to do this to remove it from the internal "orphaned setting" map
+                config.Bind(configDefinition, "");
+                config.Remove(configDefinition);
+            }
+            config.Save();
         }
     }
 }

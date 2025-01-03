@@ -5,10 +5,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Security.Permissions;
+using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
-using System.Text;
+using VsTwitch.Twitch;
 
 // Allow scanning for ConCommand, and other stuff for Risk of Rain 2
 [assembly: HG.Reflection.SearchableAttribute.OptIn]
@@ -22,7 +23,7 @@ namespace VsTwitch
         private static readonly char[] SPACE = new char[] { ' ' };
         public const string GUID = "com.justinderby.vstwitch";
         public const string ModName = "VsTwitch";
-        public const string Version = "1.0.17";
+        public const string Version = "1.1.0";
 
         // This is only used for ConCommands, since they need to be static...
         public static VsTwitch Instance;
@@ -31,14 +32,13 @@ namespace VsTwitch
         private BitsManager bitsManager;
         private ChannelPointsManager channelPointsManager;
         private ItemRollerManager itemRollerManager;
-        private LanguageOverride languageOverride;
         private EventDirector eventDirector;
         private EventFactory eventFactory;
         private TiltifyManager tiltifyManager;
         private Configuration configuration;
 
         /// <summary>
-        /// Provides extrea debug information to help people understand why some Twitch libraries might not load.
+        /// Provides extra debug information to help people understand why some Twitch libraries might not load.
         /// This is usually because the TwitchLib libraries are being loaded in two or more locations on the filesystem.
         /// This isn't good, as they should all be loaded via the mod; if they aren't you could get differnet
         /// versions which may or may not have specific methods/structures.
@@ -102,7 +102,8 @@ namespace VsTwitch
             
             SetUpChannelPoints();
 
-            twitchManager = new TwitchManager()
+            SetupHelper setupHelper = gameObject.GetComponent<SetupHelper>() ?? gameObject.AddComponent<SetupHelper>();
+            twitchManager = new TwitchManager(setupHelper)
             {
                 DebugLogs = configuration.TwitchDebugLogs.Value,
             };
@@ -129,16 +130,11 @@ namespace VsTwitch
                     break;
             }
             itemRollerManager = new ItemRollerManager(strategy);
-            languageOverride = new LanguageOverride
-            {
-                StreamerName = configuration.TwitchChannel.Value
-            };
 
             tiltifyManager = new TiltifyManager();
 
             RoR2.Networking.NetworkManagerSystem.onStartHostGlobal += GameNetworkManager_onStartHostGlobal;
             RoR2.Networking.NetworkManagerSystem.onStopHostGlobal += GameNetworkManager_onStopHostGlobal;
-            On.RoR2.Language.GetLocalizedStringByToken += Language_GetLocalizedStringByToken;
             On.RoR2.Run.OnEnable += Run_OnEnable;
             On.RoR2.Run.OnDisable += Run_OnDisable;
 
@@ -355,7 +351,7 @@ namespace VsTwitch
 
             RoR2.Networking.NetworkManagerSystem.onStartHostGlobal -= GameNetworkManager_onStartHostGlobal;
             RoR2.Networking.NetworkManagerSystem.onStopHostGlobal -= GameNetworkManager_onStopHostGlobal;
-            On.RoR2.Language.GetLocalizedStringByToken -= Language_GetLocalizedStringByToken;
+            //On.RoR2.Language.GetLocalizedStringByToken -= Language_GetLocalizedStringByToken;
             On.RoR2.Run.OnEnable -= Run_OnEnable;
             On.RoR2.Run.OnDisable -= Run_OnDisable;
         }
@@ -404,48 +400,13 @@ namespace VsTwitch
             On.EntityStates.Missions.BrotherEncounter.BrotherEncounterBaseState.KillAllMonsters -= BrotherEncounterBaseState_KillAllMonsters;
             On.RoR2.ArenaMissionController.EndRound -= ArenaMissionController_EndRound;
 
-            if (eventDirector)
-            {
-                eventDirector.ClearEvents();
-            }
-            if (itemRollerManager != null)
-            {
-                itemRollerManager.ClearVotes();
-            }
+            eventFactory?.Reset();
+            eventDirector?.ClearEvents();
+            itemRollerManager?.ClearVotes();
         }
         #endregion
 
         #region "Twitch Integration"
-        [ConCommand(commandName = "vs_connect_twitch", flags = ConVarFlags.SenderMustBeServer, helpText = "Connect to Twitch.")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "ConCommand")]
-        private static void CCConnectToTwitch(ConCommandArgs args)
-        {
-            if (!Instance)
-            {
-                Debug.LogError($"{ModName} mod not instatiated!");
-                return;
-            }
-            
-            if (args.Count < 2)
-            {
-                Log.Error("Requires two args: <channel> <access_token> [username]");
-                return;
-            }
-
-            string channel = args[0];
-            string oauthToken = args[1];
-            string username = args.Count > 2 ? args[2] : args[0];
-            try
-            {
-                Log.Info("Connecting to Twitch...");
-                Instance.twitchManager.Connect(channel, oauthToken, username, null);
-            }
-            catch (Exception e)
-            {
-                Log.Error(e);
-            }
-        }
-
         [ConCommand(commandName = "vs_add_bits", flags = ConVarFlags.SenderMustBeServer, helpText = "Fake add bits.")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "ConCommand")]
         private static void CCTwitchAddBits(ConCommandArgs args)
@@ -526,34 +487,23 @@ namespace VsTwitch
 
         private void GameNetworkManager_onStartHostGlobal()
         {
-            try
-            {
-                Log.Info("Connecting to Twitch...");
-                if (string.IsNullOrWhiteSpace(configuration.TwitchUsername.Value))
-                {
-                    configuration.TwitchUsername.Value = configuration.TwitchChannel.Value;
-                }
-
-                twitchManager.Connect(
-                    configuration.TwitchChannel.Value,
-                    configuration.TwitchOAuth.Value,
-                    configuration.TwitchUsername.Value,
-                    configuration.TwitchClientID.Value
-                    );
-            }
-            catch (Exception e)
-            {
-                Log.Error(e);
-                Chat.AddMessage($"Couldn't connect to Twitch: {e.Message}");
-                if (e is ArgumentException)
-                {
-                    Chat.AddMessage($"Did you configure the mod correctly?");
-                }
-                else
-                {
-                    DumpAssemblies();
-                }
-            }
+            Log.Info("Connecting to Twitch...");
+            twitchManager.MaybeSetup(configuration)
+                .ContinueWith(t => {
+                    if (t.Exception != null)
+                    {
+                        return Task.FromException(t.Exception);
+                    }
+                    return twitchManager.Connect();
+                })
+                .Unwrap().ContinueWith(t => {
+                    if (t.Exception != null)
+                    {
+                        Log.Error(t.Exception);
+                        Chat.AddMessage($"Couldn't connect to Twitch: {t.Exception.Message}");
+                        DumpAssemblies();
+                    }
+                });
 
             try
             {
@@ -572,14 +522,13 @@ namespace VsTwitch
 
         private void GameNetworkManager_onStopHostGlobal()
         {
-            try
+            twitchManager.Disconnect().ContinueWith((t) =>
             {
-                twitchManager.Disconnect();
-            }
-            catch (Exception e)
-            {
-                Log.Error(e);
-            }
+                if (t.Exception != null)
+                {
+                    Log.Error(t.Exception);
+                }
+            });
 
             try
             {
@@ -835,17 +784,6 @@ namespace VsTwitch
 
             Log.Info($"Recieved donation; rolling Bit Reward");
             RollBitReward();
-        }
-        #endregion
-
-        #region "Localization Overrides"
-        private string Language_GetLocalizedStringByToken(On.RoR2.Language.orig_GetLocalizedStringByToken orig, Language self, string token)
-        {
-            if (configuration.EnableLanguageEdits.Value && languageOverride.TryGetLocalizedStringByToken(token, out string result))
-            {
-                return result;
-            }
-            return orig(self, token);
         }
         #endregion
 

@@ -102,9 +102,17 @@
 		</Reference>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Update="language.json">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Exec Command="echo &quot;Installing mod in Testing profile&quot;" />
+    <Exec Command="copy /Y $(ProjectDir)$(OutDir)language.json $(ProjectDir)..\..\..\..\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Testing\BepInEx\plugins\JustDerb-Vs_Twitch\VsTwitch.language" />
 		<Exec Command="copy /Y $(ProjectDir)$(OutDir)*.dll $(ProjectDir)..\..\..\..\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Testing\BepInEx\plugins\JustDerb-Vs_Twitch\" />
+		<Exec Command="if $(ConfigurationName) == Debug copy /Y $(ProjectDir)$(OutDir)*.pdb $(ProjectDir)..\..\..\..\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Testing\BepInEx\plugins\JustDerb-Vs_Twitch\" />
 
 		<Exec Command="copy /Y $(ProjectDir)icon.png $(ProjectDir)..\..\..\..\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Testing\BepInEx\plugins\JustDerb-Vs_Twitch\" />
 		<Exec Command="copy /Y $(ProjectDir)manifest.json $(ProjectDir)..\..\..\..\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Testing\BepInEx\plugins\JustDerb-Vs_Twitch\" />

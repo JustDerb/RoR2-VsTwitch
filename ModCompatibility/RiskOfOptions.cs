@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using BepInEx.Configuration;
+﻿using BepInEx.Configuration;
 using RiskOfOptions;
-using RiskOfOptions.Options;
 using RiskOfOptions.OptionConfigs;
+using RiskOfOptions.Options;
+using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine.Events;
 
@@ -34,10 +34,6 @@ namespace VsTwitch.ModCompatibility
             {
                 ModSettingsManager.SetModDescription("Fight Twitch chat. Item voting, bit events, channel points integration, and more!");
                 // Twitch
-                ModSettingsManager.AddOption(new StringInputFieldOption(config.TwitchChannel,
-                    new InputFieldConfig() { restartRequired = true }));
-                ModSettingsManager.AddOption(new StringInputFieldOption(config.TwitchUsername,
-                    new InputFieldConfig() { restartRequired = true }));
                 ModSettingsManager.AddOption(new CheckBoxOption(config.TwitchDebugLogs));
                 ModSettingsManager.AddOption(new CheckBoxOption(config.EnableItemVoting));
                 ModSettingsManager.AddOption(new IntSliderOption(config.VoteDurationSec,
@@ -101,10 +97,6 @@ namespace VsTwitch.ModCompatibility
                 // Behaviour
                 ModSettingsManager.AddOption(new CheckBoxOption(config.EnableChoosingLunarItems));
                 ModSettingsManager.AddOption(new CheckBoxOption(config.ForceUniqueRolls));
-
-                //Language
-                ModSettingsManager.AddOption(new CheckBoxOption(config.EnableLanguageEdits,
-                    new CheckBoxConfig() { restartRequired = true }));
             }
             catch (Exception ex)
             {

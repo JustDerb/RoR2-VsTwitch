@@ -1,58 +1,79 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using TwitchLib.Api;
+using TwitchLib.Client;
+using TwitchLib.Client.Enums;
+using TwitchLib.Client.Models;
 using UnityEngine;
+using VsTwitch.Data;
 
 namespace VsTwitch.Twitch.Auth
 {
     internal class AuthManager
     {
-        private readonly string AuthFilePath;
+        private readonly static string TWITCH_CLIENT_ID = "ms931m917okbj4hu8l230hejiagie0";
+        private readonly static string DATA_MANAGER_OAUTH_KEY = "twitchOAuth";
 
-        public AuthManager(string authFilePath, ILoggerFactory loggerFactory)
+        private readonly DataManager dataManager;
+
+        private DateTimeOffset tokenExpiry = DateTimeOffset.MinValue;
+
+        public TwitchAPI TwitchAPI { get; }
+        public TwitchClient TwitchClient { get; }
+        public string TwitchUsername { get; private set; }
+        public string TwitchChannelId { get; private set; }
+
+        private AuthManager(DataManager dataManager, ILoggerFactory loggerFactory)
         {
-            AuthFilePath = authFilePath;
+            this.dataManager = dataManager;
+            TwitchUsername = "";
             TwitchAPI = new TwitchAPI(loggerFactory);
-            TwitchAPI.Settings.ClientId = WebServer.TwitchClientId;
+            TwitchAPI.Settings.ClientId = TWITCH_CLIENT_ID;
             TwitchAPI.Settings.SkipAutoServerTokenGeneration = true;
-
-            // TODO: Pull access token from authFilePath
+            TwitchClient = new TwitchClient(null, ClientProtocol.WebSocket, null, loggerFactory);
         }
 
-        public TwitchAPI TwitchAPI { get; private set; }
-
-        public async Task<bool> IsAuthed(bool useApiCallToCheck = false)
+        public async static Task<AuthManager> Create(DataManager dataManager, ILoggerFactory loggerFactory)
         {
-            Log.Info($"IsAuthed({useApiCallToCheck}) 1");
-            bool authed = !string.IsNullOrEmpty(TwitchAPI.Settings.AccessToken);
-            if (authed && useApiCallToCheck)
+            AuthManager authManager = new AuthManager(dataManager, loggerFactory);
+
+            if (dataManager.Contains(DATA_MANAGER_OAUTH_KEY))
             {
-                Log.Info($"IsAuthed({useApiCallToCheck}) 2");
-                var resp = await TwitchAPI.Auth.ValidateAccessTokenAsync().ConfigureAwait(false);
-                if (resp == null)
+                Log.Debug("[Twitch Auth Manager] Reusing stored OAuth token...");
+                bool inited = await authManager.Initialize(dataManager.Get<string>(DATA_MANAGER_OAUTH_KEY));
+
+                if (inited)
                 {
-                    Log.Info($"IsAuthed({useApiCallToCheck}) 3");
-                    return false;
+                    Log.Info("[Twitch Auth Manager] Stored OAuth token is valid!");
                 }
-                // Doesn't expire in less than 30 minutes
-                authed = resp.ExpiresIn >= 30 * 60;
+                else
+                {
+                    Log.Warning("[Twitch Auth Manager] Stored OAuth token is invalid/expired. One will need to be requested.");
+                }
+            }
+            else
+            {
+                Log.Warning("[Twitch Auth Manager] No stored OAuth token. One will need to be requested.");
             }
 
-            Log.Info($"IsAuthed({useApiCallToCheck}) 4");
-            return authed;
+            return authManager;
         }
+
+        public bool IsAuthed() => !string.IsNullOrEmpty(TwitchAPI.Settings.AccessToken)
+            && !string.IsNullOrEmpty(TwitchUsername)
+            && tokenExpiry > DateTimeOffset.UtcNow;
 
         public async Task<ReadOnlyCollection<string>> GetAuthorizedScopes()
         {
-            if (!await IsAuthed())
+            if (!IsAuthed())
             {
                 return new List<string>().AsReadOnly();
             }
 
-            var resp = await TwitchAPI.Auth.ValidateAccessTokenAsync();
+            var resp = await TwitchAPI.Auth.ValidateAccessTokenAsync().ConfigureAwait(false);
             if (resp == null)
             {
                 return new List<string>().AsReadOnly();
@@ -62,31 +83,49 @@ namespace VsTwitch.Twitch.Auth
 
         public async Task MaybeAuthUser()
         {
-            Log.Info("MaybeAuthUser() 1");
-            if (await IsAuthed(true))
+            if (IsAuthed())
             {
-                Log.Info("MaybeAuthUser() 1a");
                 return;
             }
 
-            Log.Info("MaybeAuthUser() 2");
-            WebServer webServer = new WebServer();
+            using WebServer webServer = new WebServer(TWITCH_CLIENT_ID);
             webServer.Listen();
 
-            Log.Info("MaybeAuthUser() 3");
             string authTokenUrl = webServer.GetAuthorizationTokenUrl(""); // FIXME
             Application.OpenURL(authTokenUrl);
 
-            Log.Info("MaybeAuthUser() 4");
-            Models.Authorization auth = await webServer.OnRequest().ConfigureAwait(false);
+            Log.Info("Waiting for Twitch Authorization token...");
+            Models.Authorization auth = await webServer.GetAuthorization().ConfigureAwait(false);
             if (auth == null)
             {
-                Log.Info("MaybeAuthUser() 4a");
                 throw new InvalidOperationException("WebServer didn't return an auth object");
             }
 
-            Log.Info("MaybeAuthUser() 5");
-            TwitchAPI.Settings.AccessToken = auth.AccessToken;
+            bool inited = await Initialize(auth.AccessToken).ConfigureAwait(false);
+            if (!inited)
+            {
+                throw new InvalidOperationException("WebServer didn't return a valid access token");
+            }
+            dataManager.Set(DATA_MANAGER_OAUTH_KEY, auth.AccessToken);
+        }
+
+        private async Task<bool> Initialize(string oauth)
+        {
+            TwitchAPI.Settings.AccessToken = oauth;
+
+            var resp = await TwitchAPI.Auth.ValidateAccessTokenAsync().ConfigureAwait(false);
+            if (resp == null)
+            {
+                return false;
+            }
+            TwitchUsername = resp.Login;
+            TwitchChannelId = resp.UserId;
+            tokenExpiry = DateTimeOffset.UtcNow.AddSeconds(resp.ExpiresIn);
+
+            ConnectionCredentials credentials = new ConnectionCredentials(resp.Login, oauth);
+            TwitchClient.Initialize(credentials, resp.Login);
+
+            return true;
         }
     }
 }

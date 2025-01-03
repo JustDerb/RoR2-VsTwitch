@@ -1,0 +1,15 @@
+﻿{
+    "strings": {
+        "VSTWITCH_HEADER_DIALOG_TWITCH_SETUP": "VsTwitch Setup",
+        "VSTWITCH_DESCRIPTION_DIALOG_TWITCH_SETUP": "Look's like your Twitch authorization has expired or this is your first time using this mod. Your browser will open outside of the game; please ensure you follow the prompts before returning to the game!",
+        "VSTWITCH_DESCRIPTION_DIALOG_TWITCH_SETUP_WAITING": "Waiting for Twitch authorization...",
+        "VSTWITCH_DESCRIPTION_DIALOG_TWITCH_SETUP_FINISHED": "Setup finished! Enjoy!",
+        "VSTWITCH_DESCRIPTION_DIALOG_WALKTHROUGH_CONFIG_ASK": "Would you like to walk through the high-level options of the mod and configure them? (About 3 questions)",
+        "VSTWITCH_DESCRIPTION_DIALOG_WALKTHROUGH_CONFIG_ENABLE_ITEM_VOTING": "When you open most chests/equipment, would you like Twitch Chat to vote for 1 of 3 random items? (Chat influences your items; all players receive a copy)",
+        "VSTWITCH_DESCRIPTION_DIALOG_WALKTHROUGH_CONFIG_ENABLE_BIT_EVENTS": "If you are a Twitch affiliate, would you like bit donations to contribute towards a goal and upon reaching it triggers events? (Events are all 'negative' and do not generally help you)",
+        "VSTWITCH_DESCRIPTION_DIALOG_WALKTHROUGH_CONFIG_ENABLE_BIT_EVENTS_YES": "The bits goal is set to {0} bits. You can change this via the in-game \"Settings\" menu.",
+        "VSTWITCH_DESCRIPTION_DIALOG_WALKTHROUGH_CONFIG_ENABLE_CHANNEL_POINTS": "If you are a Twitch affiliate, would you like to enable channel points to influence your runs? (These are 'negative' and 'positive' effects)",
+        "VSTWITCH_DESCRIPTION_DIALOG_WALKTHROUGH_CONFIG_ENABLE_CHANNEL_POINTS_YES": "Rewards can be customized via the Manage Rewards section under Channel Points in the Creator Dashboard. (https://link.twitch.tv/myChannelPoints) IMPORTANT: You need to copy the reward name EXACTLY (case-sensitive) into this mods settings. You can access them via the in-game \"Settings\" menu.",
+        "VSTWITCH_DESCRIPTION_DIALOG_WALKTHROUGH_CONFIG_ENABLE_CHANNEL_POINTS_NO": "Rewards can be customized via the Manage Rewards section under Channel Points in the Creator Dashboard. (https://link.twitch.tv/myChannelPoints) Be sure to disable any/all rewards that have been configured for this mod."
+    }
+}

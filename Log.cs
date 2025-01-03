@@ -1,7 +1,7 @@
 ﻿
-using System;
 using BepInEx.Logging;
 using Microsoft.Extensions.Logging;
+using System;
 
 namespace VsTwitch
 {

@@ -19,10 +19,16 @@ namespace VsTwitch
 
         public void Awake()
         {
-            if (!spawner)
+            Reset();
+        }
+
+        public void Reset()
+        {
+            if (spawner != null)
             {
-                spawner = gameObject.AddComponent<MonsterSpawner>();
+                Destroy(spawner);
             }
+            spawner = gameObject.AddComponent<MonsterSpawner>();
         }
 
         public Func<EventDirector, IEnumerator> BroadcastChat(ChatMessageBase message)

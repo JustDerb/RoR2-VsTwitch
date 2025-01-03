@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Console;
+﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using System;
+using System.IO;
+using System.Threading.Tasks;
 using TwitchLib.Client.Events;
-using TwitchLib.Client.Models;
 using TwitchLib.Communication.Events;
 using TwitchLib.PubSub.Events;
 using TwitchLib.Unity;
 using UnityEngine;
+using VsTwitch.Data;
+using VsTwitch.Twitch;
 using VsTwitch.Twitch.Auth;
 
 namespace VsTwitch
@@ -19,12 +19,10 @@ namespace VsTwitch
     /// </summary>
     class TwitchManager
     {
-        private Client TwitchClient = null;
-        //private Api TwitchApi = null;
+        private readonly ILoggerFactory loggerFactory;
+        private readonly SetupHelper setupHelper;
         private AuthManager Auth = null;
         private PubSub TwitchPubSub = null;
-        private string Channel;
-        public string Username { get; private set; }
 
         public bool DebugLogs { get; set; }
 
@@ -33,143 +31,127 @@ namespace VsTwitch
         public event AsyncEventHandler<OnJoinedChannelArgs> OnConnected;
         public event AsyncEventHandler<OnDisconnectedArgs> OnDisconnected;
 
-        public TwitchManager()
+        public TwitchManager(SetupHelper setupHelper)
         {
             DebugLogs = false;
+            loggerFactory = Log.CreateLoggerFactory((type, category, logLevel) => DebugLogs);
+            this.setupHelper = setupHelper;
         }
 
-        public void Connect(string channel, string oauthToken, string username, string clientId)
+        private async Task InitializeAuth()
         {
-            Disconnect();
+            if (Auth != null)
+            {
+                return;
+            }
+            string dataBasePath = Path.Combine(Application.persistentDataPath, VsTwitch.GUID);
+            Log.Debug($"AuthManager::DataManager basepath = {dataBasePath}");
+            DataManager dataManager = DataManager.LoadForModule(dataBasePath, "TwitchAuth");
+            Auth = await AuthManager.Create(dataManager, loggerFactory);
+        }
+
+        public async Task MaybeSetup(Configuration config)
+        {
+            await Disconnect();
+            LogDebug("TwitchManager::MaybeSetup");
+            await InitializeAuth();
+            if (!Auth.IsAuthed())
+            {
+                await setupHelper.GuideThroughTwitchIntegration(Auth, config);
+            }
+        }
+
+        public async Task Connect()
+        {
+            await Disconnect();
             LogDebug("TwitchManager::Connect");
+            LogDebug("[Twitch API] Logging in...");
+            await InitializeAuth();
 
-            if (channel == null || channel.Trim().Length == 0)
-            {
-                throw new ArgumentException("Twitch channel must be specified!", "channel");
-            }
-            if (oauthToken == null || oauthToken.Trim().Length == 0)
-            {
-                throw new ArgumentException("Twitch OAuth password must be specified!", "oauthToken");
-            }
-            if (username == null || username.Trim().Length == 0)
-            {
-                throw new ArgumentException("Twitch username must be specified!", "username");
-            }
+            await Auth.MaybeAuthUser();
 
-            Channel = channel;
-            Username = username;
-
-            LogDebug("[Twitch API] Creating...");
-            ILoggerFactory loggerFactory = Log.CreateLoggerFactory((type, category, logLevel) => DebugLogs);
-            // TwitchApi = new Api();
-            Auth = new AuthManager("", loggerFactory);
-            //string twitchApiOauthToken = oauthToken;
-            //if (twitchApiOauthToken.StartsWith("oauth:"))
-            //{
-            //    twitchApiOauthToken = twitchApiOauthToken.Substring("oauth:".Length);
-            //}
-            //TwitchApi.Settings.AccessToken = twitchApiOauthToken;
-            //TwitchApi.Settings.ClientId = clientId;
-            LogDebug("Authing...");
-            Auth.MaybeAuthUser().GetAwaiter().GetResult();
-            string channelId = null;
-            LogDebug("[Twitch API] Trying to find channel ID...");
-            Task<TwitchLib.Api.Helix.Models.Users.GetUsers.GetUsersResponse> response = Auth.TwitchAPI.Helix.Users.GetUsersAsync(null,
-                new List<string>(new string[] { channel }));
-            response.Wait(5000);
-
-            if (response.IsCompleted && response.Result.Users.Length == 1)
+            Auth.TwitchClient.OnJoinedChannel += OnConnected;
+            Auth.TwitchClient.OnMessageReceived += OnMessageReceived;
+            Auth.TwitchClient.OnConnected += (object sender, TwitchLib.Client.Events.OnConnectedEventArgs e) =>
             {
-                channelId = response.Result.Users[0].Id;
-                Log.Info($"[Twitch API] Channel ID for {channel} = {channelId}");
-            }
-
-            if (channelId == null)
-            {
-                throw new ArgumentException($"Couldn't find Twitch user/channel {channel}!");
-            }
-            
-            LogDebug("[Twitch Client] Creating...");
-            ConnectionCredentials credentials = new ConnectionCredentials(username, oauthToken);
-            TwitchClient = new Client();
-            TwitchClient.Initialize(credentials, channel);
-            //TwitchClient.OnLog += TwitchClient_OnLog;
-            TwitchClient.OnJoinedChannel += OnConnected;
-            TwitchClient.OnMessageReceived += OnMessageReceived;
-            TwitchClient.OnConnected += (object sender, TwitchLib.Client.Events.OnConnectedEventArgs e) =>
-            {
-                TwitchClient.JoinChannelAsync(channelId);
+                Auth.TwitchClient.JoinChannelAsync(Auth.TwitchChannelId);
                 return Task.CompletedTask;
             };
-            TwitchClient.OnDisconnected += OnDisconnected;
+            Auth.TwitchClient.OnDisconnected += OnDisconnected;
             LogDebug("[Twitch Client] Connecting...");
-            TwitchClient.ConnectAsync();
+            await Auth.TwitchClient.ConnectAsync();
 
-            if (channelId != null && channelId.Trim().Length != 0)
+            LogDebug("[Twitch PubSub] Creating...");
+            TwitchPubSub = new PubSub(loggerFactory.CreateLogger<PubSub>());
+            TwitchPubSub.OnLog += TwitchPubSub_OnLog;
+            TwitchPubSub.OnPubSubServiceConnected += (sender, e) =>
             {
-                ILogger<PubSub> logger = loggerFactory.CreateLogger<PubSub>();
-                logger.LogError("Created internal Twitch PubSub logger");
-
-                LogDebug("[Twitch PubSub] Creating...");
-                TwitchPubSub = new PubSub(logger);
-                TwitchPubSub.OnLog += TwitchPubSub_OnLog;
-                TwitchPubSub.OnPubSubServiceConnected += (sender, e) =>
+                Log.Info("[Twitch PubSub] Sending topics to listen too...");
+                TwitchPubSub.ListenToChannelPoints(Auth.TwitchChannelId);
+                TwitchPubSub.ListenToBitsEventsV2(Auth.TwitchChannelId);
+                TwitchPubSub.SendTopicsAsync(Auth.TwitchAPI.Settings.AccessToken);
+            };
+            TwitchPubSub.OnPubSubServiceError += (sender, e) =>
+            {
+                Log.Error($"[Twitch PubSub] ERROR: {e.Exception}");
+            };
+            TwitchPubSub.OnPubSubServiceClosed += (sender, e) =>
+            {
+                Log.Info($"[Twitch PubSub] Connection closed");
+            };
+            TwitchPubSub.OnListenResponse += (sender, e) =>
+            {
+                if (!e.Successful)
                 {
-                    Log.Info("[Twitch PubSub] Sending topics to listen too...");
-                    TwitchPubSub.ListenToChannelPoints(channelId);
-                    TwitchPubSub.ListenToBitsEventsV2(channelId);
-                    TwitchPubSub.SendTopicsAsync(Auth.TwitchAPI.Settings.AccessToken);
-                };
-                TwitchPubSub.OnPubSubServiceError += (sender, e) =>
+                    Log.Error($"[Twitch PubSub] Failed to listen! Response: {JsonConvert.SerializeObject(e.Response)}");
+                }
+                else
                 {
-                    Log.Error($"[Twitch PubSub] ERROR: {e.Exception}");
-                };
-                TwitchPubSub.OnPubSubServiceClosed += (sender, e) =>
-                {
-                    Log.Info($"[Twitch PubSub] Connection closed");
-                };
-                TwitchPubSub.OnListenResponse += (sender, e) =>
-                {
-                    if (!e.Successful)
-                    {
-                        Log.Error($"[Twitch PubSub] Failed to listen! Response: {JsonConvert.SerializeObject(e.Response)}");
-                    }
-                    else
-                    {
-                        Log.Info($"[Twitch PubSub] Listening to {e.Topic} - {JsonConvert.SerializeObject(e.Response)}");
-                    }
-                };
-                // ListenToChannelPoints
-                TwitchPubSub.OnChannelPointsRewardRedeemed += OnRewardRedeemed;
-                // ListenToBitsEventsV2 - This is taken care of automatically via the "OnMessageReceived" event
-                // TwitchPubSub.OnBitsReceivedV2 += OnBitsReceivedV2;
-                Log.Info("[Twitch PubSub] Connecting...");
-                TwitchPubSub.ConnectAsync();
-            }
+                    Log.Info($"[Twitch PubSub] Listening to {e.Topic} - {JsonConvert.SerializeObject(e.Response)}");
+                }
+            };
+            // ListenToChannelPoints
+            TwitchPubSub.OnChannelPointsRewardRedeemed += OnRewardRedeemed;
+            // ListenToBitsEventsV2 - This is taken care of automatically via the "OnMessageReceived" event
+            // TwitchPubSub.OnBitsReceivedV2 += OnBitsReceivedV2;
+            Log.Info("[Twitch PubSub] Connecting...");
+            await TwitchPubSub.ConnectAsync();
         }
 
-        public void Disconnect()
+        public async Task Disconnect()
         {
             LogDebug("TwitchManager::Disconnect");
             if (TwitchPubSub != null)
             {
-                TwitchPubSub.DisconnectAsync();
+                try
+                {
+                    await TwitchPubSub.DisconnectAsync();
+                }
+                catch (Exception e)
+                {
+                    // We don't care about any exceptions here, we're tearing down.
+                    Log.Debug(e);
+                }
                 TwitchPubSub = null;
             }
-            if (TwitchClient != null)
+            if (Auth != null)
             {
-                TwitchClient.DisconnectAsync();
-                TwitchClient = null;
+                try
+                {
+                    await Auth.TwitchClient.DisconnectAsync();
+                }
+                catch (Exception e)
+                {
+                    // We don't care about any exceptions here, we're tearing down.
+                    Log.Debug(e);
+                }
+                Auth = null;
             }
-            //if (TwitchApi != null)
-            //{
-            //    TwitchApi = null;
-            //}
         }
 
         public bool IsConnected()
         {
-            return TwitchClient != null && TwitchClient.IsConnected;
+            return Auth.TwitchClient != null && Auth.TwitchClient.IsConnected && Auth.IsAuthed();
         }
 
         public void SendMessage(string message)
@@ -179,7 +161,7 @@ namespace VsTwitch
                 Log.Warning("[Twitch Client] Not connected to Twitch!");
                 return;
             }
-            TwitchClient.SendMessageAsync(Channel, message);
+            Auth.TwitchClient.SendMessageAsync(Auth.TwitchUsername, message);
         }
 
         private void TwitchPubSub_OnLog(object sender, TwitchLib.PubSub.Events.OnLogArgs e)
