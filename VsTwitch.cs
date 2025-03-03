@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
+using TwitchLib.EventSub.Core.SubscriptionTypes.Channel;
 using UnityEngine;
 using UnityEngine.Networking;
 using VsTwitch.Twitch;
@@ -173,11 +174,11 @@ namespace VsTwitch
 
         private void SetUpChannelPoints()
         {
-            void UsedChannelPoints(TwitchLib.PubSub.Events.OnChannelPointsRewardRedeemedArgs e)
+            void UsedChannelPoints(ChannelPointsCustomRewardRedemption e)
             {
                 eventDirector.AddEvent(eventFactory.BroadcastChat(new Chat.SimpleChatMessage()
                 {
-                    baseToken = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>{Util.EscapeRichTextForTextMeshPro(e.RewardRedeemed.Redemption.User.DisplayName)} used their channel points ({e.RewardRedeemed.Redemption.Reward.Cost:N0}).</color>"
+                    baseToken = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>{Util.EscapeRichTextForTextMeshPro(e.UserName)} used their channel points ({e.Reward.Cost:N0}).</color>"
                 }));
             }
 
@@ -186,7 +187,7 @@ namespace VsTwitch
             if (channelPointsManager.RegisterEvent(configuration.ChannelPointsAllyBeetle.Value, (manager, e) =>
             {
                 eventDirector.AddEvent(eventFactory.CreateAlly(
-                    e.RewardRedeemed.Redemption.User.DisplayName,
+                    e.UserName,
                     MonsterSpawner.Monsters.Beetle,
                     RollForElite(true)));
             }))
@@ -201,7 +202,7 @@ namespace VsTwitch
             if (channelPointsManager.RegisterEvent(configuration.ChannelPointsAllyLemurian.Value, (manager, e) =>
             {
                 eventDirector.AddEvent(eventFactory.CreateAlly(
-                    e.RewardRedeemed.Redemption.User.DisplayName,
+                    e.UserName,
                     MonsterSpawner.Monsters.Lemurian,
                     RollForElite(true)));
             }))
@@ -216,7 +217,7 @@ namespace VsTwitch
             if (channelPointsManager.RegisterEvent(configuration.ChannelPointsAllyElderLemurian.Value, (manager, e) =>
             {
                 eventDirector.AddEvent(eventFactory.CreateAlly(
-                    e.RewardRedeemed.Redemption.User.DisplayName,
+                    e.UserName,
                     MonsterSpawner.Monsters.LemurianBruiser,
                     RollForElite(true)));
             }))
@@ -230,7 +231,7 @@ namespace VsTwitch
 
             if (channelPointsManager.RegisterEvent(configuration.ChannelPointsRustedKey.Value, (manager, e) =>
             {
-                GiveRustedKey(e.RewardRedeemed.Redemption.User.DisplayName);
+                GiveRustedKey(e.UserName);
             }))
             {
                 Log.Info($"Successfully registered Channel Points event: Rusted Key ({configuration.ChannelPointsRustedKey.Value})");
@@ -682,25 +683,26 @@ namespace VsTwitch
             eventDirector.AddEvent(eventFactory.SpawnItem(PickupCatalog.FindPickupIndex(RoR2Content.Items.TreasureCache.itemIndex)));
         }
 
-        private void TwitchManager_OnRewardRedeemed(object sender, TwitchLib.PubSub.Events.OnChannelPointsRewardRedeemedArgs e)
+        private Task TwitchManager_OnRewardRedeemed(object sender, ChannelPointsCustomRewardRedemption e)
         {
             try
             {
                 if (!configuration.ChannelPointsEnable.Value)
                 {
-                    Log.Warning($"Channel points disabled - Could not trigger event for Channel Points Redemption: {e.RewardRedeemed.Redemption.Reward.Title}");
-                    return;
+                    Log.Warning($"Channel points disabled - Could not trigger event for Channel Points Redemption: {e.Reward.Title}");
+                    return Task.CompletedTask;
                 }
                 if (channelPointsManager != null)
                 {
                     bool triggered = channelPointsManager.TriggerEvent(e);
-                    Log.Info($"Channel Points Redemption: {e.RewardRedeemed.Redemption.Reward.Title} (Event triggered: {triggered})");
+                    Log.Info($"Channel Points Redemption: {e.Reward.Title} (Event triggered: {triggered})");
                 }
             }
             catch (Exception ex)
             {
                 Log.Error(ex);
             }
+            return Task.CompletedTask;
         }
 
         private string GetUsernameFromCommand(string[] msgParts, string defaultUsername)

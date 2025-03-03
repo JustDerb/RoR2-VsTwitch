@@ -1,11 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using TwitchLib.Api.Core.Enums;
 using TwitchLib.Client.Events;
 using TwitchLib.Communication.Events;
-using TwitchLib.PubSub.Events;
+using TwitchLib.EventSub.Core.SubscriptionTypes.Channel;
 using TwitchLib.Unity;
 using UnityEngine;
 using VsTwitch.Data;
@@ -22,12 +24,12 @@ namespace VsTwitch
         private readonly ILoggerFactory loggerFactory;
         private readonly SetupHelper setupHelper;
         private AuthManager Auth = null;
-        private PubSub TwitchPubSub = null;
+        private EventSubWebSocket TwitchEventSubWebSocket = null;
 
         public bool DebugLogs { get; set; }
 
         public event AsyncEventHandler<OnMessageReceivedArgs> OnMessageReceived;
-        public event EventHandler<OnChannelPointsRewardRedeemedArgs> OnRewardRedeemed;
+        public event AsyncEventHandler<ChannelPointsCustomRewardRedemption> OnRewardRedeemed;
         public event AsyncEventHandler<OnJoinedChannelArgs> OnConnected;
         public event AsyncEventHandler<OnDisconnectedArgs> OnDisconnected;
 
@@ -81,58 +83,71 @@ namespace VsTwitch
             LogDebug("[Twitch Client] Connecting...");
             await Auth.TwitchClient.ConnectAsync();
 
-            LogDebug("[Twitch PubSub] Creating...");
-            TwitchPubSub = new PubSub(loggerFactory.CreateLogger<PubSub>());
-            TwitchPubSub.OnLog += TwitchPubSub_OnLog;
-            TwitchPubSub.OnPubSubServiceConnected += (sender, e) =>
+            LogDebug("[Twitch EventSub] Creating...");
+            TwitchEventSubWebSocket = new EventSubWebSocket(loggerFactory);
+            TwitchEventSubWebSocket.WebsocketConnected += (sender, e) =>
             {
-                Log.Info("[Twitch PubSub] Sending topics to listen too...");
-                TwitchPubSub.ListenToChannelPoints(Auth.TwitchChannelId);
-                TwitchPubSub.ListenToBitsEventsV2(Auth.TwitchChannelId);
-                TwitchPubSub.SendTopicsAsync(Auth.TwitchAPI.Settings.AccessToken);
-            };
-            TwitchPubSub.OnPubSubServiceError += (sender, e) =>
-            {
-                Log.Error($"[Twitch PubSub] ERROR: {e.Exception}");
-            };
-            TwitchPubSub.OnPubSubServiceClosed += (sender, e) =>
-            {
-                Log.Info($"[Twitch PubSub] Connection closed");
-            };
-            TwitchPubSub.OnListenResponse += (sender, e) =>
-            {
-                if (!e.Successful)
+                LogDebug($"[Twitch EventSub] Connected! ({TwitchEventSubWebSocket.SessionId})");
+
+                if (!e.IsRequestedReconnect)
                 {
-                    Log.Error($"[Twitch PubSub] Failed to listen! Response: {JsonConvert.SerializeObject(e.Response)}");
+                    // Subscribe to Channel Point Redeems
+                    Dictionary<string, string> conditions = new Dictionary<string, string>()
+                    {
+                        { "broadcaster_user_id", Auth.TwitchChannelId }
+                    };
+                    return Auth.TwitchAPI.Helix.EventSub.CreateEventSubSubscriptionAsync(
+                        "channel.channel_points_custom_reward_redemption.add", "1", conditions,
+                        EventSubTransportMethod.Websocket, TwitchEventSubWebSocket.SessionId);
                 }
-                else
-                {
-                    Log.Info($"[Twitch PubSub] Listening to {e.Topic} - {JsonConvert.SerializeObject(e.Response)}");
-                }
+                return Task.CompletedTask;
             };
-            // ListenToChannelPoints
-            TwitchPubSub.OnChannelPointsRewardRedeemed += OnRewardRedeemed;
-            // ListenToBitsEventsV2 - This is taken care of automatically via the "OnMessageReceived" event
-            // TwitchPubSub.OnBitsReceivedV2 += OnBitsReceivedV2;
-            Log.Info("[Twitch PubSub] Connecting...");
-            await TwitchPubSub.ConnectAsync();
+            TwitchEventSubWebSocket.WebsocketDisconnected += (sender, e) =>
+            {
+                LogDebug($"[Twitch EventSub] Disconnected! ({TwitchEventSubWebSocket.SessionId})");
+                return Task.CompletedTask;
+            };
+            TwitchEventSubWebSocket.WebsocketReconnected += (sender, e) =>
+            {
+                LogDebug($"[Twitch EventSub] Reconnected! ({TwitchEventSubWebSocket.SessionId})");
+                return Task.CompletedTask;
+            };
+            TwitchEventSubWebSocket.ErrorOccurred += (sender, e) =>
+            {
+                Log.Error($"[Twitch EventSub] ERROR: {e.Message} ({e.Exception})");
+                return Task.CompletedTask;
+            };
+            TwitchEventSubWebSocket.ChannelPointsCustomRewardRedemptionAdd += (sender, e) =>
+            {
+                // Wrap this to only serialize JSON if debug logs are enabled
+                if (DebugLogs)
+                {
+                    LogDebug($"[Twitch EventSub] Channel Point Redeemed ({TwitchEventSubWebSocket.SessionId}): {JsonConvert.SerializeObject(e.Notification.Payload.Event)}");
+                }
+                if (OnRewardRedeemed != null)
+                {
+                    return OnRewardRedeemed.Invoke(this, e.Notification.Payload.Event);
+                }
+                return Task.CompletedTask;
+            };
+            await TwitchEventSubWebSocket.ConnectAsync();
         }
 
         public async Task Disconnect()
         {
             LogDebug("TwitchManager::Disconnect");
-            if (TwitchPubSub != null)
+            if (TwitchEventSubWebSocket != null)
             {
                 try
                 {
-                    await TwitchPubSub.DisconnectAsync();
+                    await TwitchEventSubWebSocket.DisconnectAsync();
                 }
                 catch (Exception e)
                 {
                     // We don't care about any exceptions here, we're tearing down.
                     Log.Debug(e);
                 }
-                TwitchPubSub = null;
+                TwitchEventSubWebSocket = null;
             }
             if (Auth != null)
             {

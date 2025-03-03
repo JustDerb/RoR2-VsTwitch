@@ -94,6 +94,12 @@
 		<Reference Include="TwitchLib.Communication">
 		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.Communication.dll</HintPath>
 		</Reference>
+		<Reference Include="TwitchLib.EventSub.Core">
+		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.EventSub.Core.dll</HintPath>
+		</Reference>
+		<Reference Include="TwitchLib.EventSub.Websockets">
+		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.EventSub.Websockets.dll</HintPath>
+		</Reference>
 		<Reference Include="TwitchLib.PubSub">
 		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.PubSub.dll</HintPath>
 		</Reference>

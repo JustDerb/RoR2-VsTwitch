@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using TwitchLib.PubSub.Events;
+using TwitchLib.EventSub.Core.SubscriptionTypes.Channel;
 
 namespace VsTwitch
 {
     class ChannelPointsManager
     {
-        private readonly Dictionary<string, Action<ChannelPointsManager, OnChannelPointsRewardRedeemedArgs>> channelEvents;
+        private readonly Dictionary<string, Action<ChannelPointsManager, ChannelPointsCustomRewardRedemption>> channelEvents;
 
         public ChannelPointsManager()
         {
-            channelEvents = new Dictionary<string, Action<ChannelPointsManager, OnChannelPointsRewardRedeemedArgs>>();
+            channelEvents = new Dictionary<string, Action<ChannelPointsManager, ChannelPointsCustomRewardRedemption>>();
         }
 
-        public bool RegisterEvent(string eventName, Action<ChannelPointsManager, OnChannelPointsRewardRedeemedArgs> e) {
+        public bool RegisterEvent(string eventName, Action<ChannelPointsManager, ChannelPointsCustomRewardRedemption> e) {
             if (string.IsNullOrWhiteSpace(eventName))
             {
                 return false;
@@ -34,9 +34,9 @@ namespace VsTwitch
             return true;
         }
 
-        public bool TriggerEvent(OnChannelPointsRewardRedeemedArgs e)
+        public bool TriggerEvent(ChannelPointsCustomRewardRedemption e)
         {
-            string title = e.RewardRedeemed.Redemption.Reward.Title;
+            string title = e.Reward.Title;
             if (!channelEvents.ContainsKey(title))
             {
                 return false;
