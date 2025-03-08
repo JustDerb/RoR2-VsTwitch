@@ -3,8 +3,10 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using TwitchLib.Api.Core.Enums;
+using TwitchLib.Api.Helix.Models.EventSub;
 using TwitchLib.Client.Events;
 using TwitchLib.Communication.Events;
 using TwitchLib.EventSub.Core.SubscriptionTypes.Channel;
@@ -83,38 +85,50 @@ namespace VsTwitch
             LogDebug("[Twitch Client] Connecting...");
             await Auth.TwitchClient.ConnectAsync();
 
-            LogDebug("[Twitch EventSub] Creating...");
+            LogDebug("[Twitch EventSub | ] Creating...");
             TwitchEventSubWebSocket = new EventSubWebSocket(loggerFactory);
-            TwitchEventSubWebSocket.WebsocketConnected += (sender, e) =>
+            TwitchEventSubWebSocket.WebsocketConnected += async (sender, e) =>
             {
-                LogDebug($"[Twitch EventSub] Connected! ({TwitchEventSubWebSocket.SessionId})");
+                LogDebug($"[Twitch EventSub | {TwitchEventSubWebSocket.SessionId}] Connected!");
 
                 if (!e.IsRequestedReconnect)
                 {
+                    LogDebug($"[Twitch EventSub | {TwitchEventSubWebSocket.SessionId}] Deleting all subscriptions for token...");
+                    var response = await Auth.TwitchAPI.Helix.EventSub.GetEventSubSubscriptionsAsync();
+                    Task<bool[]> allDeleted = Task.WhenAll(
+                        response.Subscriptions.Select(
+                            s => Auth.TwitchAPI.Helix.EventSub.DeleteEventSubSubscriptionAsync(s.Id)
+                        )
+                    );
+                    await allDeleted;
+                    // TODO: Maybe ensure all the return values are true?
+                    LogDebug($"[Twitch EventSub | {TwitchEventSubWebSocket.SessionId}] Deleted {allDeleted.Result.Length} subscriptions.");
+
+                    LogDebug($"[Twitch EventSub | {TwitchEventSubWebSocket.SessionId}] Requesting channel.channel_points_custom_reward_redemption.add (v1) subscription...");
                     // Subscribe to Channel Point Redeems
                     Dictionary<string, string> conditions = new Dictionary<string, string>()
                     {
                         { "broadcaster_user_id", Auth.TwitchChannelId }
                     };
-                    return Auth.TwitchAPI.Helix.EventSub.CreateEventSubSubscriptionAsync(
+                    CreateEventSubSubscriptionResponse ret = await Auth.TwitchAPI.Helix.EventSub.CreateEventSubSubscriptionAsync(
                         "channel.channel_points_custom_reward_redemption.add", "1", conditions,
                         EventSubTransportMethod.Websocket, TwitchEventSubWebSocket.SessionId);
+                    LogDebug($"[Twitch EventSub | {TwitchEventSubWebSocket.SessionId}] Current subscriptions active: {ret.Total}");
                 }
-                return Task.CompletedTask;
             };
             TwitchEventSubWebSocket.WebsocketDisconnected += (sender, e) =>
             {
-                LogDebug($"[Twitch EventSub] Disconnected! ({TwitchEventSubWebSocket.SessionId})");
+                LogDebug($"[Twitch EventSub | {TwitchEventSubWebSocket.SessionId}] Disconnected!");
                 return Task.CompletedTask;
             };
             TwitchEventSubWebSocket.WebsocketReconnected += (sender, e) =>
             {
-                LogDebug($"[Twitch EventSub] Reconnected! ({TwitchEventSubWebSocket.SessionId})");
+                LogDebug($"[Twitch EventSub | {TwitchEventSubWebSocket.SessionId}] Reconnected!");
                 return Task.CompletedTask;
             };
             TwitchEventSubWebSocket.ErrorOccurred += (sender, e) =>
             {
-                Log.Error($"[Twitch EventSub] ERROR: {e.Message} ({e.Exception})");
+                Log.Error($"[Twitch EventSub | {TwitchEventSubWebSocket.SessionId}] ERROR: {e.Message} ({e.Exception})");
                 return Task.CompletedTask;
             };
             TwitchEventSubWebSocket.ChannelPointsCustomRewardRedemptionAdd += (sender, e) =>
@@ -122,7 +136,7 @@ namespace VsTwitch
                 // Wrap this to only serialize JSON if debug logs are enabled
                 if (DebugLogs)
                 {
-                    LogDebug($"[Twitch EventSub] Channel Point Redeemed ({TwitchEventSubWebSocket.SessionId}): {JsonConvert.SerializeObject(e.Notification.Payload.Event)}");
+                    LogDebug($"[Twitch EventSub | {TwitchEventSubWebSocket.SessionId}] Channel Point Redeemed: {JsonConvert.SerializeObject(e.Notification.Payload.Event)}");
                 }
                 if (OnRewardRedeemed != null)
                 {
