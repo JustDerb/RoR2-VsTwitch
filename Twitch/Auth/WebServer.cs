@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
@@ -44,25 +43,6 @@ namespace VsTwitch.Twitch.Auth
             "</body>\n" +
             "</html>";
 
-        /// <summary>
-        /// Minimum scope needed to run the mod
-        /// </summary>
-        private readonly static ReadOnlyCollection<string> MinimumScopes = new List<string>()
-        {
-            // View bits information for your channel.
-            "bits:read",
-            // View live Stream Chat and Rooms messages
-            "chat:read",
-            // Send live Stream Chat and Rooms messages
-            "chat:edit",
-            // Get a list of all subscribers to your channel and check if a user is subscribed to your channel
-            "channel:read:subscriptions",
-            // View your channel points custom reward redemptions
-            "channel:read:redemptions",
-            // View hype train data for a given channel.
-            "channel:read:hype_train",
-        }.AsReadOnly();
-
         private readonly static string TwitchRedirectUri = "http://localhost:9876/auth/redirect/";
 
         private readonly string twitchClientId;
@@ -81,7 +61,7 @@ namespace VsTwitch.Twitch.Auth
             listener.Start();
         }
 
-        public async Task<Models.Authorization> GetAuthorization()
+        public async Task<Models.Authorization> GetAuthorization(string state)
         {
             while (listener.IsListening)
             {
@@ -122,7 +102,16 @@ namespace VsTwitch.Twitch.Auth
                     hashHeader = hashHeader.Substring(1);
                 }
                 var hashMap = HttpUtility.ParseQueryString(hashHeader);
-                Log.Warning(hashHeader);
+                if (state != "")
+                {
+                    string authState = hashMap["state"];
+                    if (!string.Equals(state, authState))
+                    {
+                        Log.Info($"state is different between requests!");
+                        WriteResponse(res, "{\"error\":\"Incorrect state in hash header\"}", 400, "application/json");
+                        continue;
+                    }
+                }
                 string accessToken = hashMap["access_token"];
                 if (string.IsNullOrEmpty(accessToken))
                 {
@@ -160,9 +149,9 @@ namespace VsTwitch.Twitch.Auth
         /// </summary>
         /// <returns>URL for user to visit to authorize the app</returns>
         /// <seealso cref="https://dev.twitch.tv/docs/authentication/getting-tokens-oauth/#implicit-grant-flow"/>
-        public string GetAuthorizationTokenUrl(string state)
+        public string GetAuthorizationTokenUrl(string state, ReadOnlyCollection<string> scopes)
         {
-            var scopesStr = string.Join('+', MinimumScopes);
+            var scopesStr = string.Join('+', scopes);
 
             return "https://id.twitch.tv/oauth2/authorize" +
                    $"?client_id={twitchClientId}" +

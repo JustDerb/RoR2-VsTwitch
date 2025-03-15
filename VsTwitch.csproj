@@ -33,6 +33,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\TwitchLib.Unity.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
 		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
 		</Reference>
@@ -60,51 +64,6 @@
 			<!-- Compile from https://github.com/JustDerb/Tiltify-Client -->
 			<HintPath>..\Tiltify-Client\bin\Release\netstandard2.0\Tiltify-Client.dll</HintPath>
 			<Private>True</Private>
-		</Reference>
-		<Reference Include="TwitchLib.Api">
-		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.Api.dll</HintPath>
-		</Reference>
-		<Reference Include="TwitchLib.Api.Core">
-		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.Api.Core.dll</HintPath>
-		</Reference>
-		<Reference Include="TwitchLib.Api.Core.Enums">
-		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.Api.Core.Enums.dll</HintPath>
-		</Reference>
-		<Reference Include="TwitchLib.Api.Core.Interfaces">
-		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.Api.Core.Interfaces.dll</HintPath>
-		</Reference>
-		<Reference Include="TwitchLib.Api.Core.Models">
-		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.Api.Core.Models.dll</HintPath>
-		</Reference>
-		<Reference Include="TwitchLib.Api.Helix">
-		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.Api.Helix.dll</HintPath>
-		</Reference>
-		<Reference Include="TwitchLib.Api.Helix.Models">
-		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.Api.Helix.Models.dll</HintPath>
-		</Reference>
-		<Reference Include="TwitchLib.Client">
-		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.Client.dll</HintPath>
-		</Reference>
-		<Reference Include="TwitchLib.Client.Enums">
-		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.Client.Enums.dll</HintPath>
-		</Reference>
-		<Reference Include="TwitchLib.Client.Models">
-		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.Client.Models.dll</HintPath>
-		</Reference>
-		<Reference Include="TwitchLib.Communication">
-		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.Communication.dll</HintPath>
-		</Reference>
-		<Reference Include="TwitchLib.EventSub.Core">
-		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.EventSub.Core.dll</HintPath>
-		</Reference>
-		<Reference Include="TwitchLib.EventSub.Websockets">
-		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.EventSub.Websockets.dll</HintPath>
-		</Reference>
-		<Reference Include="TwitchLib.PubSub">
-		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.PubSub.dll</HintPath>
-		</Reference>
-		<Reference Include="TwitchLib.Unity">
-		  <HintPath>..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\bin\Debug\netstandard2.1\TwitchLib.Unity.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 

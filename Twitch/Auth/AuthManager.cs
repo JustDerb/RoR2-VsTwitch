@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using TwitchLib.Api;
 using TwitchLib.Client;
@@ -14,8 +15,28 @@ namespace VsTwitch.Twitch.Auth
 {
     internal class AuthManager
     {
+        private readonly static System.Random random = new System.Random();
         private readonly static string TWITCH_CLIENT_ID = "ms931m917okbj4hu8l230hejiagie0";
         private readonly static string DATA_MANAGER_OAUTH_KEY = "twitchOAuth";
+
+        /// <summary>
+        /// Minimum scope needed to run the mod
+        /// </summary>
+        private readonly static ReadOnlyCollection<string> TWITCH_SCOPES = new List<string>()
+        {
+            // View bits information for your channel.
+            "bits:read",
+            // View live Stream Chat and Rooms messages
+            "chat:read",
+            // Send live Stream Chat and Rooms messages
+            "chat:edit",
+            // Get a list of all subscribers to your channel and check if a user is subscribed to your channel
+            "channel:read:subscriptions",
+            // View your channel points custom reward redemptions
+            "channel:read:redemptions",
+            // View hype train data for a given channel.
+            "channel:read:hype_train",
+        }.AsReadOnly();
 
         private readonly DataManager dataManager;
 
@@ -25,6 +46,12 @@ namespace VsTwitch.Twitch.Auth
         public TwitchClient TwitchClient { get; }
         public string TwitchUsername { get; private set; }
         public string TwitchChannelId { get; private set; }
+        public ReadOnlyCollection<string> TwitchUserScopes { get; private set; }
+        /// <summary>
+        /// Set inside the Initialize() method to do a one-time compare of scopes from API and the TWITCH_SCOPES
+        /// to eliminate a list comparison everytime IsAuthed() is called
+        /// </summary>
+        private bool TwitchUserScopesMatch = false;
 
         private AuthManager(DataManager dataManager, ILoggerFactory loggerFactory)
         {
@@ -64,7 +91,8 @@ namespace VsTwitch.Twitch.Auth
 
         public bool IsAuthed() => !string.IsNullOrEmpty(TwitchAPI.Settings.AccessToken)
             && !string.IsNullOrEmpty(TwitchUsername)
-            && tokenExpiry > DateTimeOffset.UtcNow;
+            && tokenExpiry > DateTimeOffset.UtcNow
+            && TwitchUserScopesMatch;
 
         public async Task<ReadOnlyCollection<string>> GetAuthorizedScopes()
         {
@@ -91,11 +119,15 @@ namespace VsTwitch.Twitch.Auth
             using WebServer webServer = new WebServer(TWITCH_CLIENT_ID);
             webServer.Listen();
 
-            string authTokenUrl = webServer.GetAuthorizationTokenUrl(""); // FIXME
+            const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            string randomState = new string(Enumerable.Repeat(chars, 32)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+
+            string authTokenUrl = webServer.GetAuthorizationTokenUrl(randomState, TWITCH_SCOPES);
             Application.OpenURL(authTokenUrl);
 
             Log.Info("Waiting for Twitch Authorization token...");
-            Models.Authorization auth = await webServer.GetAuthorization().ConfigureAwait(false);
+            Models.Authorization auth = await webServer.GetAuthorization(randomState).ConfigureAwait(false);
             if (auth == null)
             {
                 throw new InvalidOperationException("WebServer didn't return an auth object");
@@ -120,6 +152,8 @@ namespace VsTwitch.Twitch.Auth
             }
             TwitchUsername = resp.Login;
             TwitchChannelId = resp.UserId;
+            TwitchUserScopes = resp.Scopes.AsReadOnly();
+            TwitchUserScopesMatch = Enumerable.SequenceEqual(TWITCH_SCOPES.OrderBy(e => e), TwitchUserScopes.OrderBy(e => e));
             tokenExpiry = DateTimeOffset.UtcNow.AddSeconds(resp.ExpiresIn);
 
             ConnectionCredentials credentials = new ConnectionCredentials(resp.Login, oauth);

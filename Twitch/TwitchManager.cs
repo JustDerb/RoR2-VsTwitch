@@ -10,6 +10,7 @@ using TwitchLib.Api.Helix.Models.EventSub;
 using TwitchLib.Client.Events;
 using TwitchLib.Communication.Events;
 using TwitchLib.EventSub.Core.SubscriptionTypes.Channel;
+using TwitchLib.EventSub.Websockets;
 using TwitchLib.Unity;
 using UnityEngine;
 using VsTwitch.Data;
@@ -26,7 +27,7 @@ namespace VsTwitch
         private readonly ILoggerFactory loggerFactory;
         private readonly SetupHelper setupHelper;
         private AuthManager Auth = null;
-        private EventSubWebSocket TwitchEventSubWebSocket = null;
+        private EventSubWebsocketClient TwitchEventSubWebSocket = null;
 
         public bool DebugLogs { get; set; }
 
