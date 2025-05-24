@@ -2,9 +2,11 @@
 
 	<PropertyGroup>
 		<TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
 		<AssemblyName>VsTwitch</AssemblyName>
+    <SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -13,6 +15,7 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<ExcludeAssets></ExcludeAssets>
 		</PackageReference>
+    <PackageReference Include="System.Text.Json" Version="9.0.0" />
 		<PackageReference Include="BepInEx.Core" Version="5.4.21">
 			<PrivateAssets></PrivateAssets>
 			<ExcludeAssets>runtime</ExcludeAssets>

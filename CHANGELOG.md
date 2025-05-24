@@ -1,5 +1,12 @@
 # Changelog
 
+### 1.1.1
+
+See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/16?closed=1
+
+* Migrated from Twitch PubSub to Twitch EventSub. ([Deprecation notice](https://discuss.dev.twitch.com/t/legacy-pubsub-deprecation-and-shutdown-timeline/58043))
+  * If you see Channel Points not working due to an error (`System.MissingMethodException: Method not found: !!0 System.Text.Json.JsonSerializer.Deserialize<!0>(System.ReadOnlySpan\`1<char>,System.Text.Json.JsonSerializerOptions)`) please file an issue on GitHub.
+
 ### 1.1.0
 
 See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/15?closed=1
