@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.1.2
+
+* Fixed Twitch EventSub integration
+
 ### 1.1.1
 
 See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/16?closed=1

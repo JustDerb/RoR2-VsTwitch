@@ -36,6 +36,11 @@ namespace VsTwitch.Twitch.Auth
             "channel:read:redemptions",
             // View hype train data for a given channel.
             "channel:read:hype_train",
+#if DEBUG
+            // For testing EventSub - channel.chat.message
+            "user:read:chat",
+            "channel:bot",
+#endif
         }.AsReadOnly();
 
         private readonly DataManager dataManager;

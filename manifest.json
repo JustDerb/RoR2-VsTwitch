@@ -1,6 +1,6 @@
 ﻿{
     "name": "Vs_Twitch",
-    "version_number": "1.1.1",
+    "version_number": "1.1.2",
     "website_url": "https://github.com/JustDerb/RoR2-VsTwitch",
     "description": "Fight Twitch chat. Item voting, bit events, channel points integration, and more! Also with Tiltify support!",
     "dependencies": [

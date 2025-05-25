@@ -7,10 +7,10 @@ using System.Reflection;
 using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
-using TwitchLib.EventSub.Core.SubscriptionTypes.Channel;
 using UnityEngine;
 using UnityEngine.Networking;
 using VsTwitch.Twitch;
+using VsTwitch.Twitch.WebSocket.Models.Notifications;
 
 // Allow scanning for ConCommand, and other stuff for Risk of Rain 2
 [assembly: HG.Reflection.SearchableAttribute.OptIn]
@@ -24,7 +24,7 @@ namespace VsTwitch
         private static readonly char[] SPACE = new char[] { ' ' };
         public const string GUID = "com.justinderby.vstwitch";
         public const string ModName = "VsTwitch";
-        public const string Version = "1.1.1";
+        public const string Version = "1.1.2";
 
         // This is only used for ConCommands, since they need to be static...
         public static VsTwitch Instance;
@@ -174,7 +174,7 @@ namespace VsTwitch
 
         private void SetUpChannelPoints()
         {
-            void UsedChannelPoints(ChannelPointsCustomRewardRedemption e)
+            void UsedChannelPoints(ChannelPointsCustomRewardRedemptionAddMessage e)
             {
                 eventDirector.AddEvent(eventFactory.BroadcastChat(new Chat.SimpleChatMessage()
                 {
@@ -371,7 +371,11 @@ namespace VsTwitch
 
             Chat.SendBroadcastChat(new Chat.SimpleChatMessage()
             {
+#if DEBUG
+                baseToken = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>{ModName} {Version} (DEBUG) enabled for run</color>"
+#else
                 baseToken = $"<color=#{TwitchConstants.TWITCH_COLOR_MAIN}>{ModName} {Version} enabled for run</color>"
+#endif
             });
 
             On.RoR2.ChestBehavior.ItemDrop += ChestBehavior_ItemDrop;
@@ -405,7 +409,7 @@ namespace VsTwitch
             eventDirector?.ClearEvents();
             itemRollerManager?.ClearVotes();
         }
-        #endregion
+#endregion
 
         #region "Twitch Integration"
         [ConCommand(commandName = "vs_add_bits", flags = ConVarFlags.SenderMustBeServer, helpText = "Fake add bits.")]
@@ -683,7 +687,7 @@ namespace VsTwitch
             eventDirector.AddEvent(eventFactory.SpawnItem(PickupCatalog.FindPickupIndex(RoR2Content.Items.TreasureCache.itemIndex)));
         }
 
-        private Task TwitchManager_OnRewardRedeemed(object sender, ChannelPointsCustomRewardRedemption e)
+        private Task TwitchManager_OnRewardRedeemed(object sender, ChannelPointsCustomRewardRedemptionAddMessage e)
         {
             try
             {

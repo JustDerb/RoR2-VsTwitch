@@ -10,12 +10,13 @@ using TwitchLib.Api.Helix.Models.EventSub;
 using TwitchLib.Client.Events;
 using TwitchLib.Communication.Events;
 using TwitchLib.EventSub.Core.SubscriptionTypes.Channel;
-using TwitchLib.EventSub.Websockets;
-using TwitchLib.Unity;
 using UnityEngine;
 using VsTwitch.Data;
 using VsTwitch.Twitch;
 using VsTwitch.Twitch.Auth;
+using VsTwitch.Twitch.WebSocket;
+using VsTwitch.Twitch.WebSocket.Handlers;
+using VsTwitch.Twitch.WebSocket.Models.Notifications;
 
 namespace VsTwitch
 {
@@ -27,12 +28,12 @@ namespace VsTwitch
         private readonly ILoggerFactory loggerFactory;
         private readonly SetupHelper setupHelper;
         private AuthManager Auth = null;
-        private EventSubWebsocketClient TwitchEventSubWebSocket = null;
+        private WebSocketClient TwitchEventSubWebSocket = null;
 
         public bool DebugLogs { get; set; }
 
         public event AsyncEventHandler<OnMessageReceivedArgs> OnMessageReceived;
-        public event AsyncEventHandler<ChannelPointsCustomRewardRedemption> OnRewardRedeemed;
+        public event AsyncEventHandler<ChannelPointsCustomRewardRedemptionAddMessage> OnRewardRedeemed;
         public event AsyncEventHandler<OnJoinedChannelArgs> OnConnected;
         public event AsyncEventHandler<OnDisconnectedArgs> OnDisconnected;
 
@@ -87,7 +88,28 @@ namespace VsTwitch
             await Auth.TwitchClient.ConnectAsync();
 
             LogDebug("[Twitch EventSub | ] Creating...");
-            TwitchEventSubWebSocket = new EventSubWebSocket(loggerFactory);
+            EventSubMessageFactory messageFactory = new EventSubMessageFactory();
+            TwitchEventSubWebSocket = new WebSocketClient(null, messageFactory);
+            TwitchEventSubWebSocket.OnLog += (sender, e) =>
+            {
+                LogDebug($"[Twitch EventSub | {TwitchEventSubWebSocket.SessionId}] {e}");
+            };
+
+#if DEBUG
+            var channelChatMessageHandler = new ChannelChatMessageHandler(messageFactory);
+            channelChatMessageHandler.OnEvent += (sender, e) =>
+            {
+                LogDebug($"[Twitch EventSub | {TwitchEventSubWebSocket.SessionId}] {e.ChatterUserName}: {e.Message.Text}");
+            };
+            TwitchEventSubWebSocket.RegisterHandlers(channelChatMessageHandler);
+#endif
+            var channelPointsCustomRewardRedemption = new ChannelChannelPointsCustomRewardRedemptionAddHandler(messageFactory);
+            channelPointsCustomRewardRedemption.OnEvent += (sender, e) =>
+            {
+                OnRewardRedeemed?.Invoke(this, e);
+            };
+            TwitchEventSubWebSocket.RegisterHandlers(channelPointsCustomRewardRedemption);
+
             TwitchEventSubWebSocket.WebsocketConnected += async (sender, e) =>
             {
                 LogDebug($"[Twitch EventSub | {TwitchEventSubWebSocket.SessionId}] Connected!");
@@ -104,7 +126,7 @@ namespace VsTwitch
                     await allDeleted;
                     // TODO: Maybe ensure all the return values are true?
                     LogDebug($"[Twitch EventSub | {TwitchEventSubWebSocket.SessionId}] Deleted {allDeleted.Result.Length} subscriptions.");
-
+                    
                     LogDebug($"[Twitch EventSub | {TwitchEventSubWebSocket.SessionId}] Requesting channel.channel_points_custom_reward_redemption.add (v1) subscription...");
                     // Subscribe to Channel Point Redeems
                     Dictionary<string, string> conditions = new Dictionary<string, string>()
@@ -114,36 +136,26 @@ namespace VsTwitch
                     CreateEventSubSubscriptionResponse ret = await Auth.TwitchAPI.Helix.EventSub.CreateEventSubSubscriptionAsync(
                         "channel.channel_points_custom_reward_redemption.add", "1", conditions,
                         EventSubTransportMethod.Websocket, TwitchEventSubWebSocket.SessionId);
+
+#if DEBUG
+                    LogDebug($"[Twitch EventSub | {TwitchEventSubWebSocket.SessionId}] Requesting channel.chat.message (v1) subscription...");
+                    // Subscribe to Channel Point Redeems
+                    conditions = new Dictionary<string, string>()
+                    {
+                        { "broadcaster_user_id", Auth.TwitchChannelId },
+                        { "user_id", Auth.TwitchChannelId },
+                    };
+                    ret = await Auth.TwitchAPI.Helix.EventSub.CreateEventSubSubscriptionAsync(
+                        "channel.chat.message", "1", conditions,
+                        EventSubTransportMethod.Websocket, TwitchEventSubWebSocket.SessionId);
+#endif
+
                     LogDebug($"[Twitch EventSub | {TwitchEventSubWebSocket.SessionId}] Current subscriptions active: {ret.Total}");
                 }
             };
             TwitchEventSubWebSocket.WebsocketDisconnected += (sender, e) =>
             {
                 LogDebug($"[Twitch EventSub | {TwitchEventSubWebSocket.SessionId}] Disconnected!");
-                return Task.CompletedTask;
-            };
-            TwitchEventSubWebSocket.WebsocketReconnected += (sender, e) =>
-            {
-                LogDebug($"[Twitch EventSub | {TwitchEventSubWebSocket.SessionId}] Reconnected!");
-                return Task.CompletedTask;
-            };
-            TwitchEventSubWebSocket.ErrorOccurred += (sender, e) =>
-            {
-                Log.Error($"[Twitch EventSub | {TwitchEventSubWebSocket.SessionId}] ERROR: {e.Message} ({e.Exception})");
-                return Task.CompletedTask;
-            };
-            TwitchEventSubWebSocket.ChannelPointsCustomRewardRedemptionAdd += (sender, e) =>
-            {
-                // Wrap this to only serialize JSON if debug logs are enabled
-                if (DebugLogs)
-                {
-                    LogDebug($"[Twitch EventSub | {TwitchEventSubWebSocket.SessionId}] Channel Point Redeemed: {JsonConvert.SerializeObject(e.Notification.Payload.Event)}");
-                }
-                if (OnRewardRedeemed != null)
-                {
-                    return OnRewardRedeemed.Invoke(this, e.Notification.Payload.Event);
-                }
-                return Task.CompletedTask;
             };
             await TwitchEventSubWebSocket.ConnectAsync();
         }

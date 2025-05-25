@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using TwitchLib.EventSub.Core.SubscriptionTypes.Channel;
+using VsTwitch.Twitch.WebSocket.Models.Notifications;
 
 namespace VsTwitch
 {
     class ChannelPointsManager
     {
-        private readonly Dictionary<string, Action<ChannelPointsManager, ChannelPointsCustomRewardRedemption>> channelEvents;
+        private readonly Dictionary<string, Action<ChannelPointsManager, ChannelPointsCustomRewardRedemptionAddMessage>> channelEvents;
 
         public ChannelPointsManager()
         {
-            channelEvents = new Dictionary<string, Action<ChannelPointsManager, ChannelPointsCustomRewardRedemption>>();
+            channelEvents = new Dictionary<string, Action<ChannelPointsManager, ChannelPointsCustomRewardRedemptionAddMessage>>();
         }
 
-        public bool RegisterEvent(string eventName, Action<ChannelPointsManager, ChannelPointsCustomRewardRedemption> e) {
+        public bool RegisterEvent(string eventName, Action<ChannelPointsManager, ChannelPointsCustomRewardRedemptionAddMessage> e) {
             if (string.IsNullOrWhiteSpace(eventName))
             {
                 return false;
@@ -34,7 +34,7 @@ namespace VsTwitch
             return true;
         }
 
-        public bool TriggerEvent(ChannelPointsCustomRewardRedemption e)
+        public bool TriggerEvent(ChannelPointsCustomRewardRedemptionAddMessage e)
         {
             string title = e.Reward.Title;
             if (!channelEvents.ContainsKey(title))
