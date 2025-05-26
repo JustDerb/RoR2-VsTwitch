@@ -2,7 +2,9 @@
 
 ### 1.1.2
 
-* Fixed Twitch EventSub integration
+See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/17?closed=1
+
+* Fixed Twitch EventSub integration (migrated to internal WebSocket client)
 
 ### 1.1.1
 
