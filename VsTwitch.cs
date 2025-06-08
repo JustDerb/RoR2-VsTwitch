@@ -493,7 +493,29 @@ namespace VsTwitch
         private void GameNetworkManager_onStartHostGlobal()
         {
             Log.Info("Connecting to Twitch...");
-            twitchManager.MaybeSetup(configuration)
+            StartCoroutine(ConnectToTwitch());
+            
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(configuration.TiltifyCampaignId.Value))
+                {
+                    Log.Info($"Connecting to Tiltify and watching campaign ID {configuration.TiltifyCampaignId.Value}...");
+                    tiltifyManager.Connect(configuration.TiltifyCampaignId.Value);
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error(e);
+                Chat.AddMessage($"Couldn't connect to Tiltify: {e.Message}");
+            }
+        }
+
+        private IEnumerator ConnectToTwitch()
+        {
+            // We need to wait until the scene finished since the setup could load a dialog box (and we shouldn't load assets during a scene transition)
+            yield return new WaitUntil(() => NetworkManager.s_LoadingSceneAsync == null);
+            
+            yield return twitchManager.MaybeSetup(configuration)
                 .ContinueWith(t => {
                     if (t.Exception != null)
                     {
@@ -509,20 +531,6 @@ namespace VsTwitch
                         DumpAssemblies();
                     }
                 });
-
-            try
-            {
-                if (!string.IsNullOrWhiteSpace(configuration.TiltifyCampaignId.Value))
-                {
-                    Log.Info($"Connecting to Tiltify and watching campaign ID {configuration.TiltifyCampaignId.Value}...");
-                    tiltifyManager.Connect(configuration.TiltifyCampaignId.Value);
-                }
-            }
-            catch (Exception e)
-            {
-                Log.Error(e);
-                Chat.AddMessage($"Couldn't connect to Tiltify: {e.Message}");
-            }
         }
 
         private void GameNetworkManager_onStopHostGlobal()
