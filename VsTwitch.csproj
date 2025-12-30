@@ -44,6 +44,7 @@
 		</Reference>
 		<Reference Include="MMHOOK_RoR2">
 		  <HintPath>..\..\..\..\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Testing\BepInEx\plugins\MMHOOK\MMHOOK_RoR2.dll</HintPath>
+		  <Private>False</Private>
 		</Reference>
 		<Reference Include="RiskOfOptions">
 		  <!-- Pull from RoR2 Mod Manager -->
