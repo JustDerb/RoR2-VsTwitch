@@ -1,5 +1,11 @@
 # Changelog
 
+### 1.1.3
+
+See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/18?closed=1
+
+* Fixed mod to work with Alloyed Collective update.
+
 ### 1.1.2
 
 See more info: https://github.com/JustDerb/RoR2-VsTwitch/milestone/17?closed=1
