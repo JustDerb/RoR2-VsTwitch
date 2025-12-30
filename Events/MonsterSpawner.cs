@@ -156,7 +156,7 @@ namespace VsTwitch
                 EquipmentIndex equipmentIndex = (eliteDef != null) ? eliteDef.eliteEquipmentDef.equipmentIndex : EquipmentIndex.None;
                 if (equipmentIndex != EquipmentIndex.None)
                 {
-                    monster.inventory.SetEquipmentIndex(equipmentIndex);
+                    monster.inventory.SetEquipmentIndex(equipmentIndex, equipmentIndex == EquipmentIndex.None);
                 }
                 float healthBoostCoefficient = 1f;
                 float damageBoostCoefficient = 1f;
@@ -164,8 +164,8 @@ namespace VsTwitch
                 damageBoostCoefficient += Run.instance.difficultyCoefficient / 15f;
                 int numberOfPlayers = Mathf.Max(1, Run.instance.livingPlayerCount);
                 healthBoostCoefficient *= Mathf.Pow(numberOfPlayers, 0.75f);
-                monster.inventory.GiveItem(RoR2Content.Items.BoostHp, Mathf.RoundToInt(Mathf.RoundToInt(healthBoostCoefficient - 1f) * 10f));
-                monster.inventory.GiveItem(RoR2Content.Items.BoostDamage, Mathf.RoundToInt(Mathf.RoundToInt(damageBoostCoefficient - 1f) * 10f));
+                monster.inventory.GiveItemPermanent(RoR2Content.Items.BoostHp, Mathf.RoundToInt(Mathf.RoundToInt(healthBoostCoefficient - 1f) * 10f));
+                monster.inventory.GiveItemPermanent(RoR2Content.Items.BoostDamage, Mathf.RoundToInt(Mathf.RoundToInt(damageBoostCoefficient - 1f) * 10f));
 
                 monster.isBoss = IsBoss;
             }

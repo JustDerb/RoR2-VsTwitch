@@ -385,6 +385,72 @@ namespace VsTwitch
             On.RoR2.HealthComponent.Suicide += HealthComponent_Suicide;
             On.EntityStates.Missions.BrotherEncounter.BrotherEncounterBaseState.KillAllMonsters += BrotherEncounterBaseState_KillAllMonsters;
             On.RoR2.ArenaMissionController.EndRound += ArenaMissionController_EndRound;
+
+            //On.RoR2.PurchaseInteraction.OnInteractionBegin += PurchaseInteraction_OnInteractionBegin;
+            //On.RoR2.PickupDropletController.CreatePickupDroplet_CreatePickupInfo_Vector3_Vector3 += PickupDropletController_CreatePickupDroplet_CreatePickupInfo_Vector3_Vector3;
+        }
+
+        private void PickupDropletController_CreatePickupDroplet_CreatePickupInfo_Vector3_Vector3(On.RoR2.PickupDropletController.orig_CreatePickupDroplet_CreatePickupInfo_Vector3_Vector3 orig, GenericPickupController.CreatePickupInfo pickupInfo, Vector3 position, Vector3 velocity)
+        {
+            Log.Error("PickupDropletController_CreatePickupDroplet_CreatePickupInfo_Vector3_Vector3: START");
+            orig(pickupInfo, position, velocity);
+            Log.Error("PickupDropletController_CreatePickupDroplet_CreatePickupInfo_Vector3_Vector3: END");
+        }
+
+        private void PurchaseInteraction_OnInteractionBegin(On.RoR2.PurchaseInteraction.orig_OnInteractionBegin orig, PurchaseInteraction self, Interactor activator)
+        {
+            Log.Error("PurchaseInteraction_OnInteractionBegin: START");
+            if (!IsRunning())
+            {
+                orig(self, activator);
+                return;
+            }
+
+            if (!configuration.EnableItemVoting.Value)
+            {
+                orig(self, activator);
+                return;
+            }
+
+            if ((bool)self.GetComponent<ChestBehavior>())
+            {
+                var chest = self.GetComponent<ChestBehavior>();
+                var dropPickupValue = chest.currentPickup.pickupIndex;
+                if (dropPickupValue != PickupIndex.none)
+                {
+                    var itemdef = PickupCatalog.GetPickupDef(dropPickupValue);
+                    Log.Error($"PurchaseInteraction_OnInteractionBegin: ChestBehavior has {itemdef.internalName}");
+                }
+            }
+            else if ((bool)self.GetComponent<MultiShopController>())
+            {
+                var chest = self.GetComponent<MultiShopController>();
+                HG.ReadOnlyArray<GameObject> terminalGameObjectsValue = chest.terminalGameObjects;
+                foreach (GameObject gameObject in terminalGameObjectsValue)
+                {
+                    ShopTerminalBehavior shopTerminalBehavior = gameObject.GetComponent<ShopTerminalBehavior>();
+                    FieldInfo dropPickup = shopTerminalBehavior.GetType().GetField("pickupIndex", BindingFlags.Instance | BindingFlags.NonPublic);
+                    PickupIndex dropPickupValue = shopTerminalBehavior.CurrentPickup().pickupIndex;
+                    if (dropPickupValue != PickupIndex.none)
+                    {
+                        var itemdef = PickupCatalog.GetPickupDef(dropPickupValue);
+                        Log.Error($"PurchaseInteraction_OnInteractionBegin: MultiShopController has {itemdef.internalName}");
+                    }
+                }
+            }
+            else if ((bool)self.GetComponent<RouletteChestController>())
+            {
+                var chest = self.GetComponent<RouletteChestController>();
+                var dropPickupValue = chest.pickupDisplay.GetPickupIndex();
+                if (dropPickupValue != PickupIndex.none)
+                {
+                    var itemdef = PickupCatalog.GetPickupDef(dropPickupValue);
+                    Log.Error($"PurchaseInteraction_OnInteractionBegin: RouletteChestController has {itemdef.internalName}");
+                }
+            }
+
+            orig(self, activator);
+            Log.Error("PurchaseInteraction_OnInteractionBegin: END");
         }
 
         private void Run_OnDisable(On.RoR2.Run.orig_OnDisable orig, Run self)
@@ -404,6 +470,9 @@ namespace VsTwitch
             On.RoR2.HealthComponent.Suicide -= HealthComponent_Suicide;
             On.EntityStates.Missions.BrotherEncounter.BrotherEncounterBaseState.KillAllMonsters -= BrotherEncounterBaseState_KillAllMonsters;
             On.RoR2.ArenaMissionController.EndRound -= ArenaMissionController_EndRound;
+
+            //On.RoR2.PurchaseInteraction.OnInteractionBegin -= PurchaseInteraction_OnInteractionBegin;
+            //On.RoR2.PickupDropletController.CreatePickupDroplet_CreatePickupInfo_Vector3_Vector3 -= PickupDropletController_CreatePickupDroplet_CreatePickupInfo_Vector3_Vector3;
 
             eventFactory?.Reset();
             eventDirector?.ClearEvents();
@@ -939,17 +1008,17 @@ namespace VsTwitch
         }
 
         #region "Game Behaviour Changes"
-        private void MultiShopController_OnPurchase(On.RoR2.MultiShopController.orig_OnPurchase orig, MultiShopController self, Interactor interactor, PurchaseInteraction purchaseInteraction)
+        private void MultiShopController_OnPurchase(On.RoR2.MultiShopController.orig_OnPurchase orig, MultiShopController self, CostTypeDef.PayCostContext payCostContext, CostTypeDef.PayCostResults payCostResult)
         {
             if (!IsRunning())
             {
-                orig(self, interactor, purchaseInteraction);
+                orig(self, payCostContext, payCostResult);
                 return;
             }
 
             if (!configuration.EnableItemVoting.Value)
             {
-                orig(self, interactor, purchaseInteraction);
+                orig(self, payCostContext, payCostResult);
                 return;
             }
 
@@ -962,7 +1031,7 @@ namespace VsTwitch
                 {
                     ShopTerminalBehavior shopTerminalBehavior = gameObject.GetComponent<ShopTerminalBehavior>();
                     FieldInfo dropPickup = shopTerminalBehavior.GetType().GetField("pickupIndex", BindingFlags.Instance | BindingFlags.NonPublic);
-                    PickupIndex dropPickupValue = shopTerminalBehavior.CurrentPickupIndex();
+                    PickupIndex dropPickupValue = shopTerminalBehavior.CurrentPickup().pickupIndex;
                     if (dropPickupValue != PickupIndex.none)
                     {
                         indices.Add(dropPickupValue);
@@ -994,7 +1063,7 @@ namespace VsTwitch
                 Log.Error(e);
             }
 
-            orig(self, interactor, purchaseInteraction);
+            orig(self, payCostContext, payCostResult);
         }
 
         private void ShopTerminalBehavior_DropPickup(On.RoR2.ShopTerminalBehavior.orig_DropPickup orig, ShopTerminalBehavior self)
@@ -1067,7 +1136,7 @@ namespace VsTwitch
                     return;
                 }
 
-                var dropPickupValue = self.dropPickup;
+                var dropPickupValue = self.currentPickup.pickupIndex;
                 if (dropPickupValue != PickupIndex.none)
                 {
                     var itemdef = PickupCatalog.GetPickupDef(dropPickupValue);
@@ -1121,14 +1190,16 @@ namespace VsTwitch
             Xoroshiro128Plus rng = (Xoroshiro128Plus)rngField.GetValue(self);
             if (configuration.ForceUniqueRolls.Value)
             {
-                return self.dropTable.GenerateUniqueDrops(maxDrops, rng);
+                List<UniquePickup> pickups = new List<UniquePickup>();
+                self.dropTable.GenerateDistinctPickups(pickups, maxDrops, rng);
+                return pickups.ConvertAll((e) => e.pickupIndex).ToArray();
             }
             else
             {
                 PickupIndex[] pickups = new PickupIndex[maxDrops];
                 for (int i = 0; i < maxDrops; i++)
                 {
-                    pickups[i] = self.dropTable.GenerateDrop(rng);
+                    pickups[i] = self.dropTable.GeneratePickup(rng).pickupIndex;
                 }
                 return pickups;
             }

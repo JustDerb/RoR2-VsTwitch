@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VsTwitch", "VsTwitch.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwitchLib.Unity", "..\TwitchLib\TwitchLib.Unity\TwitchLib.Unity\TwitchLib.Unity.csproj", "{A5B02D56-FE91-42FF-8818-246FEECD9D66}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwitchLib.EventSub.Websockets", "..\TwitchLib\TwitchLib.EventSub.Websockets\TwitchLib.EventSub.Websockets\TwitchLib.EventSub.Websockets.csproj", "{5CBFCF88-3DFF-4380-8D4A-2BD4EF0DD527}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TwitchLib.EventSub.Websockets", "..\TwitchLib\TwitchLib.EventSub.Websockets\TwitchLib.EventSub.Websockets\TwitchLib.EventSub.Websockets.csproj", "{AD998A2B-AC3A-EA14-7CB2-49D4DB8EFDAE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{A5B02D56-FE91-42FF-8818-246FEECD9D66}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A5B02D56-FE91-42FF-8818-246FEECD9D66}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A5B02D56-FE91-42FF-8818-246FEECD9D66}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5CBFCF88-3DFF-4380-8D4A-2BD4EF0DD527}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5CBFCF88-3DFF-4380-8D4A-2BD4EF0DD527}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5CBFCF88-3DFF-4380-8D4A-2BD4EF0DD527}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5CBFCF88-3DFF-4380-8D4A-2BD4EF0DD527}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD998A2B-AC3A-EA14-7CB2-49D4DB8EFDAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD998A2B-AC3A-EA14-7CB2-49D4DB8EFDAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD998A2B-AC3A-EA14-7CB2-49D4DB8EFDAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD998A2B-AC3A-EA14-7CB2-49D4DB8EFDAE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

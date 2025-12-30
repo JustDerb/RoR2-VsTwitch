@@ -35,15 +35,17 @@ namespace VsTwitch
             var itemdef = PickupCatalog.GetPickupDef(pickupIndex);
             if (itemdef.equipmentIndex != EquipmentIndex.None)
             {
-                characterMaster.inventory.SetEquipmentIndex(itemdef.equipmentIndex);
+                characterMaster.inventory.SetEquipmentIndex(itemdef.equipmentIndex, itemdef.equipmentIndex == EquipmentIndex.None);
             }
             else
             {
-                characterMaster.inventory.GiveItem(itemdef.itemIndex, 1);
+                characterMaster.inventory.GiveItemPermanent(itemdef.itemIndex, 1);
             }
 
             // Broadcast message that pickup happened
-            GenericPickupController.SendPickupMessage(characterMaster, pickupIndex);
+            UniquePickup pickup = default;
+            pickup.pickupIndex = pickupIndex;
+            GenericPickupController.SendPickupMessage(characterMaster, pickup);
         }
 
         public static void DropToAllPlayers(PickupIndex pickupIndex, Vector3 velocity)
@@ -72,7 +74,9 @@ namespace VsTwitch
             var body = characterMaster.GetBody();
             if (body != null)
             {
-                PickupDropletController.CreatePickupDroplet(pickupIndex, body.corePosition + Vector3.up * 1.5f, velocity);
+                UniquePickup pickup = default;
+                pickup.pickupIndex = pickupIndex;
+                PickupDropletController.CreatePickupDroplet(pickup, body.corePosition + Vector3.up * 1.5f, velocity, false);
             }
         }
     }

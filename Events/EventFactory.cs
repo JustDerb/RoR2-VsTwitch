@@ -205,10 +205,10 @@ namespace VsTwitch
                     CharacterBody body = teamComponent.body;
                     if (body)
                     {
-                        if (body.inventory.GetItemCount(RoR2Content.Items.ExtraLife) == 0 &&
-                            body.inventory.GetItemCount(RoR2Content.Items.ExtraLifeConsumed) == 0)
+                        if (body.inventory.GetItemCountEffective(RoR2Content.Items.ExtraLife) == 0 &&
+                            body.inventory.GetItemCountEffective(RoR2Content.Items.ExtraLifeConsumed) == 0)
                         {
-                            body.inventory.GiveItem(RoR2Content.Items.ExtraLife, 1);
+                            body.inventory.GiveItemPermanent(RoR2Content.Items.ExtraLife, 1);
                             body.inventory.GiveRandomItems(Run.instance.livingPlayerCount, false, true);
                         }
                     }
@@ -371,8 +371,8 @@ namespace VsTwitch
                 spawnedMonster.teleportWhenOOB = false;
 
                 // Help them out since the AI are pretty bad at staying alive
-                member.inventory.GiveItem(RoR2Content.Items.HealWhileSafe, Run.instance.livingPlayerCount);
-                member.inventory.GiveItem(RoR2Content.Items.Infusion, Run.instance.livingPlayerCount);
+                member.inventory.GiveItemPermanent(RoR2Content.Items.HealWhileSafe, Run.instance.livingPlayerCount);
+                member.inventory.GiveItemPermanent(RoR2Content.Items.Infusion, Run.instance.livingPlayerCount);
 
                 //CharacterBody memberBody = member.GetBody();
                 //if (memberBody)
@@ -394,8 +394,8 @@ namespace VsTwitch
 
                 CharacterMaster summonerMaster = summonerBody.master;
 
-                member.inventory.GiveItem(RoR2Content.Items.Hoof, summonerMaster.inventory.GetItemCount(RoR2Content.Items.Hoof));
-                member.inventory.GiveItem(RoR2Content.Items.SprintBonus, summonerMaster.inventory.GetItemCount(RoR2Content.Items.SprintBonus));
+                member.inventory.GiveItemPermanent(RoR2Content.Items.Hoof, summonerMaster.inventory.GetItemCountEffective(RoR2Content.Items.Hoof));
+                member.inventory.GiveItemPermanent(RoR2Content.Items.SprintBonus, summonerMaster.inventory.GetItemCountEffective(RoR2Content.Items.SprintBonus));
 
                 if (summonerMaster && summonerMaster.minionOwnership.ownerMaster)
                 {
